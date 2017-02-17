@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="130px"
+    android:layout_height="140px"
     android:id="@+id/itemLayout">
     <ImageView
         android:layout_width="100px"
         android:layout_height="match_parent"
         android:background="@null"
         android:id="@+id/itemImageView"
-        android:padding="5dp"/>
+        android:padding="5dp"
+        android:layout_marginLeft="10dp" />
 
     <TextView
     android:layout_width="match_parent"
@@ -16,6 +17,6 @@
     android:id="@+id/itemTextView"
     android:text="AmazingText"
         android:textColor="@android:color/white"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="20dp"
         android:gravity="center_vertical|center_horizontal" />
 </LinearLayout>
