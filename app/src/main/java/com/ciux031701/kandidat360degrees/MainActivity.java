@@ -1,6 +1,7 @@
 package com.ciux031701.kandidat360degrees;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.media.Image;
@@ -77,41 +78,50 @@ public class MainActivity extends AppCompatActivity {
         //fragment.setArguments(args);
         private void selectItem(int position) {
 
-            FragmentManager fm = getFragmentManager();
-            FragmentTransaction ft = fm.beginTransaction();
-            if(position==0){
-                System.out.println("clicked explore");
-                ExploreFragment f = (ExploreFragment) fm.findFragmentByTag("fragment_explore");
-                if (f == null) {  // not added
-                    f = new ExploreFragment();
-                    ft.add(R.id.content_frame, f, "fragment_explore");
-                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                } else {  // already added
-                    ft.remove(f);
-                    ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-                }
-
-                // Highlight the selected item, update the title, and close the drawer
-                mDrawerList.setItemChecked(position, true);
-                setTitle(mListOptions[position]);
-            }else if(position==1) {
-                System.out.println("clicked notifications");
-
-            }else if (position==2){
-                System.out.println("clicked camera");
-            }else if (position==3){
-                System.out.println("clicked friends");
-            }else if (position==4){
-                System.out.println("clicked upload");
-            }else if (position==5){
-                System.out.println("clicked settings");
-            }else if (position==6){
-                System.out.println("clicked logout");
+            Fragment fragment = null;
+            Class fragmentClass;
+            switch(position) {
+                case 0:
+                    fragmentClass = ExploreFragment.class;
+                    break;
+                case 1:
+                    fragmentClass = NotificationFragment.class;
+                    break;
+                case 2:
+                    fragmentClass = CameraFragment.class;
+                    break;
+                case 3:
+                    fragmentClass = FriendsFragment.class;
+                    break;
+                case 4:
+                    fragmentClass = UploadFragment.class;
+                    break;
+                case 5:
+                    fragmentClass = SettingsFragment.class;
+                    break;
+                case 6: // log out
+                    fragmentClass = ExploreFragment.class;
+                    break;
+                default:
+                    fragmentClass = ExploreFragment.class;
             }
-            ft.commit();
-            // Highlight the selected item, update the title, and close the drawer
+
+            try {
+                fragment = (Fragment) fragmentClass.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // Insert the fragment by replacing any existing fragment
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+
             mDrawerList.setItemChecked(position, true);
             mDrawerLayout.closeDrawer(mDrawerList);
+            setTitle(mListOptions[position]);
+            mDrawerLayout.closeDrawers();
+            //mDrawerLayout.closeDrawer(mDrawerList);
+
         }
 
     }
