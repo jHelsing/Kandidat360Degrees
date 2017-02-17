@@ -7,9 +7,9 @@
 
 <!-- This is how we add things to the toolbar
     <item
-        android:id="@+id/menu_button"
+        android:id="@+id/settings_button"
         android:orderInCategory="100"
-        android:title="menu_button"
+        android:title="settings_button"
         android:icon="@drawable/menu_icon"
         app:showAsAction="always" />-->
 </menu>

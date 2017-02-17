@@ -2,6 +2,7 @@ package com.ciux031701.kandidat360degrees.adaptors;
 
 import android.app.Activity;
 import android.content.Context;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,26 +33,25 @@ public class DrawerAdapter extends ArrayAdapter<String> {
 
         String option = getItem(position);
 
-        LinearLayout itemLayout = (LinearLayout) customView.findViewById(R.id.itemLayout);
         ImageView itemImageView = (ImageView) customView.findViewById(R.id.itemImageView);
         TextView itemTextView = (TextView) customView.findViewById(R.id.itemTextView);
+        itemTextView.setGravity(Gravity.CENTER_VERTICAL);
 
-        /*itemLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                overviewFragment.getActivity().finish();
-            }
-        });*/
-
-        //The image will be different for each row
+                //The image will be different for each row
         if(option.equals("Camera")){
-            //itemImageView.setImageResource(drawable);
+            itemImageView.setImageResource(R.drawable.camera_icon);
         }else if(option.equals("Explore")){
-            //itemImageView.setImageResource(drawable);
+            itemImageView.setImageResource(R.drawable.camera_icon);
+        }else if (option.equals("Notifications")){
+            itemImageView.setImageResource(R.drawable.camera_icon);
+        }else if(option.equals("Friends")){
+            itemImageView.setImageResource(R.drawable.camera_icon);
+        }else if(option.equals("Upload")){
+            itemImageView.setImageResource(R.drawable.camera_icon);
         }else if(option.equals("Settings")){
-            //itemImageView.setImageResource(drawable);
+            itemImageView.setImageResource(R.drawable.camera_icon);
         }else if(option.equals("Logout")){
-            //itemImageView.setImageResource(drawable);
+            itemImageView.setImageResource(R.drawable.camera_icon);
         }
         itemTextView.setText(option);
         //same with image when we have those resources

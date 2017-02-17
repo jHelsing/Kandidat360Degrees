@@ -7,11 +7,11 @@
     android:elevation="4dp">
     <ImageButton
         android:id="@+id/toolbarMenuButton"
-        android:layout_width="100px"
         android:src="@drawable/menu_icon"
         android:padding="10dp"
         android:layout_gravity="left"
-        android:layout_height="100px"
         android:scaleType="fitXY"
-        android:background="@null" />
+        android:background="@null"
+        android:layout_height="100px"
+        android:layout_width="100px" />
 </android.support.v7.widget.Toolbar>

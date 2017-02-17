@@ -1,10 +1,11 @@
 <resources>
     <string name="app_name">360World</string>
     <string-array name="list_options">
-        <item>Camera</item>
         <item>Explore</item>
         <item>Notifications</item>
+        <item>Camera</item>
         <item>Friends</item>
+        <item>Upload</item>
         <item>Settings</item>
         <item>Logout</item>
     </string-array>

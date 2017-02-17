@@ -80,9 +80,7 @@ public class MainActivity extends AppCompatActivity {
             FragmentManager fm = getFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
             if(position==0){
-                System.out.println("clicked drawer 0");
-            }else if(position==1) {
-                System.out.println("clicked drawer 1");
+                System.out.println("clicked explore");
                 ExploreFragment f = (ExploreFragment) fm.findFragmentByTag("fragment_explore");
                 if (f == null) {  // not added
                     f = new ExploreFragment();
@@ -96,8 +94,19 @@ public class MainActivity extends AppCompatActivity {
                 // Highlight the selected item, update the title, and close the drawer
                 mDrawerList.setItemChecked(position, true);
                 setTitle(mListOptions[position]);
-            }else if (position==2){
+            }else if(position==1) {
+                System.out.println("clicked notifications");
 
+            }else if (position==2){
+                System.out.println("clicked camera");
+            }else if (position==3){
+                System.out.println("clicked friends");
+            }else if (position==4){
+                System.out.println("clicked upload");
+            }else if (position==5){
+                System.out.println("clicked settings");
+            }else if (position==6){
+                System.out.println("clicked logout");
             }
             ft.commit();
             // Highlight the selected item, update the title, and close the drawer
