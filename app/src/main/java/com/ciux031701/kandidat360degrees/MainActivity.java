@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private ImageButton toolbarMenuButton;
 
+    private View drawerHeader;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +42,9 @@ public class MainActivity extends AppCompatActivity {
         mListOptions = getResources().getStringArray(R.array.list_options);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
+        drawerHeader = getLayoutInflater().inflate(R.layout.drawer_header, mDrawerList, false);
 
+        mDrawerList.addHeaderView(drawerHeader, null, false);
         //mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
