@@ -65,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
         mDrawerList.setAdapter(new DrawerAdapter(this,getApplicationContext(), mListOptions));
         // Set the list's click listener
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        showExploreView();
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -80,11 +82,15 @@ public class MainActivity extends AppCompatActivity {
             selectItem(position);
         }
 
-        //for args:
+        //for arguments:
         // Bundle args = new Bundle();
         //args.putInt(PlanetFragment.ARG_PLANET_NUMBER, position);
         //fragment.setArguments(args);
         private void selectItem(int position) {
+
+            //for some reason position seems to be 1 off, and it does not allow for index 6 since it has length 6.
+            position--;
+            System.out.println("Pos: " + position);
 
             Fragment fragment = null;
             Class fragmentClass;
@@ -106,9 +112,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case 5:
                     fragmentClass = SettingsFragment.class;
-                    break;
-                case 6: // log out
-                    fragmentClass = ExploreFragment.class;
                     break;
                 default:
                     fragmentClass = ExploreFragment.class;
@@ -132,6 +135,13 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    private void showExploreView(){
+        ExploreFragment fragment = new ExploreFragment();
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        setTitle("Explore");
     }
 
 }

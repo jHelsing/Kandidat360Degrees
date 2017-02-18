@@ -50,8 +50,6 @@ public class DrawerAdapter extends ArrayAdapter<String> {
             itemImageView.setImageResource(R.drawable.camera_icon);
         }else if(option.equals("Settings")){
             itemImageView.setImageResource(R.drawable.camera_icon);
-        }else if(option.equals("Logout")){
-            itemImageView.setImageResource(R.drawable.camera_icon);
         }
         itemTextView.setText(option);
         //same with image when we have those resources
