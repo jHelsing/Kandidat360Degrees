@@ -33,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton toolbarMenuButton;
 
     private View drawerHeader;
+    private View drawerFooter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -43,8 +44,10 @@ public class MainActivity extends AppCompatActivity {
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         drawerHeader = getLayoutInflater().inflate(R.layout.drawer_header, mDrawerList, false);
+        drawerFooter = getLayoutInflater().inflate(R.layout.drawer_footer, mDrawerList, false);
 
         mDrawerList.addHeaderView(drawerHeader, null, false);
+        mDrawerList.addFooterView(drawerFooter, null, false);
         //mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
 
         toolbar = (Toolbar) findViewById(R.id.tool_bar);
