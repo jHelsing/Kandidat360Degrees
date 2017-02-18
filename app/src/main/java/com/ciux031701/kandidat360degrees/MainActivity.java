@@ -19,12 +19,16 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 
 /**
  * Created by boking on 2017-02-14.
  */
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     private String[] mListOptions;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -73,6 +77,11 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.tool_menu, menu);
         return true;
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+
     }
 
     //Handles drawer item clicks

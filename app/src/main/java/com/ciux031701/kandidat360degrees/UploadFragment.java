@@ -16,7 +16,7 @@ public class UploadFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_explore, container, false);
+        View root = inflater.inflate(R.layout.fragment_upload, container, false);
 
         textView = (TextView) root.findViewById(R.id.textView1);
         textView.setText("upload");
