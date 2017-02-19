@@ -47,7 +47,7 @@ public class ExploreFragment extends Fragment {
             @Override
             public void onMapReady(GoogleMap mMap) {
                 googleMap = mMap;
-
+                googleMap.getUiSettings().setMapToolbarEnabled(false);
                 // For dropping a marker at a point on the Map
                 LatLng gothenburg = new LatLng(57.4, 12);
                 googleMap.addMarker(new MarkerOptions().position(gothenburg).title("Here we go bois").snippet("its happening!").icon(BitmapDescriptorFactory
