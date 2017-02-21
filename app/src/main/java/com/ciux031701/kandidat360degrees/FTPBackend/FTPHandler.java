@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.Image;
 
-import java.util.Map;
-
 /**
  * @author Jonathan
  * @version 0.1
@@ -20,7 +18,7 @@ public class FTPHandler {
         // Start service
         Intent i = new Intent(context, DownloadService.class);
         i.putExtra("KEY1", imageID);
-        context.startService(i);
+
         // Remove service
         return null;
     }
