@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,17 +39,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private View drawerHeader;
     private View drawerFooter;
+    private TextView usernameText;
+
+    private Session loginSession;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        loginSession = new Session();
 
         mListOptions = getResources().getStringArray(R.array.list_options);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         drawerHeader = getLayoutInflater().inflate(R.layout.drawer_header, mDrawerList, false);
         drawerFooter = getLayoutInflater().inflate(R.layout.drawer_footer, mDrawerList, false);
+        usernameText = (TextView) drawerHeader.findViewById(R.id.userNameText);
+        usernameText.setText("swag");
 
         mDrawerList.addHeaderView(drawerHeader, null, false);
         mDrawerList.addFooterView(drawerFooter, null, false);
