@@ -85,7 +85,7 @@ public class DownloadService extends IntentService {
                output.createNewFile();
                outputStream = new FileOutputStream(output);
                result = Activity.RESULT_OK;
-              Toast.makeText(getApplicationContext(), "Saved", 5);
+              Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_LONG);
            } finally {
                if (outputStream != null)
                    outputStream.close();

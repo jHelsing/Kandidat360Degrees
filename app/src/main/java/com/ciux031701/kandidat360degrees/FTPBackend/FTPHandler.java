@@ -18,7 +18,7 @@ public class FTPHandler {
     public Image downloadImage(Context context, int imageID) {
         // Start service
         Intent i = new Intent(context, DownloadService.class);
-        i.putExtra("FILENAME", imageID+"");
+        i.putExtra("FILENAME", imageID);
         i.putExtra("FILETYPE", "PANORAMA");
 
         context.startService(i);
@@ -27,10 +27,13 @@ public class FTPHandler {
         return null;
     }
 
-    public void uploadImage(Context context, Image image) {
-        // Start service.
-        
-        // Stop service
+    public void uploadImage(Context context, int imageID) {
+        // Start service
+        Intent i = new Intent(context, UploadService.class);
+        i.putExtra("FILENAME", imageID);
+        i.putExtra("FILETYPE", "PANORAMA");
+
+        context.startService(i);
     }
 
 }
