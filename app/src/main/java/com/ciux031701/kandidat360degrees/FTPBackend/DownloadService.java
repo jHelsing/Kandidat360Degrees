@@ -17,9 +17,9 @@ public class DownloadService extends IntentService {
 
     private int result = Activity.RESULT_CANCELED;
     private static final String DOMAIN = "saga.olf.sgsnet.se";
-    private static final String PROFILEURL = "profile";
-    private static final String PANORAMAURL = "panorama";
-    private static final String ICONURL = "icon";
+    private static final String PROFILEURL = "profiles";
+    private static final String PANORAMAURL = "panoramas";
+    private static final String PREVIEWURL = "previews";
     public static final String NOTIFICATION = "com.ciux031701.kandidat.360degrees";
 
     public DownloadService() {
@@ -32,7 +32,7 @@ public class DownloadService extends IntentService {
         String fileName = "";
         switch (intent.getStringExtra("FILETYPE")) {
             case "ICON":
-                fileName = fileName + ICONURL;
+                fileName = fileName + PREVIEWURL;
                 break;
             case "PANORAMA":
                 fileName = fileName + PANORAMAURL;
@@ -51,7 +51,7 @@ public class DownloadService extends IntentService {
         InputStream stream = null;
         FileOutputStream fileOutputStream = null;
         try {
-            URL url = new URL("FTP", DOMAIN, fileName);
+            URL url = new URL("ftp", DOMAIN, fileName);
 
             stream = url.openConnection().getInputStream();
             InputStreamReader reader = new InputStreamReader(stream);
