@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private Session loginSession;
     Bundle b;
+    Bundle setArgs;
 
 
     @Override
@@ -66,6 +67,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         usernameText = (TextView) drawerHeader.findViewById(R.id.userNameText);
         usernameText.setText(userName);
 
+        drawerHeader.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ProfileFragment fragment = new ProfileFragment();
+                FragmentManager fragmentManager = getFragmentManager();
+                setArgs = new Bundle();
+                setArgs.putString("username", loginSession.getUsername());
+                fragment.setArguments(setArgs);
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                setTitle("Profile");
+                mDrawerLayout.closeDrawer(mDrawerList);
+                mDrawerLayout.closeDrawers();
+            }
+        });
+
         mDrawerList.addHeaderView(drawerHeader, null, false);
         mDrawerList.addFooterView(drawerFooter, null, false);
         //mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
@@ -81,9 +97,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mDrawerLayout.openDrawer(Gravity.LEFT);
             }
         });
-        // Set the adapter for the list view
+
         mDrawerList.setAdapter(new DrawerAdapter(this,getApplicationContext(), mListOptions));
-        // Set the list's click listener
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         showExploreView();
@@ -107,10 +122,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             selectItem(position);
         }
 
-        //for arguments:
-        // Bundle args = new Bundle();
-        //args.putInt(PlanetFragment.ARG_PLANET_NUMBER, position);
-        //fragment.setArguments(args);
         private void selectItem(int position) {
 
             //for some reason position seems to be 1 off, and it does not allow for index 6 since it has length 6.
@@ -126,8 +137,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 case 1:
                     fragmentClass = NotificationFragment.class;
                     break;
-                case 2:
-                    fragmentClass = CameraFragment.class;
+                case 2: //TODO:Implement camera fragment here instead
+                    fragmentClass = FriendsFragment.class;
                     break;
                 case 3:
                     fragmentClass = FriendsFragment.class;
@@ -156,7 +167,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mDrawerLayout.closeDrawer(mDrawerList);
             setTitle(mListOptions[position]);
             mDrawerLayout.closeDrawers();
-            //mDrawerLayout.closeDrawer(mDrawerList);
 
         }
 
