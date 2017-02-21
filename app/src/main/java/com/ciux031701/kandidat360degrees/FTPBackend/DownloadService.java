@@ -3,8 +3,11 @@ package com.ciux031701.kandidat360degrees.FTPBackend;
 import android.app.Activity;
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Environment;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
+import android.widget.Toast;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
@@ -23,7 +26,7 @@ public class DownloadService extends IntentService {
     private static final String DOMAIN = "saga.olf.sgsnet.se";
     private static final int PORT = 21;
     private static final String PROFILEURL = "\\profiles\\";
-    private static final String PANORAMAURL = "\\panoramas\\";
+    private static final String PANORAMAURL = "/panoramas/";
     private static final String PREVIEWURL = "\\previews\\";
     private static final String FILETYPE = ".jpg";
     public static final String NOTIFICATION = "com.ciux031701.kandidat.360degrees";
@@ -32,6 +35,7 @@ public class DownloadService extends IntentService {
         super("DownloadService");
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onHandleIntent(Intent intent) {
         // Create the correct path for the file to be downloaded
@@ -51,18 +55,18 @@ public class DownloadService extends IntentService {
                 break;
         }
         String filename = intent.getStringExtra("FILENAME") + FILETYPE;
-        File output = new File(Environment.getExternalStorageDirectory(), filePath + filename);
-        if (output.exists()) {
-            output.delete();
-        }
 
-        // Grab username and password
+        File outputDir = new File(getApplicationContext().getDataDir() + "/360world/");
+        if (!outputDir.exists())
+           outputDir.mkdirs();
+
+       // Grab username and password
         String username = getUsername();
         String password = getPassword();
 
         // Start FTP communication
         FTPClient ftpClient = null;
-
+        File output =  new File(getApplicationContext().getDataDir() + "/360world/" + filename);
         try {
            ftpClient =  new FTPClient();
            ftpClient.connect(DOMAIN, PORT);
@@ -76,10 +80,12 @@ public class DownloadService extends IntentService {
 
            ftpClient.enterLocalPassiveMode();
 
-           OutputStream outputStream = null;
+           FileOutputStream outputStream = null;
            try {
-               outputStream = new BufferedOutputStream(new FileOutputStream(output));
+               output.createNewFile();
+               outputStream = new FileOutputStream(output);
                result = Activity.RESULT_OK;
+              Toast.makeText(getApplicationContext(), "Saved", 5);
            } finally {
                if (outputStream != null)
                    outputStream.close();
@@ -93,34 +99,6 @@ public class DownloadService extends IntentService {
         }
 
 
-        // Open connection to FTP server and download the correct file
-        InputStream stream = null;
-        FileOutputStream fileOutputStream = null;
-        try {
-            URL url = new URL("ftp", DOMAIN, filePath);
-
-            stream = url.openConnection().getInputStream();
-            InputStreamReader reader = new InputStreamReader(stream);
-            fileOutputStream = new FileOutputStream(output.getPath());
-            int next = -1;
-            while ((next = reader.read()) != -1) {
-                fileOutputStream.write(next);
-            }
-            // Download completed successfully
-            result = Activity.RESULT_OK;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            // Close the stream
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
         publishResults(output.getAbsolutePath(), result, intent.getStringExtra("FILENAME"));
 
     }

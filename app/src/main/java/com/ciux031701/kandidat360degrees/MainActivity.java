@@ -19,6 +19,7 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.ciux031701.kandidat360degrees.FTPBackend.FTPHandler;
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -102,6 +103,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         showExploreView();
+
+        /**
+         * Testing code for FTP connection will be commented when on git, just leave it be :D
+         */
+        //FTPHandler handler = new FTPHandler();
+        //handler.downloadImage(this, 111);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
