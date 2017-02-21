@@ -26,7 +26,7 @@ public class FTPHandler {
     }
 
     public void uploadImage(Context context, Image image) {
-        // Start service
+        // Start service.
         
         // Stop service
     }
