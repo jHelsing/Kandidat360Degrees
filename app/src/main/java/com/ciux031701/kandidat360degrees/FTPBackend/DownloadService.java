@@ -5,6 +5,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
+import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
 import java.io.*;
@@ -70,6 +71,21 @@ public class DownloadService extends IntentService {
            ftpClient.login(username, password);
            Log.d("FTP", "Phone logged-in to server");
 
+           ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+           Log.d("FTP", "Phone in download mode");
+
+           ftpClient.enterLocalPassiveMode();
+
+           OutputStream outputStream = null;
+           try {
+               outputStream = new BufferedOutputStream(new FileOutputStream(output));
+               result = Activity.RESULT_OK;
+           } finally {
+               if (outputStream != null)
+                   outputStream.close();
+           }
+           ftpClient.logout();
+           ftpClient.disconnect();
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -114,7 +130,7 @@ public class DownloadService extends IntentService {
      * @return The username to log in with
      */
     private String getUsername() {
-        return null;
+        return "superftpprofile";
     }
 
     /**
@@ -122,7 +138,7 @@ public class DownloadService extends IntentService {
      * @return The password to log in with
      */
     private String getPassword() {
-        return null;
+        return "Ue0EXHSdjR717yAx";
     }
 
     private void publishResults(String outputPath, int result, String fileName) {
