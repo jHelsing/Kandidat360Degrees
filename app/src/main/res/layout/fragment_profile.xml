@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/cast_intro_overlay_background_color">
+    android:background="#2d2d2d">
     <LinearLayout
         android:orientation="horizontal" android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/place_autocomplete_prediction_secondary_text">
+        android:background="#3f3f3f">
 
         <ImageView
             app:srcCompat="@drawable/profile_icon"
