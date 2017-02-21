@@ -42,12 +42,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private TextView usernameText;
 
     private Session loginSession;
+    Bundle b;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        loginSession = new Session();
+
+        //Retrieves username parameter from login
+        b = getIntent().getExtras();
+        String userName = ""; // or other values
+        if(b != null)
+            userName = b.getString("username");
+
+        loginSession = new Session(userName);
 
         mListOptions = getResources().getStringArray(R.array.list_options);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -55,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         drawerHeader = getLayoutInflater().inflate(R.layout.drawer_header, mDrawerList, false);
         drawerFooter = getLayoutInflater().inflate(R.layout.drawer_footer, mDrawerList, false);
         usernameText = (TextView) drawerHeader.findViewById(R.id.userNameText);
-        usernameText.setText("swag");
+        usernameText.setText(userName);
 
         mDrawerList.addHeaderView(drawerHeader, null, false);
         mDrawerList.addFooterView(drawerFooter, null, false);

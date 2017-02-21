@@ -22,7 +22,7 @@ public class LoginActivity extends Activity {
             @Override
             public void onClick(View view) {
                 Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
-                //myIntent.putExtra("key", value); //Optional parameters
+                myIntent.putExtra("username", "usernamefromlogin"); //Optional parameters
                 LoginActivity.this.startActivity(myIntent);
             }
         });
