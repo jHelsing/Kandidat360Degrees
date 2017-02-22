@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Environment;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.widget.Toast;
@@ -13,7 +12,6 @@ import org.apache.commons.net.ftp.FTPClient;
 
 import java.io.*;
 import java.net.SocketException;
-import java.net.URL;
 
 /**
  * @author Jonathan
@@ -23,13 +21,7 @@ import java.net.URL;
 public class DownloadService extends IntentService {
 
     private int result = Activity.RESULT_CANCELED;
-    private static final String DOMAIN = "saga.olf.sgsnet.se";
-    private static final int PORT = 21;
-    private static final String PROFILEURL = "\\profiles\\";
-    private static final String PANORAMAURL = "/panoramas/";
-    private static final String PREVIEWURL = "\\previews\\";
-    private static final String FILETYPE = ".jpg";
-    public static final String NOTIFICATION = "com.ciux031701.kandidat.360degrees";
+    public static final String NOTIFICATION = "com.ciux031701.kandidat.360degrees.action.download";
 
     public DownloadService() {
         super("DownloadService");
@@ -42,19 +34,19 @@ public class DownloadService extends IntentService {
         String filePath = "";
         switch (intent.getStringExtra("FILETYPE")) {
             case "ICON":
-                filePath = filePath + PREVIEWURL;
+                filePath = filePath + FTPInfo.PREVIEWURL;
                 break;
             case "PANORAMA":
-                filePath = filePath + PANORAMAURL;
+                filePath = filePath + FTPInfo.PANORAMAURL;
                 break;
             case "PROFILE":
-                filePath = filePath + PROFILEURL;
+                filePath = filePath + FTPInfo.PROFILEURL;
                 break;
             default:
                 this.stopSelf();
                 break;
         }
-        String filename = intent.getStringExtra("FILENAME") + FILETYPE;
+        String filename = intent.getStringExtra("FILENAME") + FTPInfo.FILETYPE;
 
         File outputDir = new File(getApplicationContext().getDataDir() + "/360world/");
         if (!outputDir.exists())
@@ -69,7 +61,7 @@ public class DownloadService extends IntentService {
         File output =  new File(getApplicationContext().getDataDir() + "/360world/" + filename);
         try {
            ftpClient =  new FTPClient();
-           ftpClient.connect(DOMAIN, PORT);
+           ftpClient.connect(FTPInfo.DOMAIN, FTPInfo.PORT);
            Log.d("FTP", "Phone connected to server");
 
            ftpClient.login(username, password);
@@ -80,10 +72,10 @@ public class DownloadService extends IntentService {
 
            ftpClient.enterLocalPassiveMode();
 
-           FileOutputStream outputStream = null;
+           OutputStream outputStream = null;
            try {
                output.createNewFile();
-               outputStream = new FileOutputStream(output);
+               outputStream = new BufferedOutputStream(new FileOutputStream(output));
                result = Activity.RESULT_OK;
               Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_LONG);
            } finally {
