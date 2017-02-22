@@ -31,7 +31,7 @@ public class FTPHandler {
         // Start service
         Intent i = new Intent(context, UploadService.class);
         i.putExtra("FILENAME", imageID);
-        i.putExtra("FILETYPE", "PANORAMA");
+        i.putExtra("FILETYPE", "panorama");
 
         context.startService(i);
     }

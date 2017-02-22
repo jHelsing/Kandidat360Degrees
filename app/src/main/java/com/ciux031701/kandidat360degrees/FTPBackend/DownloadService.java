@@ -54,8 +54,8 @@ public class DownloadService extends IntentService {
            outputDir.mkdirs();
 
        // Grab username and password
-        String username = getUsername();
-        String password = getPassword();
+        String username = FTPInfo.getUsername();
+        String password = FTPInfo.getPassword();
 
         // Start FTP communication
         FTPClient ftpClient = null;
@@ -93,22 +93,6 @@ public class DownloadService extends IntentService {
 
         publishResults(output.getAbsolutePath(), result, intent.getIntExtra("FILENAME", 0)+"");
 
-    }
-
-    /**
-     * Loads the username to the FTP server from storage
-     * @return The username to log in with
-     */
-    private String getUsername() {
-        return "superftpprofile";
-    }
-
-    /**
-     * Loads the password to the FTP server from storage
-     * @return The password to log in with
-     */
-    private String getPassword() {
-        return "Ue0EXHSdjR717yAx";
     }
 
     private void publishResults(String outputPath, int result, String fileName) {

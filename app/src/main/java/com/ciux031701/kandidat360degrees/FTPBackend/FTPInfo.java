@@ -16,4 +16,22 @@ public class FTPInfo {
    public static final String PREVIEWURL = "/previews/";
    public static final String FILETYPE = ".jpg";
 
+
+
+   /**
+    * Loads the username to the FTP server from storage
+    * @return The username to log in with
+    */
+   public static String getUsername() {
+      return "superftpprofile";
+   }
+
+   /**
+    * Loads the password to the FTP server from storage
+    * @return The password to log in with
+    */
+   public static String getPassword() {
+      return "Ue0EXHSdjR717yAx";
+   }
+
 }
