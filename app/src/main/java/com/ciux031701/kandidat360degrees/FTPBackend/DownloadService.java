@@ -46,7 +46,7 @@ public class DownloadService extends IntentService {
                 this.stopSelf();
                 break;
         }
-        String filename = intent.getStringExtra("FILENAME") + FTPInfo.FILETYPE;
+        String filename = intent.getIntExtra("FILENAME", 0) + FTPInfo.FILETYPE;
 
         File outputDir = new File(getApplicationContext().getDataDir() + "/360world/");
         if (!outputDir.exists())
@@ -75,7 +75,7 @@ public class DownloadService extends IntentService {
            OutputStream outputStream = null;
            try {
                output.createNewFile();
-               outputStream = new BufferedOutputStream(new FileOutputStream(output));
+               outputStream = new BufferedOutputStream(new FileOutputStream(output.getPath()));
                result = Activity.RESULT_OK;
               Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_LONG);
            } finally {
@@ -91,7 +91,7 @@ public class DownloadService extends IntentService {
         }
 
 
-        publishResults(output.getAbsolutePath(), result, intent.getStringExtra("FILENAME"));
+        publishResults(output.getAbsolutePath(), result, intent.getIntExtra("FILENAME", 0)+"");
 
     }
 
