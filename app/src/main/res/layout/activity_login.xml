@@ -10,6 +10,15 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.ciux031701.kandidat360degrees.LoginActivity">
 
+    <!-- To put CreateAccountFragment in -->
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/tool_bar" >
+
+    </FrameLayout>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -54,7 +63,8 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="205dp"
-        android:textStyle="normal|bold" />
+        android:textStyle="normal|bold"
+        android:textSize="24sp" />
 
     <TextView
         android:text="Username"
@@ -65,7 +75,8 @@
         android:layout_above="@+id/usernameFIeld"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="11dp" />
+        android:layout_marginBottom="11dp"
+        android:textSize="18sp" />
 
     <TextView
         android:text="Password"
@@ -76,6 +87,19 @@
         android:paddingTop="3dp"
         android:layout_above="@+id/passwordField"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:textSize="18sp" />
+
+    <Button
+        android:text="Create account"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/createAccountButton"
+        android:layout_marginTop="49dp"
+        android:layout_below="@+id/passwordField"
+        android:layout_centerHorizontal="true"
+        android:textAppearance="@style/TextAppearance.AppCompat"
+        android:textSize="18sp"
+        android:background="@android:color/transparent"/>
 
 </RelativeLayout>
