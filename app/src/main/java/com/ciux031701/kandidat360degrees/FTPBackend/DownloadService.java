@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.widget.Toast;
@@ -48,7 +49,7 @@ public class DownloadService extends IntentService {
         }
         String filename = intent.getIntExtra("FILENAME", 0) + FTPInfo.FILETYPE;
 
-        File outputDir = new File(getApplicationContext().getDataDir() + "/360world/");
+        File outputDir = new File(getApplicationContext().getCacheDir() + "/360world/");
         if (!outputDir.exists())
            outputDir.mkdirs();
 
@@ -58,7 +59,7 @@ public class DownloadService extends IntentService {
 
         // Start FTP communication
         FTPClient ftpClient = null;
-        File output =  new File(getApplicationContext().getDataDir() + "/360world/" + filename);
+        File output =  new File(getApplicationContext().getCacheDir() + "/360world/" + filename);
         try {
            ftpClient =  new FTPClient();
            ftpClient.connect(FTPInfo.DOMAIN, FTPInfo.PORT);
@@ -75,7 +76,7 @@ public class DownloadService extends IntentService {
            OutputStream outputStream = null;
            try {
                output.createNewFile();
-               outputStream = new BufferedOutputStream(new FileOutputStream(output.getPath()));
+               outputStream = new DataOutputStream(new FileOutputStream(output.getPath()));
                result = Activity.RESULT_OK;
               Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_LONG);
            } finally {
@@ -89,7 +90,6 @@ public class DownloadService extends IntentService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
 
         publishResults(output.getAbsolutePath(), result, intent.getIntExtra("FILENAME", 0)+"");
 
