@@ -34,14 +34,14 @@ public class DownloadService extends IntentService {
         // Create the correct path for the file to be downloaded
         String filePath = "";
         switch (intent.getStringExtra("FILETYPE")) {
-            case "ICON":
-                filePath = filePath + FTPInfo.PREVIEWURL;
+            case "PREVIEW":
+                filePath = FTPInfo.PREVIEWURL;
                 break;
             case "PANORAMA":
-                filePath = filePath + FTPInfo.PANORAMAURL;
+                filePath = FTPInfo.PANORAMAURL;
                 break;
             case "PROFILE":
-                filePath = filePath + FTPInfo.PROFILEURL;
+                filePath = FTPInfo.PROFILEURL;
                 break;
             default:
                 this.stopSelf();
@@ -49,7 +49,7 @@ public class DownloadService extends IntentService {
         }
         String filename = intent.getIntExtra("FILENAME", 0) + FTPInfo.FILETYPE;
 
-        File outputDir = new File(getApplicationContext().getCacheDir() + "/360world/");
+        File outputDir = new File(getApplicationContext().getCacheDir() + "/360world/"+ filePath);
         if (!outputDir.exists())
            outputDir.mkdirs();
 
@@ -59,17 +59,21 @@ public class DownloadService extends IntentService {
 
         // Start FTP communication
         FTPClient ftpClient = null;
-        File output =  new File(getApplicationContext().getCacheDir() + "/360world/" + filename);
+        File output =  new File(getApplicationContext().getCacheDir() + "/360world/" + filePath + filename);
         try {
            ftpClient =  new FTPClient();
            ftpClient.connect(FTPInfo.DOMAIN, FTPInfo.PORT);
            Log.d("FTP", "Phone connected to server");
 
-           ftpClient.login(username, password);
+           if (!ftpClient.login(username, password)) {
+              Log.d("FTP", "Fail login");
+           }
            Log.d("FTP", "Phone logged-in to server");
 
            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
            Log.d("FTP", "Phone in download mode");
+
+           ftpClient.changeWorkingDirectory("/panoramas/");
 
            ftpClient.enterLocalPassiveMode();
 
@@ -77,6 +81,15 @@ public class DownloadService extends IntentService {
            try {
                output.createNewFile();
                outputStream = new DataOutputStream(new FileOutputStream(output.getPath()));
+               DataInputStream input = new DataInputStream(ftpClient.retrieveFileStream("111.jpg"));
+               int next = -1;
+
+               while ((next = input.read()) != -1) {
+                  outputStream.write(next);
+               }
+
+               input.close();
+
                result = Activity.RESULT_OK;
               Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_LONG);
            } finally {
