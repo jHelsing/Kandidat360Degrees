@@ -34,6 +34,13 @@
         android:id="@+id/usernameField" />
 
     <TextView
+        android:text="Miniumum of five characters"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/usernameInfoView"
+        android:textStyle="normal|italic" />
+
+    <TextView
         android:text="E-mail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -62,6 +69,13 @@
         android:inputType="textPassword"
         android:ems="10"
         android:id="@+id/password1Field" />
+
+    <TextView
+        android:text="Minimum of five characters"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/passwordInfoView"
+        android:textStyle="normal|italic" />
 
     <TextView
         android:text="Repeat password"
