@@ -44,7 +44,7 @@ public class CreateAccountFragment extends Fragment {
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
-                //TODO
+                getFragmentManager().popBackStack();
             }
         });
 
