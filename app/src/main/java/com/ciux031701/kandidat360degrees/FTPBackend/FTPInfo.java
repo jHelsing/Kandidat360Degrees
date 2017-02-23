@@ -16,6 +16,10 @@ public class FTPInfo {
    public static final String PREVIEWURL = "/previews/";
    public static final String FILETYPE = ".jpg";
 
+   public static final String SERVERPANORAMA = "/var/www/360world/panoramas/";
+   public static final String SERVERPROFILE = "/var/www/360world/profiles/";
+   public static final String SERVERPREVIEW = "/var/www/360world/previews/";
+
 
 
    /**

@@ -28,7 +28,6 @@ public class DownloadService extends IntentService {
         super("DownloadService");
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onHandleIntent(Intent intent) {
         // Create the correct path for the file to be downloaded
@@ -49,7 +48,7 @@ public class DownloadService extends IntentService {
         }
         String filename = intent.getIntExtra("FILENAME", 0) + FTPInfo.FILETYPE;
 
-        File outputDir = new File(getApplicationContext().getCacheDir() + "/360world/"+ filePath);
+        File outputDir = new File(getApplicationContext().getCacheDir() + filePath);
         if (!outputDir.exists())
            outputDir.mkdirs();
 
@@ -59,7 +58,7 @@ public class DownloadService extends IntentService {
 
         // Start FTP communication
         FTPClient ftpClient = null;
-        File output =  new File(getApplicationContext().getCacheDir() + "/360world/" + filePath + filename);
+        File output =  new File(getApplicationContext().getCacheDir() + filePath + filename);
         try {
            ftpClient =  new FTPClient();
            ftpClient.connect(FTPInfo.DOMAIN, FTPInfo.PORT);
