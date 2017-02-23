@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -18,6 +19,7 @@ import static com.ciux031701.kandidat360degrees.R.id.textView;
  */
 
 public class CreateAccountFragment extends Fragment {
+    Button createAccountButton;
     EditText usernameText;
 
     @Override
@@ -47,6 +49,16 @@ public class CreateAccountFragment extends Fragment {
         };
         usernameText.addTextChangedListener(txwatcher);
 
+
+
+        //create account-button: should return to activity_login ( + show that the account was created?)
+        createAccountButton = (Button)root.findViewById(R.id.createButton);
+        createAccountButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view){
+                //TODO
+            }
+        });
 
 
         return root;

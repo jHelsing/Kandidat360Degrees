@@ -11,35 +11,15 @@ import android.widget.Button;
 
 public class LoginActivity extends Activity {
 
-    Button loginButton;
-    Button createAccountButton;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        //GUI
-        loginButton = (Button)findViewById(R.id.loginButton);
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
-                myIntent.putExtra("username", "usernamefromlogin"); //Optional parameters
-                LoginActivity.this.startActivity(myIntent);
-            }
-        });
-
-        createAccountButton = (Button)findViewById(R.id.createAccountButton);
-        //Button createAccountButton = (Button)findViewById(R.id.createAccountButton);
-        createAccountButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view){
-                FragmentManager fragmentManager = getFragmentManager();
-                Fragment fragment = new CreateAccountFragment();
-                fragmentManager.beginTransaction().replace(R.id.fragment_container,fragment).commit();
-            }
-        });
+        FragmentManager fragmentManager = getFragmentManager();
+        Fragment fragment = new LoginFragment();
+        //fragmentManager.beginTransaction().add(R.id.fragment_container,fragment).addToBackStack(null).commit();
+        fragmentManager.beginTransaction().replace(R.id.fragment_container,fragment).commit();
 
     }
 
