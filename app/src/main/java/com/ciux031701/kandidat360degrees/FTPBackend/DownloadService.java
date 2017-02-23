@@ -63,17 +63,19 @@ public class DownloadService extends IntentService {
         try {
            ftpClient =  new FTPClient();
            ftpClient.connect(FTPInfo.DOMAIN, FTPInfo.PORT);
-           Log.d("FTP", "Phone connected to server");
+           Log.d("FTP", "Phone connected to server: " + ftpClient.getReplyString());
 
            if (!ftpClient.login(username, password)) {
-              Log.d("FTP", "Fail login");
+              Log.d("FTP", ftpClient.getReplyString());
            }
-           Log.d("FTP", "Phone logged-in to server");
+
+           Log.d("FTP", "Phone logged-in to server: " + ftpClient.getReplyString());
 
            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-           Log.d("FTP", "Phone in download mode");
+           Log.d("FTP", "Phone in download mode: " + ftpClient.getReplyString());
 
-           ftpClient.changeWorkingDirectory("/panoramas/");
+           ftpClient.changeWorkingDirectory("/var/www/360world/panoramas/");
+           Log.d("FTP", "Changed Directory: " + ftpClient.getReplyString()); // Working until here
 
            ftpClient.enterLocalPassiveMode();
 
@@ -91,12 +93,14 @@ public class DownloadService extends IntentService {
                input.close();
 
                result = Activity.RESULT_OK;
-              Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_LONG);
+               Log.d("FTP", "Completed");
+
            } finally {
                if (outputStream != null)
                    outputStream.close();
            }
            ftpClient.logout();
+           Log.d("FTP", "Logout: " + ftpClient.getReplyString());
            ftpClient.disconnect();
         } catch (SocketException e) {
             e.printStackTrace();
