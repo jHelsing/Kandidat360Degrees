@@ -18,7 +18,7 @@ import java.net.SocketException;
 public class DownloadService extends IntentService {
 
     private int result = Activity.RESULT_CANCELED;
-    public static final String NOTIFICATION = "com.ciux031701.kandidat.360degrees.action.download";
+    public static final String NOTIFICATION = "com.ciux031701.kandidat360degrees.FTPBackend.action.download";
 
     public DownloadService() {
         super("DownloadService");
@@ -71,7 +71,6 @@ public class DownloadService extends IntentService {
         } else {
            publishResults(outputFile.getPath(), Activity.RESULT_OK,
                    intent.getIntExtra("IMAGEID", -1) + "");
-           this.stopSelf();
         }
 
         // Start FTP communication
@@ -89,15 +88,18 @@ public class DownloadService extends IntentService {
               // Failed the login
               Log.d("FTP", "FAILED: " + ftpClient.getReplyString());
               Log.d("FTP", "Returning failed result");
-              publishResults(outputFile.getPath(), Activity.RESULT_CANCELED,
-                      intent.getIntExtra("IMAGEID", -1) + "");
               Log.d("FTP", "Published results. Closing connection and stopping service.");
               ftpClient.disconnect();
-              this.stopSelf();
+
+              publishResults(outputFile.getPath(), Activity.RESULT_CANCELED,
+                      intent.getIntExtra("IMAGEID", -1) + "");
            } else {
               // Login successful
               Log.d("FTP", "Phone logged-in to server: " + ftpClient.getReplyString());
            }
+
+            // Make the server ready for uploading a file to our device
+           ftpClient.enterLocalPassiveMode();
 
            // Set the correct filetype of the file on the server. For images it is as follows;
            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
@@ -105,18 +107,15 @@ public class DownloadService extends IntentService {
 
            // Set the correct location for the image to be downloaded
            ftpClient.changeWorkingDirectory(serverFilePath);
-           Log.d("FTP", "Changed Directory: " + ftpClient.getReplyString()); // Working until here
-
-           // Make the server ready for uploading a file to our device
-           ftpClient.enterLocalPassiveMode();
+           Log.d("FTP", "Changed Directory: " + ftpClient.getReplyString());
 
            // Start downloading the file from the server and write to the local file
-           OutputStream outputStream = null;
-           DataInputStream input = null;
+           FileOutputStream outputStream = null;
+           BufferedInputStream input = null;
            try {
                // Grab the correct input and output streams
-               outputStream = new DataOutputStream(new FileOutputStream(outputFile.getPath()));
-               input = new DataInputStream(ftpClient.retrieveFileStream(filename));
+               outputStream = new FileOutputStream(outputFile.getPath());
+               input = new BufferedInputStream(ftpClient.retrieveFileStream(filename));
 
                // Start writing the file and and store it, int for int
                int next = -1;

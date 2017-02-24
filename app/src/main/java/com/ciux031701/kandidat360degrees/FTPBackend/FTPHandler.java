@@ -1,5 +1,6 @@
 package com.ciux031701.kandidat360degrees.FTPBackend;
 
+
 import android.content.Context;
 import android.content.Intent;
 import android.media.Image;
@@ -55,7 +56,7 @@ public class FTPHandler {
         // Start service
         Intent i = new Intent(context, UploadService.class);
         i.putExtra("FILENAME", imageID);
-        i.putExtra("FILETYPE", "panorama");
+        i.putExtra("FILETYPE", "PREVIEW");
 
         context.startService(i);
     }
