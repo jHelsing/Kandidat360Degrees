@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
          * Testing code for FTP connection will be commented when on git, just leave it be :D
          */
         //FTPHandler handler = new FTPHandler();
-        //handler.downloadPanorama(this, 111);
+        //handler.downloadPanoramaImage(this, 111);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

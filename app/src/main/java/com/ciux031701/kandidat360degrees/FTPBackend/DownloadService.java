@@ -130,7 +130,6 @@ public class DownloadService extends IntentService {
                // Service results correct. Service has completed it's task and downloaded the correct file
                result = Activity.RESULT_OK;
                Log.d("FTP", "File downloaded correctly");
-
            } finally {
                if (outputStream != null)
                    outputStream.close();

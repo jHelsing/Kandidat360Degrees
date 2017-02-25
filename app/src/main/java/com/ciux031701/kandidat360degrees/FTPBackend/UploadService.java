@@ -63,7 +63,7 @@ public class UploadService extends IntentService {
         if (!intputFile.exists()) {
             publishResults(Activity.RESULT_CANCELED);
         }
-
+        Log.d("FTP", "File exists and can upload");
         // Start FTP communication
         FTPClient ftpClient = null;
 
@@ -101,7 +101,7 @@ public class UploadService extends IntentService {
 
             // Start uploading the file from the local device and write to the FTP-server
             FileInputStream inputStream = new FileInputStream(intputFile);
-            boolean result = ftpClient.storeFile("/"+ filename, inputStream);
+            boolean result = ftpClient.storeFile(filename, inputStream);
             inputStream.close();
 
             if(result){
