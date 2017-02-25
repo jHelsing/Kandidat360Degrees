@@ -35,9 +35,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
 
-    private Toolbar toolbar;
-    private ImageButton toolbarMenuButton;
-
     private View drawerHeader;
     private View drawerFooter;
     private TextView usernameText;
@@ -86,18 +83,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mDrawerList.addHeaderView(drawerHeader, null, false);
         mDrawerList.addFooterView(drawerFooter, null, false);
         //mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-
-        toolbar = (Toolbar) findViewById(R.id.tool_bar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        toolbarMenuButton = (ImageButton)findViewById(R.id.toolbarMenuButton);
-        toolbarMenuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mDrawerLayout.openDrawer(Gravity.LEFT);
-            }
-        });
 
         mDrawerList.setAdapter(new DrawerAdapter(this,getApplicationContext(), mListOptions));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
@@ -179,9 +164,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    public void openDrawer(){
+
+    }
+
     private void showExploreView(){
         ExploreFragment fragment = new ExploreFragment();
         FragmentManager fragmentManager = getFragmentManager();
+        fragment.setArguments(setArgs);
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
         setTitle("Explore");
     }
