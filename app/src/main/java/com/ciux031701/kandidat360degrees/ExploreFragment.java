@@ -1,18 +1,21 @@
 package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
-import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -56,6 +59,7 @@ public class ExploreFragment extends Fragment {
             }
         });
 
+
         mMapView = (MapView) root.findViewById(R.id.mapView);
         mMapView.onCreate(savedInstanceState);
 
@@ -88,6 +92,7 @@ public class ExploreFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolmenu_search, menu);
+
         super.onCreateOptionsMenu(menu,inflater);
     }
 }
