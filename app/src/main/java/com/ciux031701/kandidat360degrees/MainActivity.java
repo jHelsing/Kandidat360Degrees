@@ -96,13 +96,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //handler.downloadPanoramaImage(this, 111);
     }
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.tool_menu, menu);
-        return true;
-    }
-
-    @Override
     public void onMapReady(GoogleMap googleMap) {
 
     }
