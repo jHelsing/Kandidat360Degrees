@@ -16,7 +16,7 @@ public class FTPHandler {
 
     }
 
-    public Image downloadPanorama(Context context, int imageID) {
+    public Image downloadPanoramaImage(Context context, int imageID) {
         // Start service
         Intent i = new Intent(context, DownloadService.class);
         i.putExtra("IMAGEID", imageID);
@@ -52,7 +52,25 @@ public class FTPHandler {
         return null;
     }
 
-    public void uploadImage(Context context, int imageID) {
+    public void uploadPanoramaImage(Context context, int imageID) {
+        // Start service
+        Intent i = new Intent(context, UploadService.class);
+        i.putExtra("FILENAME", imageID);
+        i.putExtra("FILETYPE", "PANORAMA");
+
+        context.startService(i);
+    }
+
+    public void uploadProfileImage(Context context, int imageID) {
+        // Start service
+        Intent i = new Intent(context, UploadService.class);
+        i.putExtra("FILENAME", imageID);
+        i.putExtra("FILETYPE", "PROFILE");
+
+        context.startService(i);
+    }
+
+    public void uploadPreviewImage(Context context, int imageID) {
         // Start service
         Intent i = new Intent(context, UploadService.class);
         i.putExtra("FILENAME", imageID);
