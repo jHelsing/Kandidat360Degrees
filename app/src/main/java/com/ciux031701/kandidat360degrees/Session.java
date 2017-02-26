@@ -7,13 +7,13 @@ package com.ciux031701.kandidat360degrees;
  */
 
 public class Session {
-    private String username;
+    private static String username;
 
     public Session(String username){
         this.username = username;
     }
 
-    public String getUsername() {
+    public static String getUsername() {
         return username;
     }
 

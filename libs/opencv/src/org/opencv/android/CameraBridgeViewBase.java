@@ -11,9 +11,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -409,7 +412,20 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         if (bmpValid && mCacheBitmap != null) {
             Canvas canvas = getHolder().lockCanvas();
             if (canvas != null) {
+
                 canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
+                /*
+                canvas.rotate(90,0,0);
+                mScale = canvas.getWidth() / (float)mCacheBitmap.getHeight();
+                float scale2 = canvas.getHeight() / (float)mCacheBitmap.getWidth();
+                if(scale2 > mScale){
+                    mScale = scale2;
+                }
+                if (mScale != 0) {
+                    canvas.scale(mScale, mScale,0,0);
+                }
+                canvas.drawBitmap(mCacheBitmap, 0, -mCacheBitmap.getHeight(), null);*/
+
                 if (BuildConfig.DEBUG)
                     Log.d(TAG, "mStretch value: " + mScale);
 
