@@ -11,6 +11,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
@@ -52,10 +53,14 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
     private boolean captureInProgress;
     private double startDegree;
 
+    private DrawerLayout mDrawerLayout;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_camera, container, false);
+
+        mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
 
         isVertical = false;
         captureInProgress = false;
@@ -75,6 +80,7 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                 Fragment fragment = new ExploreFragment();
                 FragmentManager fragmentManager = getActivity().getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

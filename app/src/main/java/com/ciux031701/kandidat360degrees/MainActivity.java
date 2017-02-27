@@ -113,53 +113,42 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             //for some reason position seems to be 1 off, and it does not allow for index 6 since it has length 6.
             position--;
             System.out.println("Pos: " + position);
-            if (position != 20) {
-                Fragment fragment = null;
-                Class fragmentClass;
+            Fragment fragment = null;
+            Class fragmentClass;
 
-                switch(position) {
-                    case 0:
-                        fragmentClass = ExploreFragment.class;
-                        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
-                        break;
-                    case 1:
-                        fragmentClass = NotificationFragment.class;
-                        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
-                        break;
-                    case 2:
-                        fragmentClass = CameraFragment.class;
-                        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                        break;
-                    case 3:
-                        fragmentClass = FriendsFragment.class;
-                        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
-                        break;
-                    case 4:
-                        fragmentClass = UploadFragment.class;
-                        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
-                        break;
-                    case 5:
-                        fragmentClass = SettingsFragment.class;
-                        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN);
-                        break;
-                    default:
-                        fragmentClass = ExploreFragment.class;
-                }
-
-                try {
-                    fragment = (Fragment) fragmentClass.newInstance();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                // Insert the fragment by replacing any existing fragment
-                FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-
-            }else{
-                Intent myIntent = new Intent(MainActivity.this, CameraActivity.class);
-                startActivity(myIntent);
+            switch(position) {
+                case 0:
+                    fragmentClass = ExploreFragment.class;
+                    break;
+                case 1:
+                    fragmentClass = NotificationFragment.class;
+                    break;
+                case 2:
+                    fragmentClass = CameraFragment.class;
+                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    break;
+                case 3:
+                    fragmentClass = FriendsFragment.class;
+                    break;
+                case 4:
+                    fragmentClass = UploadFragment.class;
+                    break;
+                case 5:
+                    fragmentClass = SettingsFragment.class;
+                    break;
+                default:
+                    fragmentClass = ExploreFragment.class;
             }
+
+            try {
+                fragment = (Fragment) fragmentClass.newInstance();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // Insert the fragment by replacing any existing fragment
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
             mDrawerList.setItemChecked(position, true);
             mDrawerLayout.closeDrawer(mDrawerList);
