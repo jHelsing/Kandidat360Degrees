@@ -6,6 +6,8 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -51,10 +53,12 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
 
     private boolean isVertical;
     private boolean captureInProgress;
+    private boolean finalizationInProgress;
     private double startDegree;
 
     private DrawerLayout mDrawerLayout;
 
+    private Bundle args;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -64,6 +68,7 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
 
         isVertical = false;
         captureInProgress = false;
+        finalizationInProgress = false;
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -76,29 +81,53 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
         holdVerticallyText = (TextView)root.findViewById(R.id.holdVerticallyText);
         holdVerticallyImage = (ImageView)root.findViewById(R.id.holdVerticallyImage);
         backButton = (ImageButton)root.findViewById(R.id.backButton);
+        backButton.setBackgroundResource(R.drawable.temp_return);
         captureButton.setVisibility(View.GONE);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                Fragment fragment = new ExploreFragment();
-                FragmentManager fragmentManager = getActivity().getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+                if(finalizationInProgress){
+                    backButton.setBackgroundResource(R.drawable.temp_return);
+                    finalizationInProgress = false;
+                    mOpenCvCameraView.setVisibility(View.VISIBLE);
+                    captureButton.setBackgroundResource(R.drawable.temp_capture);
+                }else {
+                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    Fragment fragment = new ExploreFragment();
+                    FragmentManager fragmentManager = getActivity().getFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.content_frame, fragment);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
+                }
 
             }
         });
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!captureInProgress) {
+                if(!captureInProgress && !finalizationInProgress) {
                     captureInProgress = true;
                     startDegree=lastDegree;
                     backButton.setVisibility(View.GONE);
-                }else{
+                }else if (finalizationInProgress) {
+                    //Switch fragment to upload with picture as param
+                    Bitmap tempPicture = BitmapFactory.decodeResource(getResources(), R.drawable.example_panorama);
+                    args = new Bundle();
+                    args.putParcelable("picture", tempPicture);
+
+                    UploadFragment fragment = new UploadFragment();
+                    FragmentManager fragmentManager = getFragmentManager();
+                    fragment.setArguments(args);
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+
+                }else {
                     captureInProgress = false;
+                    finalizationInProgress = true;
+                    mOpenCvCameraView.setVisibility(View.GONE);
+                    //Show image
+                    captureButton.setBackgroundResource(R.drawable.temp_check);
+                    backButton.setBackgroundResource(R.drawable.temp_cross);
                     backButton.setVisibility(View.VISIBLE);
                 }
 
@@ -198,7 +227,7 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
                 if(orientation[1] < 1.75 && orientation[1] > 1.25 || orientation[1] < -1.25 && orientation[1] > -1.75){
                     if(!isVertical) {
                         isVertical = true;
-                        if(!captureInProgress) {
+                        if(!captureInProgress && !finalizationInProgress) {
                             mOpenCvCameraView.setVisibility(View.VISIBLE);
                             //mOpenCvCameraView.setAlpha(1);
                             holdVerticallyImage.setVisibility(View.GONE);
@@ -210,7 +239,7 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
                 }else{
                     if(isVertical) {
                         isVertical = false;
-                        if(!captureInProgress) {
+                        if(!captureInProgress && !finalizationInProgress) {
                             mOpenCvCameraView.setVisibility(View.GONE);
                             //mOpenCvCameraView.setAlpha(0);
                             holdVerticallyImage.setVisibility(View.VISIBLE);

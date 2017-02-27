@@ -14,15 +14,15 @@
     opencv:show_fps="false"  opencv:camera_id="any" />
 
     <ImageButton
-        opencv:srcCompat="@android:drawable/ic_menu_revert"
         android:id="@+id/backButton"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:padding="5dp"
-        android:background="@null"
+        android:background="@drawable/temp_return"
         android:elevation="1dp"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_margin="10dp" />
 
     <ImageView
         android:layout_width="wrap_content"
@@ -41,13 +41,12 @@
         android:layout_centerHorizontal="true"/>
 
     <ImageButton
-        opencv:srcCompat="@drawable/temp_capture"
         android:id="@+id/captureButton"
-        android:background="@null"
+        android:background="@drawable/temp_capture"
         android:scaleType="fitXY"
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="490dp" />
+        android:layout_marginTop="490dp"/>
 
 </RelativeLayout>

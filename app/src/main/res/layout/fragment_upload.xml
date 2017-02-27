@@ -1,14 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <include
         android:id="@+id/tool_bar"
-        layout="@layout/tool_bar"
+        layout="@layout/tool_bar_text"
         ></include>
-    <TextView
-        android:text="TextView"
+
+    <ImageView
+        android:id="@+id/previewPic"
+        android:layout_height="90dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView1" />
+        app:srcCompat="@drawable/example_panorama" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
+
+        <TextView
+            android:text="Amazing image settings. Ska vi ens ha preview här eller bara tabbar med friends/public högst upp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView1"
+            android:layout_weight="1"
+            android:padding="10dp" />
+
+        <Button
+            android:text="SHARE"
+            android:layout_width="match_parent"
+            android:id="@+id/shareButton"
+            android:gravity="center|bottom"
+            android:layout_height="wrap_content"
+            android:padding="25dp"/>
+
+    </LinearLayout>
+
+
 </LinearLayout>
