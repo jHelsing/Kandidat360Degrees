@@ -5,13 +5,13 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.GpsSatellite;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -30,6 +30,7 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 
+
 /**
  * Created by boking on 2017-02-17.
  */
@@ -41,6 +42,8 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
     private ImageButton backButton;
     private ImageView holdVerticallyImage;
     private ImageButton captureButton;
+    private ImageButton fullscreenButton;
+    private ImageView previewImage;
 
     //Sensor stuff
     private Sensor accelerometer;
@@ -57,6 +60,7 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
     private double startDegree;
 
     private DrawerLayout mDrawerLayout;
+    private Mat lastFrame;
 
     private Bundle args;
 
@@ -77,12 +81,24 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
 
         lastDegree = 0;
 
+        previewImage = (ImageView)root.findViewById(R.id.previewImage);
+        fullscreenButton = (ImageButton)root.findViewById(R.id.fullscreenButton);
+        fullscreenButton.setVisibility(View.GONE);
         captureButton = (ImageButton)root.findViewById(R.id.captureButton);
         holdVerticallyText = (TextView)root.findViewById(R.id.holdVerticallyText);
         holdVerticallyImage = (ImageView)root.findViewById(R.id.holdVerticallyImage);
         backButton = (ImageButton)root.findViewById(R.id.backButton);
         backButton.setBackgroundResource(R.drawable.temp_return);
         captureButton.setVisibility(View.GONE);
+        previewImage.setVisibility(View.GONE);
+        fullscreenButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent myIntent = new Intent(getActivity(), ImageViewActivity.class);
+                //myIntent.putExtra("image", bitmap); //Optional parameters
+                startActivity(myIntent);
+            }
+        });
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -90,17 +106,16 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
                     backButton.setBackgroundResource(R.drawable.temp_return);
                     finalizationInProgress = false;
                     mOpenCvCameraView.setVisibility(View.VISIBLE);
+                    fullscreenButton.setVisibility(View.GONE);
+                    previewImage.setVisibility(View.GONE);
                     captureButton.setBackgroundResource(R.drawable.temp_capture);
                 }else {
                     mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                     Fragment fragment = new ExploreFragment();
                     FragmentManager fragmentManager = getActivity().getFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    fragmentTransaction.replace(R.id.content_frame, fragment);
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.commit();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame,fragment).commit();
+                    //fragmentTransaction.addToBackStack(null);
                 }
-
             }
         });
         captureButton.setOnClickListener(new View.OnClickListener() {
@@ -112,7 +127,8 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
                     backButton.setVisibility(View.GONE);
                 }else if (finalizationInProgress) {
                     //Switch fragment to upload with picture as param
-                    Bitmap tempPicture = BitmapFactory.decodeResource(getResources(), R.drawable.example_panorama);
+                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    Bitmap tempPicture = BitmapFactory.decodeResource(getResources(), R.drawable.panorama_example_2);
                     args = new Bundle();
                     args.putParcelable("picture", tempPicture);
 
@@ -125,10 +141,13 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
                     captureInProgress = false;
                     finalizationInProgress = true;
                     mOpenCvCameraView.setVisibility(View.GONE);
-                    //Show image
+                    Bitmap temp = BitmapFactory.decodeResource(getResources(), R.drawable.panorama_example_2);
+                    previewImage.setImageBitmap(temp);
                     captureButton.setBackgroundResource(R.drawable.temp_check);
                     backButton.setBackgroundResource(R.drawable.temp_cross);
+                    fullscreenButton.setVisibility(View.VISIBLE);
                     backButton.setVisibility(View.VISIBLE);
+                    previewImage.setVisibility(View.VISIBLE);
                 }
 
             }
@@ -198,6 +217,7 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
 
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        lastFrame = inputFrame.rgba();
         return inputFrame.rgba();
     }
 
