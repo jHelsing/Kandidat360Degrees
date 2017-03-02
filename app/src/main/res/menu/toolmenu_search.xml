@@ -6,7 +6,7 @@
     tools:context=".MainActivity">
     <item
         android:id="@+id/action_search"
-        android:icon="@android:drawable/ic_menu_search"
+        android:icon="@drawable/temp_search"
         app:showAsAction="always"
         app:actionViewClass="android.support.v7.widget.SearchView"
         android:title="Search"/>
@@ -18,4 +18,5 @@
         android:layout_width="24dp"
         android:layout_height="24dp"
         app:showAsAction="always" />-->
+
 </menu>

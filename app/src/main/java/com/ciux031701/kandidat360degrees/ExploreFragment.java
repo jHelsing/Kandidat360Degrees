@@ -46,6 +46,7 @@ public class ExploreFragment extends Fragment {
     private ImageButton toolbarMenuButton;
     private DrawerLayout mDrawerLayout;
     private ImageButton cameraButton;
+    private SearchView searchView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -124,6 +125,9 @@ public class ExploreFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolmenu_search, menu);
+
+        searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        ((EditText)searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setTextColor(Color.WHITE);
 
         super.onCreateOptionsMenu(menu,inflater);
     }
