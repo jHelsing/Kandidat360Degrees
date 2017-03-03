@@ -128,6 +128,14 @@ public class ProfileFragment extends Fragment {
                     }
                 });
 
+                googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                    @Override
+                    public void onInfoWindowClick(Marker marker) {
+                        //get to full screen view?
+                        marker.setRotation(marker.getRotation()+20);
+                    }
+                });
+
                 try {
                     // Customise the styling of the base map using a JSON object defined
                     // in a raw resource file.
@@ -166,7 +174,7 @@ public class ProfileFragment extends Fragment {
         infoWindowText = (TextView) v.findViewById(R.id.infoWindowText);
         infoWindowImage = (ImageView) v.findViewById(R.id.infoWindowImage);
 
-        infoWindowText.setText("2017-03-03");
+        infoWindowText.setText(marker.getPosition().toString());
         return v;
     }
 

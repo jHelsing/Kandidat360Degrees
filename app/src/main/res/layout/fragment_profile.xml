@@ -8,11 +8,11 @@
         android:id="@+id/tool_bar"
         layout="@layout/tool_bar"
         ></include>
+
     <LinearLayout
         android:orientation="horizontal" android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/common_google_signin_btn_text_dark_disabled"
-        android:paddingBottom="15dp">
+        android:background="@color/common_google_signin_btn_text_dark_disabled">
 
         <ImageView
             app:srcCompat="@drawable/profile_icon"
@@ -79,7 +79,7 @@
 
             </LinearLayout>
 
-            <LinearLayout
+            <RelativeLayout
                 android:orientation="horizontal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
@@ -92,39 +92,39 @@
                     android:layout_height="27dp"
                     android:layout_width="27dp" />
 
+                <ImageView
+                    app:srcCompat="@drawable/temp_mapsicon"
+                    android:id="@+id/mapViewImage"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="60dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_gravity="right"
+                    android:layout_marginTop="5dp" />
+
+                <ImageView
+                    app:srcCompat="@drawable/temp_threedots"
+                    android:id="@+id/imageView8"
+                    android:layout_height="30dp"
+                    android:layout_width="30dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="15dp"
+                    android:layout_gravity="right"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="5dp" />
+
                 <TextView
                     android:text="Male"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/textView3"
                     android:layout_gravity="center_vertical"
-                    android:paddingLeft="5dp" />
-            </LinearLayout>
+                    android:paddingLeft="5dp"
+                    android:layout_centerVertical="true"
+                    android:layout_toRightOf="@+id/imageView6"
+                    android:layout_toEndOf="@+id/imageView6" />
 
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right|end">
-
-                <ImageView
-                    app:srcCompat="@drawable/temp_mapsicon"
-                    android:layout_gravity="center_vertical"
-                    android:id="@+id/mapViewImage"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginRight="5dp" />
-
-                <ImageView
-                    app:srcCompat="@drawable/temp_threedots"
-                    android:layout_gravity="center_vertical"
-                    android:id="@+id/imageView8"
-                    android:layout_height="30dp"
-                    android:layout_width="30dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp" />
-
-            </LinearLayout>
+            </RelativeLayout>
 
         </LinearLayout>
 
