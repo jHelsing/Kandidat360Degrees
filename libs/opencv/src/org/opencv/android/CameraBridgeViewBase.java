@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.opencv.BuildConfig;
 import org.opencv.R;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -58,6 +61,8 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     public static final int CAMERA_ID_FRONT = 98;
     public static final int RGBA = 1;
     public static final int GRAY = 2;
+
+    private Mat mRgba,mRgbaF,mRgbaT;
 
     public CameraBridgeViewBase(Context context, int cameraId) {
         super(context);
@@ -145,6 +150,9 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         }
 
         public void onCameraViewStarted(int width, int height) {
+            mRgba = new Mat(height, width, CvType.CV_8UC4);
+            mRgbaF = new Mat(height, width, CvType.CV_8UC4);
+            mRgbaT = new Mat(width, width, CvType.CV_8UC4);
             mOldStyleListener.onCameraViewStarted(width, height);
         }
 
@@ -153,10 +161,18 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         }
 
         public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+            mRgba = inputFrame.rgba();
+
              Mat result = null;
              switch (mPreviewFormat) {
                 case RGBA:
                     result = mOldStyleListener.onCameraFrame(inputFrame.rgba());
+
+                    //TRY 3
+                    Core.transpose(mRgba,mRgbaT);
+                    Imgproc.resize(mRgbaT, mRgbaF, mRgbaF.size(), 0,0, 0);
+                    Core.flip(mRgbaF, mRgba, 1 );
+
                     break;
                 case GRAY:
                     result = mOldStyleListener.onCameraFrame(inputFrame.gray());
@@ -164,6 +180,8 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
                 default:
                     Log.e(TAG, "Invalid frame format! Only RGBA and Gray Scale are supported!");
             };
+
+
 
             return result;
         }
@@ -414,15 +432,21 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
             if (canvas != null) {
 
                 canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
-                /*
-                canvas.rotate(90,0,0);
+
+                /* TRY 1
+                Matrix matrix = new Matrix();
+                matrix.postRotate(90f);
+                Bitmap bitmap = Bitmap.createBitmap(mCacheBitmap, 0, 0, mCacheBitmap.getWidth(), mCacheBitmap.getHeight(), matrix, true);*/
+
+                /* TRY 2
+                canvas.rotate(90,canvas.getWidth()/2,canvas.getHeight()/2);
                 mScale = canvas.getWidth() / (float)mCacheBitmap.getHeight();
                 float scale2 = canvas.getHeight() / (float)mCacheBitmap.getWidth();
                 if(scale2 > mScale){
                     mScale = scale2;
                 }
                 if (mScale != 0) {
-                    canvas.scale(mScale, mScale,0,0);
+                    canvas.scale(mScale/3, mScale/3,0,0);
                 }
                 canvas.drawBitmap(mCacheBitmap, 0, -mCacheBitmap.getHeight(), null);*/
 

@@ -35,10 +35,9 @@ import org.opencv.core.Mat;
  * Created by boking on 2017-02-17.
  */
 
-public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvCameraViewListener2, SensorEventListener {
+public class CameraFragment extends Fragment implements CameraPortraitViewBase.CvCameraViewListener2, SensorEventListener {
 
     private TextView holdVerticallyText;
-    private CameraBridgeViewBase mOpenCvCameraView;
     private ImageButton backButton;
     private ImageView holdVerticallyImage;
     private ImageButton captureButton;
@@ -63,6 +62,7 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
     private Mat lastFrame;
 
     private Bundle args;
+    private CameraPortraitViewBase mOpenCvCameraView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -106,6 +106,7 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
                     backButton.setBackgroundResource(R.drawable.temp_return);
                     finalizationInProgress = false;
                     mOpenCvCameraView.setVisibility(View.VISIBLE);
+                    mOpenCvCameraView.setAlpha(1);
                     fullscreenButton.setVisibility(View.GONE);
                     previewImage.setVisibility(View.GONE);
                     captureButton.setBackgroundResource(R.drawable.temp_capture);
@@ -141,6 +142,7 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
                     captureInProgress = false;
                     finalizationInProgress = true;
                     mOpenCvCameraView.setVisibility(View.GONE);
+                    mOpenCvCameraView.setAlpha(0);
                     Bitmap temp = BitmapFactory.decodeResource(getResources(), R.drawable.panorama_example_2);
                     previewImage.setImageBitmap(temp);
                     captureButton.setBackgroundResource(R.drawable.temp_check);
@@ -154,10 +156,12 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
         });
 
         getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        mOpenCvCameraView = (CameraBridgeViewBase) root.findViewById(R.id.javaCameraView);
-        mOpenCvCameraView.setVisibility(SurfaceView.GONE);
+        mOpenCvCameraView = (CameraPortraitViewBase) root.findViewById(R.id.javaCameraView);
+        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
+        mOpenCvCameraView.setAlpha(0);
         mOpenCvCameraView.setCvCameraViewListener(this);
-        //mOpenCvCameraView.setMaxFrameSize(720, 480);
+        //i hope this is just preview resolution and not actual picture res.
+        mOpenCvCameraView.setMaxFrameSize(720, 480);
         return root;
     }
 
@@ -216,7 +220,7 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
     }
 
     @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+    public Mat onCameraFrame(CameraPortraitViewBase.CvCameraViewFrame inputFrame) {
         lastFrame = inputFrame.rgba();
         return inputFrame.rgba();
     }
@@ -248,8 +252,8 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
                     if(!isVertical) {
                         isVertical = true;
                         if(!captureInProgress && !finalizationInProgress) {
-                            mOpenCvCameraView.setVisibility(View.VISIBLE);
-                            //mOpenCvCameraView.setAlpha(1);
+                            //mOpenCvCameraView.setVisibility(View.VISIBLE);
+                            mOpenCvCameraView.setAlpha(1);
                             holdVerticallyImage.setVisibility(View.GONE);
                             holdVerticallyText.setVisibility(View.GONE);
                             captureButton.setVisibility(View.VISIBLE);
@@ -260,8 +264,8 @@ public class CameraFragment extends Fragment implements CameraBridgeViewBase.CvC
                     if(isVertical) {
                         isVertical = false;
                         if(!captureInProgress && !finalizationInProgress) {
-                            mOpenCvCameraView.setVisibility(View.GONE);
-                            //mOpenCvCameraView.setAlpha(0);
+                            //mOpenCvCameraView.setVisibility(View.GONE);
+                            mOpenCvCameraView.setAlpha(0);
                             holdVerticallyImage.setVisibility(View.VISIBLE);
                             holdVerticallyText.setVisibility(View.VISIBLE);
                             captureButton.setVisibility(View.GONE);

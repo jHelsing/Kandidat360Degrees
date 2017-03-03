@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/black">
 
-    <org.opencv.android.JavaCameraView
+    <com.ciux031701.kandidat360degrees.CameraPortraitViewBase
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:visibility="gone"
@@ -25,20 +25,10 @@
         android:layout_margin="10dp" />
 
     <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:id="@+id/holdVerticallyImage"
         opencv:srcCompat="@drawable/temp_hold_vertically" />
-
-    <TextView
-        android:text="Please hold phone vertically"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/holdVerticallyText"
-        android:layout_below="@+id/holdVerticallyImage"
-        android:textColor="@android:color/white"
-        android:textSize="22sp"
-        android:layout_centerHorizontal="true"/>
 
     <ImageButton
         android:id="@+id/captureButton"
@@ -70,5 +60,16 @@
         android:id="@+id/previewImage"
         android:scaleType="fitXY"
         android:layout_height="120dp" />
+
+    <TextView
+        android:text="Please hold phone vertically"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/holdVerticallyText"
+        android:textColor="@android:color/white"
+        android:textSize="22sp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="25dp" />
 
 </RelativeLayout>
