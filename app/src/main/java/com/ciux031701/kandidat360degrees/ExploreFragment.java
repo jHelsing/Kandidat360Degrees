@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -31,13 +32,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 /**
  * Created by boking on 2017-02-14.
  */
 
-public class ExploreFragment extends Fragment {
+public class ExploreFragment extends Fragment implements GoogleMap.OnMarkerClickListener{
 
     MapView mMapView;
     private GoogleMap googleMap;
@@ -47,6 +49,9 @@ public class ExploreFragment extends Fragment {
     private DrawerLayout mDrawerLayout;
     private ImageButton cameraButton;
     private SearchView searchView;
+
+    private TextView infoWindowText;
+    private ImageView infoWindowImage;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -92,7 +97,17 @@ public class ExploreFragment extends Fragment {
             public void onMapReady(GoogleMap mMap) {
 
                 googleMap = mMap;
+                googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+                    @Override
+                    public View getInfoWindow(Marker marker) {
+                        return onMarkerClicked(marker);
+                    }
 
+                    @Override
+                    public View getInfoContents(Marker marker) {
+                        return null;
+                    }
+                });
                 try {
                     // Customise the styling of the base map using a JSON object defined
                     // in a raw resource file.
@@ -107,7 +122,6 @@ public class ExploreFragment extends Fragment {
                     Log.e("explore", "Can't find style. Error: ", e);
                 }
 
-
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
                 // For dropping a marker at a point on the Map
                 LatLng gothenburg = new LatLng(57.4, 12);
@@ -119,7 +133,21 @@ public class ExploreFragment extends Fragment {
             }
         });
 
+
         return root;
+    }
+
+    //Get info for specific image from DB here.
+    //Use the marker as a reference when doing so.
+    public View onMarkerClicked(Marker marker){
+        View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_window, null);
+        
+        // Getting reference to the TextView to set latitude
+        infoWindowText = (TextView) v.findViewById(R.id.infoWindowText);
+        infoWindowImage = (ImageView) v.findViewById(R.id.infoWindowImage);
+
+        infoWindowText.setText("2017-03-03");
+        return v;
     }
 
     @Override
@@ -131,5 +159,9 @@ public class ExploreFragment extends Fragment {
 
         super.onCreateOptionsMenu(menu,inflater);
     }
-}
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return false;
+    }
+}
