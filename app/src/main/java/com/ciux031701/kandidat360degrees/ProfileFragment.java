@@ -81,5 +81,6 @@ public class ProfileFragment extends Fragment {
         //Drawable currentPic = image from database convertet to a Drawable. Uses template picture without third argument
         pictures.add(new FlowPicture("Gothenburg","2017-02-08",""));
         pictures.add(new FlowPicture("Stockholm","2017-02-28",""));
+        pictures.add(new FlowPicture("Malmö","2017-03-03",""));
     }
 }

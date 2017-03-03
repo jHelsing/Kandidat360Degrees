@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#2d2d2d">
+    android:background="@color/common_google_signin_btn_text_dark_disabled">
     <include
         android:id="@+id/tool_bar"
         layout="@layout/tool_bar"
@@ -11,7 +11,8 @@
     <LinearLayout
         android:orientation="horizontal" android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#3f3f3f">
+        android:background="@color/common_google_signin_btn_text_dark_disabled"
+        android:paddingBottom="15dp">
 
         <ImageView
             app:srcCompat="@drawable/profile_icon"
@@ -28,104 +29,114 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:text="MrCool"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/usernameText"
-                android:textColor="@android:color/white"
-                android:layout_marginTop="20dp"
-                android:layout_marginLeft="10dp"
-                android:textSize="16sp"
-                android:layout_marginBottom="15dp" />
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp">
 
             <LinearLayout
                 android:orientation="horizontal"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_weight="1"
+                <ImageView
+                    app:srcCompat="@drawable/profile_icon"
+                    android:id="@+id/imageView5"
+                    android:padding="2dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_height="27dp"
+                    android:layout_width="27dp" />
+
+                <TextView
+                    android:text="Mister Cool"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:text="105"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/picturesNbr"
-                        android:textColor="@android:color/white"
-                        android:layout_gravity="center_horizontal" />
-
-                    <TextView
-                        android:text="Pictures"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/textView5"
-                        android:textColor="@android:color/white"
-                        android:layout_weight="1"
-                        android:layout_gravity="center_horizontal" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:orientation="vertical"
-                    android:layout_weight="1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
-
-                    <TextView
-                        android:text="84"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/friendsNbr"
-                        android:textColor="@android:color/white"
-                        android:layout_gravity="center_horizontal"/>
-
-                    <TextView
-                        android:text="Friends"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/friendsText"
-                        android:textColor="@android:color/white"
-                        android:layout_gravity="center_horizontal"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:orientation="vertical"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_width="wrap_content">
+                    android:id="@+id/usernameText"
+                    android:layout_gravity="center_vertical"
+                    android:textSize="20sp"
+                    android:paddingLeft="5dp"
+                    android:textColor="@android:color/black" />
+            </LinearLayout>
 
-                    <TextView
-                        android:text="3.5k"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/likesNbr"
-                        android:textColor="@android:color/white"
-                        android:layout_gravity="center_horizontal"/>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
 
-                    <TextView
-                        android:text="Likes"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/likesText"
-                        android:textColor="@android:color/white"
-                        android:layout_gravity="center_horizontal"/>
-                </LinearLayout>
+                <ImageView
+                    app:srcCompat="@android:drawable/ic_dialog_email"
+                    android:id="@+id/imageView4"
+                    android:padding="2dp"
+                    android:layout_height="27dp"
+                    android:layout_width="27dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="username@domain.com"
+                    android:id="@+id/emailText"
+                    android:layout_gravity="center_vertical"
+                    android:paddingStart="5dp"
+                    android:paddingLeft="5dp"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    app:srcCompat="@drawable/temp_gender"
+                    android:id="@+id/imageView6"
+                    android:padding="2dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_height="27dp"
+                    android:layout_width="27dp" />
+
+                <TextView
+                    android:text="Male"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView3"
+                    android:layout_gravity="center_vertical"
+                    android:paddingLeft="5dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|end">
+
+                <ImageView
+                    app:srcCompat="@drawable/temp_mapsicon"
+                    android:layout_gravity="center_vertical"
+                    android:id="@+id/imageView7"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginRight="5dp" />
+
+                <ImageView
+                    app:srcCompat="@drawable/temp_threedots"
+                    android:layout_gravity="center_vertical"
+                    android:id="@+id/imageView8"
+                    android:layout_height="30dp"
+                    android:layout_width="30dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp" />
 
             </LinearLayout>
 
         </LinearLayout>
+
     </LinearLayout>
 
     <ListView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
         android:background="@android:color/white"
-        android:id="@+id/pictureListView" />
+        android:id="@+id/pictureListView"
+        android:divider="@color/common_google_signin_btn_text_dark_disabled"
+        android:dividerHeight="10.0sp"
+        android:layout_marginTop="5dp" />/>
 
 </LinearLayout>

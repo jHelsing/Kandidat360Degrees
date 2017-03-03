@@ -6,31 +6,65 @@
 
     <ImageView
         android:layout_width="wrap_content"
-        android:layout_height="100dp"
         app:srcCompat="@drawable/example_panorama"
         android:id="@+id/flowPicture"
-        android:scaleType="fitXY" />
+        android:scaleType="fitXY"
+        android:layout_height="80dp" />
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/common_google_signin_btn_text_light_focused">
+        android:background="@color/colorAccent">
 
-        <TextView
-            android:text="Location: Silver parks lake, WY"
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/locationText"
-            android:layout_weight="1"
-            android:textColor="@android:color/white" />
+            android:layout_height="match_parent">
 
-        <TextView
-            android:text="2017-02-08"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/dateText"
-            android:textColor="@android:color/white" />
+            <ImageView
+                android:layout_width="26dp"
+                app:srcCompat="@drawable/temp_pinpoint"
+                android:id="@+id/imageView2"
+                android:layout_height="26dp"
+                android:padding="5dp"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:text="Silver parks lake, WY"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/locationText"
+                android:layout_weight="1"
+                android:textColor="@android:color/white"
+                android:padding="10dp"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="28dp"
+                app:srcCompat="@drawable/temp_calendar"
+                android:id="@+id/imageView3"
+                android:layout_height="28dp"
+                android:padding="5dp"
+                android:layout_gravity="center_vertical" />
+
+            <TextView
+                android:text="2017-02-08"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/dateText"
+                android:textColor="@android:color/white"
+                android:padding="10dp"
+                android:layout_weight="1"
+                android:textSize="15sp" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </LinearLayout>
