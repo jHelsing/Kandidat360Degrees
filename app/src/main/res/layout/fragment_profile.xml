@@ -110,7 +110,7 @@
                 <ImageView
                     app:srcCompat="@drawable/temp_mapsicon"
                     android:layout_gravity="center_vertical"
-                    android:id="@+id/imageView7"
+                    android:id="@+id/mapViewImage"
                     android:layout_width="30dp"
                     android:layout_height="30dp"
                     android:layout_marginRight="5dp" />
@@ -137,6 +137,12 @@
         android:id="@+id/pictureListView"
         android:divider="@color/common_google_signin_btn_text_dark_disabled"
         android:dividerHeight="10.0sp"
-        android:layout_marginTop="5dp" />/>
+        android:layout_marginTop="5dp" />
+
+    <com.google.android.gms.maps.MapView
+        android:id="@+id/mapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
 
 </LinearLayout>
