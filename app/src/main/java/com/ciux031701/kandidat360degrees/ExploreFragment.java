@@ -39,7 +39,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
  * Created by boking on 2017-02-14.
  */
 
-public class ExploreFragment extends Fragment implements GoogleMap.OnMarkerClickListener{
+public class ExploreFragment extends Fragment{
 
     MapView mMapView;
     private GoogleMap googleMap;
@@ -141,7 +141,7 @@ public class ExploreFragment extends Fragment implements GoogleMap.OnMarkerClick
     //Use the marker as a reference when doing so.
     public View onMarkerClicked(Marker marker){
         View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_window, null);
-        
+
         // Getting reference to the TextView to set latitude
         infoWindowText = (TextView) v.findViewById(R.id.infoWindowText);
         infoWindowImage = (ImageView) v.findViewById(R.id.infoWindowImage);
@@ -160,8 +160,4 @@ public class ExploreFragment extends Fragment implements GoogleMap.OnMarkerClick
         super.onCreateOptionsMenu(menu,inflater);
     }
 
-    @Override
-    public boolean onMarkerClick(Marker marker) {
-        return false;
-    }
 }

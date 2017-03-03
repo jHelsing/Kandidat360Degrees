@@ -26,6 +26,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -45,6 +46,9 @@ public class ProfileFragment extends Fragment {
     private ImageView mapViewImage;
     private MapView mapView;
     private GoogleMap googleMap;
+
+    private TextView infoWindowText;
+    private ImageView infoWindowImage;
 
     ListView pictureListView;
     ListAdapter profileFlowAdapter;
@@ -112,6 +116,17 @@ public class ProfileFragment extends Fragment {
             public void onMapReady(GoogleMap mMap) {
 
                 googleMap = mMap;
+                googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+                    @Override
+                    public View getInfoWindow(Marker marker) {
+                        return onMarkerClicked(marker);
+                    }
+
+                    @Override
+                    public View getInfoContents(Marker marker) {
+                        return null;
+                    }
+                });
 
                 try {
                     // Customise the styling of the base map using a JSON object defined
@@ -140,6 +155,19 @@ public class ProfileFragment extends Fragment {
         });
 
         return root;
+    }
+
+    //Get info for specific image from DB here.
+    //Use the marker as a reference when doing so.
+    public View onMarkerClicked(Marker marker){
+        View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_window, null);
+
+        // Getting reference to the TextView to set latitude
+        infoWindowText = (TextView) v.findViewById(R.id.infoWindowText);
+        infoWindowImage = (ImageView) v.findViewById(R.id.infoWindowImage);
+
+        infoWindowText.setText("2017-03-03");
+        return v;
     }
 
     //Use this to fill upp pictures.
