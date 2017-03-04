@@ -13,6 +13,15 @@
     android:id="@+id/javaCameraView"
     opencv:show_fps="false"  opencv:camera_id="any" />
 
+    <SurfaceView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/surfaceView"/>
+    <SurfaceView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/surfaceViewOnTop"/>
+
     <ImageButton
         android:id="@+id/backButton"
         android:layout_width="50dp"
@@ -71,5 +80,6 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="25dp" />
+
 
 </RelativeLayout>

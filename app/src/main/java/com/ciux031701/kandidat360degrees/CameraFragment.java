@@ -7,6 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -16,6 +23,7 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,12 +38,15 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 
+import java.io.IOException;
+import java.util.List;
+
 
 /**
  * Created by boking on 2017-02-17.
  */
 
-public class CameraFragment extends Fragment implements CameraPortraitViewBase.CvCameraViewListener2, SensorEventListener {
+public class CameraFragment extends Fragment implements SensorEventListener {
 
     private TextView holdVerticallyText;
     private ImageButton backButton;
@@ -43,6 +54,9 @@ public class CameraFragment extends Fragment implements CameraPortraitViewBase.C
     private ImageButton captureButton;
     private ImageButton fullscreenButton;
     private ImageView previewImage;
+
+    private SurfaceView mSurfaceView, mSurfaceViewOnTop;
+    private Camera mCam;
 
     //Sensor stuff
     private Sensor accelerometer;
@@ -58,11 +72,11 @@ public class CameraFragment extends Fragment implements CameraPortraitViewBase.C
     private boolean finalizationInProgress;
     private double startDegree;
 
+    private boolean safeToTakePicture = true; //is it safe to capture a picture?
+
     private DrawerLayout mDrawerLayout;
-    private Mat lastFrame;
 
     private Bundle args;
-    private CameraPortraitViewBase mOpenCvCameraView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -73,6 +87,8 @@ public class CameraFragment extends Fragment implements CameraPortraitViewBase.C
         isVertical = false;
         captureInProgress = false;
         finalizationInProgress = false;
+
+        //For the sensors:
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -81,6 +97,7 @@ public class CameraFragment extends Fragment implements CameraPortraitViewBase.C
 
         lastDegree = 0;
 
+        //GUI: buttons & views
         previewImage = (ImageView)root.findViewById(R.id.previewImage);
         fullscreenButton = (ImageButton)root.findViewById(R.id.fullscreenButton);
         fullscreenButton.setVisibility(View.GONE);
@@ -91,6 +108,8 @@ public class CameraFragment extends Fragment implements CameraPortraitViewBase.C
         backButton.setBackgroundResource(R.drawable.temp_return);
         captureButton.setVisibility(View.GONE);
         previewImage.setVisibility(View.GONE);
+
+        //for fullscreenbutton: change to ImageViewActivity
         fullscreenButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -99,14 +118,15 @@ public class CameraFragment extends Fragment implements CameraPortraitViewBase.C
                 startActivity(myIntent);
             }
         });
+
+        //for backbutton: if is in finalization - return to camera. if is in camera-mode - return to explore.
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(finalizationInProgress){
                     backButton.setBackgroundResource(R.drawable.temp_return);
                     finalizationInProgress = false;
-                    mOpenCvCameraView.setVisibility(View.VISIBLE);
-                    mOpenCvCameraView.setAlpha(1);
+                    mCam.startPreview();
                     fullscreenButton.setVisibility(View.GONE);
                     previewImage.setVisibility(View.GONE);
                     captureButton.setBackgroundResource(R.drawable.temp_capture);
@@ -119,13 +139,23 @@ public class CameraFragment extends Fragment implements CameraPortraitViewBase.C
                 }
             }
         });
+
+        //If not taking pictures or in finalization -- take a picture.
+        //If in finalization - switch to upload-fragment.
+        //If taken a picture - go to finalization (show the panorama)
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(!captureInProgress && !finalizationInProgress) {
+                    //Take a picture
                     captureInProgress = true;
                     startDegree=lastDegree;
                     backButton.setVisibility(View.GONE);
+                    if(mCam != null && safeToTakePicture){
+                        //set the flag to false so we don't take two pictures at the same time
+                        safeToTakePicture = false;
+                        mCam.takePicture(null,null,jpegCallback);
+                    }
                 }else if (finalizationInProgress) {
                     //Switch fragment to upload with picture as param
                     mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
@@ -139,10 +169,12 @@ public class CameraFragment extends Fragment implements CameraPortraitViewBase.C
                     fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
                 }else {
+                    //Show the final picture/panorama:
                     captureInProgress = false;
                     finalizationInProgress = true;
-                    mOpenCvCameraView.setVisibility(View.GONE);
-                    mOpenCvCameraView.setAlpha(0);
+                    if(mCam != null){
+                        mCam.stopPreview();
+                    }
                     Bitmap temp = BitmapFactory.decodeResource(getResources(), R.drawable.panorama_example_2);
                     previewImage.setImageBitmap(temp);
                     captureButton.setBackgroundResource(R.drawable.temp_check);
@@ -150,81 +182,118 @@ public class CameraFragment extends Fragment implements CameraPortraitViewBase.C
                     fullscreenButton.setVisibility(View.VISIBLE);
                     backButton.setVisibility(View.VISIBLE);
                     previewImage.setVisibility(View.VISIBLE);
+                    mSurfaceViewOnTop.setVisibility(View.GONE);
+                    mSurfaceView.setVisibility(View.GONE);
                 }
 
             }
         });
 
+        //Views to show the camera and the most recently taken picture in:
+        mSurfaceView = (SurfaceView)root.findViewById(R.id.surfaceView);
+        mSurfaceView.getHolder().addCallback(mSurfaceCallback);
+
+        mSurfaceViewOnTop = (SurfaceView)root.findViewById(R.id.surfaceViewOnTop);
+        mSurfaceViewOnTop.setZOrderOnTop(true);
+        mSurfaceViewOnTop.getHolder().setFormat(PixelFormat.TRANSPARENT);
+
         getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        mOpenCvCameraView = (CameraPortraitViewBase) root.findViewById(R.id.javaCameraView);
-        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
-        mOpenCvCameraView.setAlpha(0);
-        mOpenCvCameraView.setCvCameraViewListener(this);
-        //i hope this is just preview resolution and not actual picture res.
-        mOpenCvCameraView.setMaxFrameSize(720, 480);
         return root;
     }
 
-    private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this.getActivity()) {
-        @Override
-        public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS:
-                {
-                    Log.i("opencvtag", "OpenCV loaded successfully");
-                    mOpenCvCameraView.enableView();
-                } break;
-                default:
-                {
-                    super.onManagerConnected(status);
-                } break;
+    //To save pictures & show the last taken picture:
+    private final Camera.PictureCallback jpegCallback = new Camera.PictureCallback(){
+        public void onPictureTaken(byte[] data, Camera camera) {
+            //byte[] --> bitmap
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data,0,data.length);
+            //Rotate the picture to fit portrait mode
+            Matrix matrix = new Matrix();
+            matrix.postRotate(90);
+            bitmap = Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,false);
+
+            //TODO: save the image to a List (to openCV)
+
+            Canvas canvas = null;
+            try {
+                canvas = mSurfaceViewOnTop.getHolder().lockCanvas(null);
+                synchronized (mSurfaceViewOnTop.getHolder()){
+                    //Clear canvas
+                    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+                    //Scale the image to fit the surfaceview
+                    float scale = 1.0f * mSurfaceView.getHeight()/bitmap.getHeight();
+                    Bitmap scaleImage = Bitmap.createScaledBitmap(bitmap,(int)(scale*bitmap.getWidth()),mSurfaceView.getHeight(),false);
+                    Paint paint = new Paint();
+                    //Set the opacity of the image
+                    paint.setAlpha(200);
+                    //Draw 1/3 of the image:
+                    canvas.drawBitmap(scaleImage,-scaleImage.getWidth()*2/3,0,paint);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (canvas != null){
+                    mSurfaceViewOnTop.getHolder().unlockCanvasAndPost(canvas);
+                }
             }
+            //Start preview of the camera & set safe to take pictures to true
+            mCam.startPreview();
+            safeToTakePicture = true;
+        }
+
+    };
+
+    //For the surfaceviews:
+    private SurfaceHolder.Callback mSurfaceCallback = new SurfaceHolder.Callback(){
+        @Override
+        public void surfaceCreated(SurfaceHolder holder){
+            try{
+                //Tell the camera to display the frame on this surfaceview:
+                mCam.setPreviewDisplay(holder);
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+        @Override
+        public void surfaceChanged(SurfaceHolder holder,int format, int width, int height){
+            //Get the default parameters for camera
+            Camera.Parameters myParameters = mCam.getParameters();
+            //Select the best preview size
+            Camera.Size myBestSize = getBestPreviewSize(myParameters);
+            if(myBestSize != null){
+                //Set the preview size
+                myParameters.setPreviewSize(myBestSize.width,myBestSize.height);
+                //Set the parameters to the camera
+                mCam.setParameters(myParameters);
+                //Rotate the display frame 90 degree to view in portrait mode
+                mCam.setDisplayOrientation(90);
+                //Start the preview
+                mCam.startPreview();
+            }
+        }
+        @Override
+        public void surfaceDestroyed(SurfaceHolder holder){
         }
     };
 
     @Override
-    public void onPause()
-    {
+    public void onPause() {
         super.onPause();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
-    }
-
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        if (!OpenCVLoader.initDebug()) {
-            Log.d("opencv", "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this.getActivity(), mLoaderCallback);
-        } else {
-            Log.d("opencv", "OpenCV library found inside package. Using it!");
-            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
+        if(mCam != null){
+            mCam.stopPreview();
+            mCam.release();
+            mCam = null;
         }
     }
 
     @Override
-    public void onDestroy() {
-
-        super.onDestroy();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
+    public void onResume() {
+       super.onResume();
+        mCam = Camera.open(0); // 0 = back camera
     }
 
-    @Override
-    public void onCameraViewStarted(int width, int height) {
-    }
 
-    @Override
-    public void onCameraViewStopped() {
-    }
 
-    @Override
-    public Mat onCameraFrame(CameraPortraitViewBase.CvCameraViewFrame inputFrame) {
-        lastFrame = inputFrame.rgba();
-        return inputFrame.rgba();
-    }
-
+    //Sensors:
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         //Maybe we want to do this like once every fifth
@@ -252,11 +321,11 @@ public class CameraFragment extends Fragment implements CameraPortraitViewBase.C
                     if(!isVertical) {
                         isVertical = true;
                         if(!captureInProgress && !finalizationInProgress) {
-                            //mOpenCvCameraView.setVisibility(View.VISIBLE);
-                            mOpenCvCameraView.setAlpha(1);
                             holdVerticallyImage.setVisibility(View.GONE);
                             holdVerticallyText.setVisibility(View.GONE);
                             captureButton.setVisibility(View.VISIBLE);
+                            mSurfaceView.setVisibility(View.VISIBLE);
+                            mSurfaceViewOnTop.setVisibility(View.VISIBLE);
                         }
                     }
 
@@ -264,11 +333,11 @@ public class CameraFragment extends Fragment implements CameraPortraitViewBase.C
                     if(isVertical) {
                         isVertical = false;
                         if(!captureInProgress && !finalizationInProgress) {
-                            //mOpenCvCameraView.setVisibility(View.GONE);
-                            mOpenCvCameraView.setAlpha(0);
                             holdVerticallyImage.setVisibility(View.VISIBLE);
                             holdVerticallyText.setVisibility(View.VISIBLE);
                             captureButton.setVisibility(View.GONE);
+                            mSurfaceView.setVisibility(View.GONE);
+                            mSurfaceViewOnTop.setVisibility(View.GONE);
                         }
                     }
                 }
@@ -287,5 +356,18 @@ public class CameraFragment extends Fragment implements CameraPortraitViewBase.C
     @Override
     public void onAccuracyChanged(Sensor sensor, int i) {
 
+    }
+
+
+    private Camera.Size getBestPreviewSize(Camera.Parameters parameters){
+        Camera.Size bestSize = null;
+        List<Camera.Size> sizeList = parameters.getSupportedPreviewSizes();
+        bestSize = sizeList.get(0);
+        for(int j=1; j < sizeList.size(); j++){
+            if((sizeList.get(j).width * sizeList.get(j).height) > (bestSize.width * bestSize.height)){
+                bestSize = sizeList.get(j);
+            }
+        }
+        return bestSize;
     }
 }
