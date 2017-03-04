@@ -41,15 +41,15 @@ public class DrawerAdapter extends ArrayAdapter<String> {
         if(option.equals("Camera")){
             itemImageView.setImageResource(R.drawable.camera_icon);
         }else if(option.equals("Explore")){
-            itemImageView.setImageResource(R.drawable.camera_icon);
+            itemImageView.setImageResource(R.drawable.temp_mapsicon);
         }else if (option.equals("Notifications")){
-            itemImageView.setImageResource(R.drawable.camera_icon);
+            itemImageView.setImageResource(R.drawable.temp_notifications);
         }else if(option.equals("Friends")){
-            itemImageView.setImageResource(R.drawable.camera_icon);
+            itemImageView.setImageResource(R.drawable.temp_friends);
         }else if(option.equals("Upload")){
-            itemImageView.setImageResource(R.drawable.camera_icon);
+            itemImageView.setImageResource(R.drawable.temp_upload);
         }else if(option.equals("Settings")){
-            itemImageView.setImageResource(R.drawable.camera_icon);
+            itemImageView.setImageResource(R.drawable.temp_settings);
         }
         itemTextView.setText(option);
         //same with image when we have those resources
