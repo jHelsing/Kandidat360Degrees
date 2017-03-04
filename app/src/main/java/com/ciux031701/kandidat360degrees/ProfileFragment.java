@@ -49,6 +49,7 @@ public class ProfileFragment extends Fragment {
 
     private TextView infoWindowText;
     private ImageView infoWindowImage;
+    private TextView toolbarTitle;
 
     ListView pictureListView;
     ListAdapter profileFlowAdapter;
@@ -68,6 +69,8 @@ public class ProfileFragment extends Fragment {
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        toolbarTitle = (TextView)root.findViewById(R.id.toolbarTitle);
+        toolbarTitle.setText("Profile");
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
         toolbarMenuButton = (ImageButton)root.findViewById(R.id.toolbarMenuButton);
         toolbarMenuButton.setOnClickListener(new View.OnClickListener() {
