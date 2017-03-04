@@ -21,6 +21,7 @@ public class SettingsFragment extends Fragment {
     private Toolbar toolbar;
     private ImageButton toolbarMenuButton;
     private DrawerLayout mDrawerLayout;
+    private TextView toolbarTitle;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -30,6 +31,8 @@ public class SettingsFragment extends Fragment {
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        toolbarTitle = (TextView)root.findViewById(R.id.toolbarTitle);
+        toolbarTitle.setText("Settings");
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
         toolbarMenuButton = (ImageButton)root.findViewById(R.id.toolbarMenuButton);
         toolbarMenuButton.setOnClickListener(new View.OnClickListener() {

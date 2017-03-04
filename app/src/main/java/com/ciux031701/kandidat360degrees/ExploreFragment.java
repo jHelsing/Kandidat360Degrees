@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,6 +19,8 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -52,15 +55,22 @@ public class ExploreFragment extends Fragment{
 
     private TextView infoWindowText;
     private ImageView infoWindowImage;
+    private MenuItem earthButton;
+
+    private Menu toolbarMenu;
+
+    private boolean isShowingPublic;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_explore, container, false);
         setHasOptionsMenu(true);
+
         toolbar = (Toolbar) root.findViewById(R.id.tool_bar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        isShowingPublic = true;
         cameraButton = (ImageButton)root.findViewById(R.id.cameraButton);
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
         toolbarMenuButton = (ImageButton)root.findViewById(R.id.toolbarMenuButton);
@@ -161,11 +171,48 @@ public class ExploreFragment extends Fragment{
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolmenu_search, menu);
-
+        this.toolbarMenu = menu;
+        earthButton = menu.findItem(R.id.togglePermission);
         searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
-        ((EditText)searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setTextColor(Color.WHITE);
+        searchView.setQueryHint("Search!");
+        int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
+        View searchPlate = searchView.findViewById(searchPlateId);
+        if (searchPlate!=null) {
+            searchPlate.setBackgroundColor(Color.DKGRAY);
+            int searchTextId = searchPlate.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+            TextView searchText = (TextView) searchPlate.findViewById(searchTextId);
+            if (searchText!=null) {
+                searchText.setTextColor(Color.WHITE);
+                searchText.setHintTextColor(Color.WHITE);
+            }
+        }
+        ((EditText)searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setTextColor(Color.BLACK);
+        ((EditText)searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(Color.LTGRAY);
+        searchView.setBackgroundColor(Color.WHITE);
 
         super.onCreateOptionsMenu(menu,inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.togglePermission:
+                if(isShowingPublic) {
+                    toolbarMenu.getItem(0).setIcon(R.drawable.temp_earthblack);
+                    //Reload markers for the private map
+                    isShowingPublic = false;
+
+                }else{
+                    toolbarMenu.getItem(0).setIcon(R.drawable.temp_earthwhite);
+                    //Reload markers for the public map
+                    isShowingPublic = true;
+                }
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 }

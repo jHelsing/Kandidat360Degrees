@@ -4,19 +4,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity">
+
+    <item
+       android:id="@+id/togglePermission"
+       android:title="toggle_button"
+       android:icon="@drawable/temp_earthwhite"
+       app:showAsAction="always|collapseActionView"
+        />
     <item
         android:id="@+id/action_search"
-        android:icon="@drawable/temp_search"
-        app:showAsAction="always"
-        app:actionViewClass="android.support.v7.widget.SearchView"
-        android:title="Search"/>
-    <!--<item
-        android:id="@+id/settings_button"
-        android:orderInCategory="100"
-        android:title="settings_button"
+        android:actionLayout="@layout/search_view"
         android:icon="@android:drawable/ic_menu_search"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        app:showAsAction="always" />-->
+        app:showAsAction="collapseActionView|always"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:iconifiedByDefault="false"
+        android:title="Search"/>
+
 
 </menu>

@@ -12,6 +12,8 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 /**
  * Created by boking on 2017-02-17.
  */
@@ -22,6 +24,7 @@ public class NotificationFragment extends Fragment {
     private Toolbar toolbar;
     private ImageButton toolbarMenuButton;
     private DrawerLayout mDrawerLayout;
+    private TextView toolbarTitle;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -31,6 +34,8 @@ public class NotificationFragment extends Fragment {
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        toolbarTitle = (TextView)root.findViewById(R.id.toolbarTitle);
+        toolbarTitle.setText("Notifications");
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
         toolbarMenuButton = (ImageButton)root.findViewById(R.id.toolbarMenuButton);
         toolbarMenuButton.setOnClickListener(new View.OnClickListener() {
