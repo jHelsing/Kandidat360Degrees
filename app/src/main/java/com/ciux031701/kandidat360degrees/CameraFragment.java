@@ -245,7 +245,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     //Set the opacity of the image
                     paint.setAlpha(200);
                     //Draw 1/3 of the image:
-                    //canvas.drawBitmap(scaleImage,-scaleImage.getWidth()*2/3,0,paint);
+                    canvas.drawBitmap(scaleImage,-scaleImage.getWidth()*2/3,0,paint);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
