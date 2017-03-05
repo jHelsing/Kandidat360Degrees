@@ -30,6 +30,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -70,13 +71,19 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private boolean isVertical;
     private boolean captureInProgress;
     private boolean finalizationInProgress;
-    private double startDegree;
 
     private boolean safeToTakePicture = true; //is it safe to capture a picture?
 
     private DrawerLayout mDrawerLayout;
 
     private Bundle args;
+    private ProgressBar angleProgressBar;
+    private double startGyroDegree;
+    private double highestGyroDegree;
+    private int lastProgressAngle;
+    private boolean isHalfWay; //temporary until we get actual picture steps going
+    private float orientation[];
+    float rField[], iField[];
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -87,7 +94,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         isVertical = false;
         captureInProgress = false;
         finalizationInProgress = false;
-
+        highestGyroDegree=0;
+        isHalfWay=false;
+        lastProgressAngle=0;
+        lastDegree = 0;
         //For the sensors:
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -95,9 +105,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         sensorManager.registerListener(this,accelerometer,SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(this,magnetometer,SensorManager.SENSOR_DELAY_UI);
 
-        lastDegree = 0;
+
 
         //GUI: buttons & views
+        angleProgressBar = (ProgressBar)root.findViewById(R.id.angleProgressBar);
+        angleProgressBar.setVisibility(View.GONE);
         previewImage = (ImageView)root.findViewById(R.id.previewImage);
         fullscreenButton = (ImageButton)root.findViewById(R.id.fullscreenButton);
         fullscreenButton.setVisibility(View.GONE);
@@ -125,6 +137,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             public void onClick(View view) {
                 if(finalizationInProgress){
                     backButton.setBackgroundResource(R.drawable.temp_return);
+                    angleProgressBar.setProgress(0);
+                    highestGyroDegree=0;
+                    isHalfWay=false;
+                    lastProgressAngle=0;
+                    lastDegree = 0;
                     finalizationInProgress = false;
                     mCam.startPreview();
                     fullscreenButton.setVisibility(View.GONE);
@@ -149,7 +166,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 if(!captureInProgress && !finalizationInProgress) {
                     //Take a picture
                     captureInProgress = true;
-                    startDegree=lastDegree;
+                    angleProgressBar.setVisibility(View.VISIBLE);
+                    startGyroDegree=lastDegree;
                     backButton.setVisibility(View.GONE);
                     if(mCam != null && safeToTakePicture){
                         //set the flag to false so we don't take two pictures at the same time
@@ -170,6 +188,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
                 }else {
                     //Show the final picture/panorama:
+                    angleProgressBar.setVisibility(View.GONE);
                     captureInProgress = false;
                     finalizationInProgress = true;
                     if(mCam != null){
@@ -226,7 +245,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     //Set the opacity of the image
                     paint.setAlpha(200);
                     //Draw 1/3 of the image:
-                    canvas.drawBitmap(scaleImage,-scaleImage.getWidth()*2/3,0,paint);
+                    //canvas.drawBitmap(scaleImage,-scaleImage.getWidth()*2/3,0,paint);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -296,19 +315,18 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     //Sensors:
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
-        //Maybe we want to do this like once every fifth
-        //second in another thread rather than all the time
+
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
             mGravity = sensorEvent.values;
         if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
             mGeomagnetic = sensorEvent.values;
         if (mGravity != null && mGeomagnetic != null) {
-            float R[] = new float[9];
-            float I[] = new float[9];
-            boolean success = SensorManager.getRotationMatrix(R, I, mGravity, mGeomagnetic);
+            rField = new float[9];
+            iField = new float[9];
+            boolean success = SensorManager.getRotationMatrix(rField, iField, mGravity, mGeomagnetic);
             if (success) {
-                float orientation[] = new float[3];
-                SensorManager.getOrientation(R, orientation);
+                orientation = new float[3];
+                SensorManager.getOrientation(rField, orientation);
                 currentDegrees = fromSensorToDegrees(orientation[0]);
                 if(currentDegrees > lastDegree){
                     currentDegrees++;
@@ -316,6 +334,30 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     currentDegrees--;
                 }
                 lastDegree = currentDegrees;
+                if(captureInProgress){
+                    int newProgressAngle = (int)fromDegreeToProgress(lastDegree);
+                    System.out.println(newProgressAngle);
+                    if(newProgressAngle < 200 && newProgressAngle > 160 && isHalfWay!=true){
+                        System.out.println("halfway=true");
+                        isHalfWay=true;
+                    }
+
+                    //To prevent weird jumps
+                    if(Math.abs(lastProgressAngle-newProgressAngle)<50 && Math.abs(newProgressAngle-lastProgressAngle)<50) {
+                        lastProgressAngle=newProgressAngle;
+                        //Compare with 180 abd ifHalfWay so it doesn't register when we go from 1,0,360,359,...
+                        if (newProgressAngle < 180 && isHalfWay == false && highestGyroDegree < newProgressAngle) {
+                            highestGyroDegree = newProgressAngle;
+                            angleProgressBar.setProgress((int) highestGyroDegree);
+                        } else if (newProgressAngle >= 180 && isHalfWay == true && highestGyroDegree < newProgressAngle) {
+                            highestGyroDegree = newProgressAngle;
+                            angleProgressBar.setProgress((int) highestGyroDegree);
+                        }
+                        if(angleProgressBar.getProgress()>357){
+                            captureButton.performClick();
+                        }
+                    }
+                }
 
                 if(orientation[1] < 1.75 && orientation[1] > 1.25 || orientation[1] < -1.25 && orientation[1] > -1.75){
                     if(!isVertical) {
@@ -342,6 +384,14 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     }
                 }
             }
+        }
+    }
+
+    public double fromDegreeToProgress(double degree){
+        if(degree>=startGyroDegree){
+            return degree-startGyroDegree;
+        }else{
+            return 360-(startGyroDegree-degree);
         }
     }
 
