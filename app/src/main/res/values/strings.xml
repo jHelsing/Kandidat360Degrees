@@ -8,4 +8,8 @@
         <item>Upload</item>
         <item>Settings</item>
     </string-array>
+    <string name="log_in">Log in</string>
+    <string name="email_username">Email/Username</string>
+    <string name="password">Password</string>
+    <string name="create_account">Create account</string>
 </resources>

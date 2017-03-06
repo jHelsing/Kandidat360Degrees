@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 /**
  * Created by Anna on 2017-02-23.
@@ -16,6 +17,7 @@ import android.widget.Button;
 public class LoginFragment extends Fragment {
     Button loginButton;
     Button createAccountButton;
+    TextView title;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -31,6 +33,9 @@ public class LoginFragment extends Fragment {
                 startActivity(myIntent);
             }
         });
+
+        title = (TextView)root.findViewById(R.id.appnameView);
+        title.setBackgroundResource(R.color.colorPrimary);
 
         createAccountButton = (Button)root.findViewById(R.id.createAccountButton);
         //Button createAccountButton = (Button)findViewById(R.id.createAccountButton);
