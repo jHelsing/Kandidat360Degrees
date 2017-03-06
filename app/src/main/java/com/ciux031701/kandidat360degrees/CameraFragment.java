@@ -181,7 +181,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     args = new Bundle();
                     args.putParcelable("picture", tempPicture);
 
-                    UploadFragment fragment = new UploadFragment();
+                    ShareFragment fragment = new ShareFragment();
                     FragmentManager fragmentManager = getFragmentManager();
                     fragment.setArguments(args);
                     fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
