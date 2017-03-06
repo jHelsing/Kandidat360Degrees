@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+    android:weightSum="1">
 
         <TextView
             android:text="Log in"
@@ -12,15 +13,20 @@
             android:textSize="24sp"
             android:id="@+id/appnameView"
             android:textAlignment="viewStart"
-            tools:background="#52ACB9" />
+            tools:background="#52ACB9"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/title_padding_without_icon"
+            android:paddingRight="56dp"
+            android:textColor="@android:color/white" />
 
-        <TextView
-            android:text="Username"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/usernameView"
-            android:textAlignment="center"
-            android:textSize="18sp"/>
+            android:layout_height="51dp"
+            android:layout_weight="0.59"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"></LinearLayout>
 
         <EditText
             android:layout_width="match_parent"
@@ -28,31 +34,35 @@
             android:inputType="textPersonName"
             android:text=""
             android:ems="10"
-            android:id="@+id/usernameFIeld" />
-
-        <TextView
-            android:text="Password"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/passwordView"
-            android:textAlignment="center"
-            android:textSize="18sp"/>
+            android:id="@+id/usernameFIeld"
+            android:hint="Email/Username"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin" />
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
             android:ems="10"
-            android:id="@+id/passwordField" />
+            android:id="@+id/passwordField"
+            android:hint="Password"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin" />
 
         <Button
             android:text="Log in"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/loginButton"
-            android:textStyle="normal|bold"
-            android:textSize="24sp"
-            android:background="#000000" />
+            android:textSize="18sp"
+            android:background="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            android:textAllCaps="false"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin" />
 
         <Button
             android:text="Create account"
@@ -61,5 +71,9 @@
             android:id="@+id/createAccountButton"
             android:textAppearance="@style/TextAppearance.AppCompat"
             android:textSize="18sp"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/transparent"
+            android:textColor="@color/colorPrimary"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin" />
 </LinearLayout>

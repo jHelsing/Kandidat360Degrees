@@ -8,12 +8,11 @@
     <ImageButton
         android:id="@+id/toolbarMenuButton"
         android:src="@drawable/menu_icon"
-        android:padding="10dp"
         android:layout_gravity="left"
         android:scaleType="fitXY"
         android:background="@null"
-        android:layout_height="100px"
-        android:layout_width="100px" />
+        android:layout_height="24dp"
+        android:layout_width="24dp" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
