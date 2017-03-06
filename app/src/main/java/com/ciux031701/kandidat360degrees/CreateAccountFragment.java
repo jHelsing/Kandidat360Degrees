@@ -1,6 +1,8 @@
 package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,6 +12,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import static com.ciux031701.kandidat360degrees.R.id.textView;
 
@@ -44,6 +47,7 @@ public class CreateAccountFragment extends Fragment {
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
+                Toast.makeText(getActivity(), "Account created",Toast.LENGTH_SHORT).show();
                 getFragmentManager().popBackStack();
             }
         });
