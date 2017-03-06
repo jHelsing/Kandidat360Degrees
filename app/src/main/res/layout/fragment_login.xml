@@ -1,16 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <TextView
-            android:text="360World"
+            android:text="Log in"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="36sp"
-            android:textAlignment="center"
-            android:id="@+id/appnameView" />
+            android:textSize="24sp"
+            android:id="@+id/appnameView"
+            android:textAlignment="viewStart"
+            tools:background="#52ACB9" />
 
         <TextView
             android:text="Username"
@@ -44,7 +46,7 @@
             android:id="@+id/passwordField" />
 
         <Button
-            android:text="Login"
+            android:text="Log in"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/loginButton"

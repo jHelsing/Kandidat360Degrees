@@ -2,5 +2,10 @@
 <resources>
     <color name="colorPrimary">#52acb9</color>
     <color name="colorPrimaryDark">#52ACB9</color>
+    <color name="colorBackground">#E8EAEA</color>
     <color name="colorAccent">#3f3f3f</color>
+    <color name="colorDrawerBackground">#3E413D</color>
+    <color name="colorLineBorder">#95989A</color>
+    <color name="colorToastBackground">#333333</color>
+    <color name="colorPanoramaLine">#FF8205</color>
 </resources>
