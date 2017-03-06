@@ -89,7 +89,7 @@ public class ShareFragment extends Fragment {
         args = getArguments();
         if(args!=null){
             pictureInBitmap = args.getParcelable("picture");
-            previewPic.setImageBitmap(pictureInBitmap);
+            //previewPic.setImageBitmap(pictureInBitmap);
         }
 
         return root;
