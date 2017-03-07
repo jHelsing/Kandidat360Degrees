@@ -41,18 +41,18 @@ public class CreateAccountFragment extends Fragment {
         //To change the color of the text field depending on if the two password fields have equal text
         listenerRepeatPasswordText(root);
 
-
+        /**
         //create account-button: should return to activity_login ( + show that the account was created?)
         createAccountButton = (Button)root.findViewById(R.id.createButton);
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
-                Toast.makeText(getActivity(), "Account created",Toast.LENGTH_SHORT).show();
+                //Toast.makeText(getActivity(), "Account created",Toast.LENGTH_SHORT).show();
                 getFragmentManager().popBackStack();
             }
         });
-
-
+         **/
+        
         return root;
 
     }

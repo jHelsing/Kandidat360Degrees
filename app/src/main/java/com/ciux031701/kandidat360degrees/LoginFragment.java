@@ -44,7 +44,7 @@ public class LoginFragment extends Fragment {
         title = (TextView)root.findViewById(R.id.appnameView);
         title.setBackgroundResource(R.color.colorPrimary);
 
-        mainLayout = (LinearLayout) root.findViewById(R.id.mainLayout);
+        mainLayout = (LinearLayout) root.findViewById(R.id.loginMainLayout);
         
         mainLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override

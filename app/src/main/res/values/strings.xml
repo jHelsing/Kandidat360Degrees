@@ -12,4 +12,5 @@
     <string name="email_username">Email/Username</string>
     <string name="password">Password</string>
     <string name="create_account">Create account</string>
+    <string name="account_details">Account details</string>
 </resources>
