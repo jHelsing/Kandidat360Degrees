@@ -4,7 +4,11 @@
     android:orientation="vertical"
     android:layout_height="match_parent"
     android:weightSum="1"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:forceHasOverlappingRendering="false"
+    android:id="@+id/mainLayout"
+    android:focusable="false"
+    android:focusableInTouchMode="false">
 
         <TextView
             android:text="@string/log_in"
@@ -54,7 +58,8 @@
             android:textAllCaps="false"
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin" />
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:focusableInTouchMode="true" />
 
         <Button
             android:text="@string/create_account"
@@ -67,5 +72,6 @@
             android:textColor="@color/colorPrimary"
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin" />
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:focusableInTouchMode="true" />
 </LinearLayout>

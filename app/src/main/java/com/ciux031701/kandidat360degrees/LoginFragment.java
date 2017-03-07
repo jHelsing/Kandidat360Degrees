@@ -4,11 +4,17 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import static android.content.Context.INPUT_METHOD_SERVICE;
 
 /**
  * Created by Anna on 2017-02-23.
@@ -18,6 +24,7 @@ public class LoginFragment extends Fragment {
     Button loginButton;
     Button createAccountButton;
     TextView title;
+    LinearLayout mainLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -36,6 +43,17 @@ public class LoginFragment extends Fragment {
 
         title = (TextView)root.findViewById(R.id.appnameView);
         title.setBackgroundResource(R.color.colorPrimary);
+
+        mainLayout = (LinearLayout) root.findViewById(R.id.mainLayout);
+        
+        mainLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event){
+                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                return true;
+            }
+        });
 
         createAccountButton = (Button)root.findViewById(R.id.createAccountButton);
         //Button createAccountButton = (Button)findViewById(R.id.createAccountButton);
