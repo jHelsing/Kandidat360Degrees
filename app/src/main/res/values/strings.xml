@@ -8,9 +8,14 @@
         <item>Upload</item>
         <item>Settings</item>
     </string-array>
+    <!-- Log in and create account -->
     <string name="log_in">Log in</string>
     <string name="email_username">Email/Username</string>
     <string name="password">Password</string>
     <string name="create_account">Create account</string>
     <string name="account_details">Account details</string>
+    <string name="username">Username</string>
+    <string name="email">Email</string>
+    <string name="retype_password">Re-type password</string>
+    <string name="min_5_chars">Minimum of five characters</string>
 </resources>

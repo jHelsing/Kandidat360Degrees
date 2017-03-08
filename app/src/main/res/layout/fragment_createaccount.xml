@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+              xmlns:app="" android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background = "@color/colorBackground"
@@ -20,101 +20,68 @@
         android:paddingLeft="@dimen/title_padding_without_icon"
         android:paddingRight="@dimen/title_padding_without_icon" />
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:id="@+id/createAccTitleLinearLayout"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:baselineAligned="false"
-        android:elevation="0dp"
-        android:gravity="center_vertical"
-        android:background="@android:color/white"
-        android:layout_marginTop="55dp">
-
-        <TextView
-            android:text="@string/account_details"
+    <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/textView2"
-            android:textSize="24sp"
-            android:textColor="@android:color/black" />
-    </LinearLayout>
+            android:inputType="textPersonName"
+            android:ems="10"
+            android:id="@+id/createAccUsernameField" android:hint="@string/username"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
 
     <TextView
-        android:text="Username"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/usernameView"
-        android:textSize="18sp"
-        android:textAlignment="viewStart"
-        android:layout_marginTop="41dp"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin" />
+            android:text="Miniumum of five characters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/usernameInfoView"
+            android:textStyle="normal|italic" android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"/>
 
     <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:id="@+id/usernameField" />
-
-    <TextView
-        android:text="Miniumum of five characters"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/usernameInfoView"
-        android:textStyle="normal|italic" />
-
-    <TextView
-        android:text="E-mail"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/emailView"
-        android:textSize="18sp"
-        android:textAlignment="center" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"
+            android:ems="10"
+            android:id="@+id/emailField" android:hint="@string/email"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
 
     <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textEmailAddress"
-        android:ems="10"
-        android:id="@+id/emailField" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:ems="10"
+            android:id="@+id/password1Field" android:hint="@string/password"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
 
     <TextView
-        android:text="Password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/password1View"
-        android:textSize="18sp"
-        android:textAlignment="center" />
+            android:text="Minimum of five characters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/passwordInfoView"
+            android:textStyle="normal|italic" android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"/>
 
     <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:ems="10"
-        android:id="@+id/password1Field" />
-
-    <TextView
-        android:text="Minimum of five characters"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/passwordInfoView"
-        android:textStyle="normal|italic" />
-
-    <TextView
-        android:text="Repeat password"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/password2View"
-        android:textSize="18sp"
-        android:textAlignment="center" />
-
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:ems="10"
-        android:id="@+id/password2Field" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:ems="10"
+            android:id="@+id/password2Field" android:hint="@string/retype_password"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
+    <Button
+            android:text="@string/create_account"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:id="@+id/createAccCreateAccButton"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/create_acc_vertical_margin" android:background="@color/colorPrimary"
+            android:textColor="@android:color/white" android:textAllCaps="false" android:textSize="18sp"/>
 
 </LinearLayout>
