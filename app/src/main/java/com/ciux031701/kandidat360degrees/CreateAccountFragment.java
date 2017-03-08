@@ -30,9 +30,9 @@ public class CreateAccountFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_createaccount, container, false);
 
-        usernameText = (EditText) root.findViewById(R.id.usernameField); //username input
-        passwordText = (EditText) root.findViewById(R.id.password1Field); //first password input
-        repeatPasswordText = (EditText) root.findViewById(R.id.password2Field); //repeat password
+        usernameText = (EditText) root.findViewById(R.id.createAccUsernameField); //username input
+        passwordText = (EditText) root.findViewById(R.id.createAccPassword1Field); //first password input
+        repeatPasswordText = (EditText) root.findViewById(R.id.createAccPassword2Field); //repeat password
 
         //To change the color of the text field depending on number of characters:
         listenerEditText(root,usernameText);
@@ -41,9 +41,9 @@ public class CreateAccountFragment extends Fragment {
         //To change the color of the text field depending on if the two password fields have equal text
         listenerRepeatPasswordText(root);
 
-        /**
+
         //create account-button: should return to activity_login ( + show that the account was created?)
-        createAccountButton = (Button)root.findViewById(R.id.createButton);
+        createAccountButton = (Button)root.findViewById(R.id.createAccCreateAccButton);
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
@@ -51,7 +51,6 @@ public class CreateAccountFragment extends Fragment {
                 getFragmentManager().popBackStack();
             }
         });
-         **/
         
         return root;
 

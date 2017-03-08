@@ -7,7 +7,7 @@
     android:id="@+id/accDetailsMainLayout">
 
     <TextView
-        android:text="Create account"
+        android:text="@string/create_account"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/createAccountView"
@@ -31,10 +31,10 @@
             android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
 
     <TextView
-            android:text="Miniumum of five characters"
+            android:text="@string/min_5_chars"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/usernameInfoView"
+            android:id="@+id/createAccUsernameInfoView"
             android:textStyle="normal|italic" android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"/>
 
@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
             android:ems="10"
-            android:id="@+id/emailField" android:hint="@string/email"
+            android:id="@+id/createAccEmailField" android:hint="@string/email"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
@@ -53,16 +53,16 @@
             android:layout_height="wrap_content"
             android:inputType="textPassword"
             android:ems="10"
-            android:id="@+id/password1Field" android:hint="@string/password"
+            android:id="@+id/createAccPassword1Field" android:hint="@string/password"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
 
     <TextView
-            android:text="Minimum of five characters"
+            android:text="@string/min_5_chars"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/passwordInfoView"
+            android:id="@+id/createAccPasswordInfoView"
             android:textStyle="normal|italic" android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"/>
 
@@ -71,7 +71,7 @@
             android:layout_height="wrap_content"
             android:inputType="textPassword"
             android:ems="10"
-            android:id="@+id/password2Field" android:hint="@string/retype_password"
+            android:id="@+id/createAccPassword2Field" android:hint="@string/retype_password"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
