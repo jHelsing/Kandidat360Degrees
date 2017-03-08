@@ -47,7 +47,7 @@ public class CreateAccountFragment extends Fragment {
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
-                //Toast.makeText(getActivity(), "Account created",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Account created",Toast.LENGTH_SHORT).show();
                 getFragmentManager().popBackStack();
             }
         });
