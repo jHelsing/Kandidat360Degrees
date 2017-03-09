@@ -1,6 +1,14 @@
 package com.ciux031701.kandidat360degrees.adaptors;
 
+import android.app.Fragment;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Context;
+import android.media.Image;
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
+import android.support.v7.view.menu.MenuView;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,66 +16,90 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.ciux031701.kandidat360degrees.FriendTuple;
+import com.ciux031701.kandidat360degrees.ProfileFragment;
 import com.ciux031701.kandidat360degrees.R;
 
 import java.util.ArrayList;
 /**
- * Created by Anna on 2017-03-07.
+ * Created by Anna on 2017-03-07. Modified by Amar 2017-03-09.
  */
 
-public class FriendsAdapter extends BaseAdapter {
+public class FriendsAdapter extends RecyclerView.Adapter {
     private LayoutInflater mInflater;
-    private ArrayList<String> mDataSource;
+    private ArrayList<FriendTuple> mDataSource;
+    private ViewHolder holder;
+    private Context context;
 
-    public FriendsAdapter(Context context,ArrayList<String> data) {
-        mInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    public FriendsAdapter(Context context, ArrayList<FriendTuple> data) {
+        this.context = context;
+        mInflater = LayoutInflater.from(context);
         mDataSource = data;
     }
 
     @Override
-    public int getCount() {
-        return mDataSource.size();
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = mInflater.inflate(R.layout.friends_list_item, parent, false);
+        view.setTag(holder);
+        holder = new ViewHolder(view);
+        return holder;
     }
 
     @Override
-    public Object getItem(int position) {
-        return mDataSource.get(position);
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+        TextView titleTextView = (TextView) holder.itemView.findViewById(R.id.friends_list_title);
+        ImageView thumbnailImageView = (ImageView) holder.itemView.findViewById(R.id.friends_list_thumbnail);
+        FriendTuple data = mDataSource.get(position);
+        titleTextView.setText(data.getUserName());
+        thumbnailImageView.setImageDrawable(data.getProfilePicture());
+
+        holder.itemView.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                String selectedUser = ((TextView) holder.itemView.findViewById(R.id.friends_list_title)).getText().toString();
+                //TODO: Go to the selectedUser's profile instead of MrCool's
+                Fragment fragment = new ProfileFragment();
+                Bundle setArgs = new Bundle();
+                setArgs.putString("username", selectedUser);
+                fragment.setArguments(setArgs);
+                FragmentManager fragmentManager = ((FragmentActivity) context).getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.content_frame, fragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }
+        });
     }
 
-        @Override
+    @Override
     public long getItemId(int position) {
         return position;
     }
 
     @Override
+    public int getItemCount() {
+        return mDataSource.size();
+    }
+
     public View getView(int position, View convertView, ViewGroup parent) {
-        //ViewHolder pattern: (for faster scrolling - do not need to inflate if the view already exists)
-        ViewHolder holder;
-        if(convertView == null) {
-            holder = new ViewHolder();
-            convertView = mInflater.inflate(R.layout.friends_list_item, parent, false);
-            holder.thumbnailImageView = (ImageView) convertView.findViewById(R.id.friends_list_thumbnail);
-            holder.titleTextView = (TextView) convertView.findViewById(R.id.friends_list_title);
 
-            convertView.setTag(holder);
-        }
-        else{
-            holder = (ViewHolder) convertView.getTag();
-        }
-
-        TextView titleTextView = holder.titleTextView;
-        ImageView thumbnailImageView = holder.thumbnailImageView;
-
-        String data = (String) getItem(position);
-        titleTextView.setText(data);
-        thumbnailImageView.setImageResource(R.drawable.anonymous_profile_image_circle_small);
+        FriendTuple data = mDataSource.get(position);
+        holder.titleTextView.setText(data.getUserName());
+        holder.thumbnailImageView.setImageDrawable(data.getProfilePicture());
 
         return convertView;
     }
 
     //Private class to implement ViewHolder pattern
-    private static class ViewHolder {
-        public TextView titleTextView;
-        public ImageView thumbnailImageView;
+    private static class ViewHolder extends RecyclerView.ViewHolder{
+        private TextView titleTextView;
+        private ImageView thumbnailImageView;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+
+            titleTextView = (TextView) itemView.findViewById(R.id.friends_list_title);
+            thumbnailImageView = (ImageView) itemView.findViewById(R.id.friends_list_thumbnail);
+        }
     }
 }

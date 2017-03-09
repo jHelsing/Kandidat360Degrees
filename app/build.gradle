@@ -34,4 +34,5 @@ dependencies {
     compile 'com.github.turing-tech:MaterialScrollBar:12.+'
     compile project(':libs:opencv')
     compile files('libs/PanoramaGL_0.2-beta.jar')
+    compile 'com.android.support:recyclerview-v7:25.2.0'
 }
