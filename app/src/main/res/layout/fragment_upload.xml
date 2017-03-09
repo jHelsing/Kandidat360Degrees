@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
     <include
@@ -9,28 +7,17 @@
         layout="@layout/tool_bar_text"
         ></include>
 
-    <ScrollView
+    <GridView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/gridview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:columnWidth="90dp"
+        android:numColumns="3"
+        android:verticalSpacing="0dp"
+        android:horizontalSpacing="10dp"
+        android:stretchMode="columnWidth"
+        android:gravity="center"
+        />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" >
-
-            <ImageButton
-                android:layout_width="180dp"
-                android:layout_height="180dp"
-                app:srcCompat="@drawable/example_panorama"
-                android:id="@+id/previewPic"
-                android:contextClickable="false" />
-
-            <Button
-                android:text="Select"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/selectButton" />
-        </LinearLayout>
-    </ScrollView>
 
 </LinearLayout>

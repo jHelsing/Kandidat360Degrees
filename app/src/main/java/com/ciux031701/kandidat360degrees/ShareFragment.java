@@ -20,8 +20,6 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import static com.ciux031701.kandidat360degrees.R.id.previewPic;
-
 /**
  * Created by Anna on 2017-03-06.
  * This fragment is started from an Upload-fragment or Camera-fragment.
