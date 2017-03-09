@@ -6,9 +6,9 @@
         android:id="@+id/tool_bar"
         layout="@layout/tool_bar"
         ></include>
-    <TextView
-        android:text="TextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/textView1" />
+    <ListView
+        android:id="@+id/notifications_list_view"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+    </ListView>
 </LinearLayout>
