@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -30,6 +31,8 @@ public class NotificationFragment extends Fragment {
     private TextView toolbarTitle;
 
     private ListView listView;
+    private Button acceptButton;
+    private Button cancelButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -69,24 +72,37 @@ public class NotificationFragment extends Fragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView adapterView, View view, int i, long l) {
-                String selectedUser;
-                if (items[i].getType() == NotificationAdapter.TYPE_FRIEND_REQUEST){
-                    //Go to the user's profile
-                    selectedUser = "Username1";
-                } else { // if(items[i].getType() == NotificationAdapter.TYPE_IMAGE_UPLOAD){
+                if (items[i].getType() == NotificationAdapter.TYPE_IMAGE_UPLOAD){
                     //Go to the user's profile - map view and show the image
-                    selectedUser = "Username3";
+                    String selectedUser = "Username1";
+                    //TODO: Go to the selectedUser's profile instead of MrCool's
+                    Fragment fragment = new ProfileFragment();
+                    Bundle setArgs = new Bundle();
+                    setArgs.putString("username", selectedUser);
+                    fragment.setArguments(setArgs);
+                    FragmentManager fragmentManager = getActivity().getFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.content_frame, fragment);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
                 }
-                //TODO: Go to the selectedUser's profile instead of MrCool's
-                Fragment fragment = new ProfileFragment();
-                Bundle setArgs = new Bundle();
-                setArgs.putString("username", selectedUser);
-                fragment.setArguments(setArgs);
-                FragmentManager fragmentManager = getActivity().getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+            }
+        });
+
+        //Buttons:
+        View inflatedView = getActivity().getLayoutInflater().inflate(R.layout.notification_friend_item, null);
+        acceptButton = (Button)inflatedView.findViewById(R.id.buttonAcceptNotification);
+        cancelButton = (Button)inflatedView.findViewById(R.id.buttonCancelNotification);
+        acceptButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view){
+                //TODO
+            }
+        });
+        cancelButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                //TODO
             }
         });
 
