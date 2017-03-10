@@ -4,28 +4,27 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
-import android.media.Image;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.view.menu.MenuView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ciux031701.kandidat360degrees.FriendTuple;
 import com.ciux031701.kandidat360degrees.ProfileFragment;
 import com.ciux031701.kandidat360degrees.R;
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 import java.util.ArrayList;
 /**
  * Created by Anna on 2017-03-07. Modified by Amar 2017-03-09.
  */
 
-public class FriendsAdapter extends RecyclerView.Adapter {
+public class FriendsAdapter extends RecyclerView.Adapter implements FastScrollRecyclerView.SectionedAdapter {
     private LayoutInflater mInflater;
     private ArrayList<FriendTuple> mDataSource;
     private ViewHolder holder;
@@ -81,13 +80,10 @@ public class FriendsAdapter extends RecyclerView.Adapter {
         return mDataSource.size();
     }
 
-    public View getView(int position, View convertView, ViewGroup parent) {
-
-        FriendTuple data = mDataSource.get(position);
-        holder.titleTextView.setText(data.getUserName());
-        holder.thumbnailImageView.setImageDrawable(data.getProfilePicture());
-
-        return convertView;
+    @NonNull
+    @Override
+    public String getSectionName(int position) {
+        return mDataSource.get(position).getUserName().charAt(0) + "";
     }
 
     //Private class to implement ViewHolder pattern
