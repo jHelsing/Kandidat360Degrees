@@ -24,7 +24,7 @@
             app:fastScrollPopupBgColor="@color/colorPrimaryDarker"
             app:fastScrollPopupTextColor="@android:color/white"
             app:fastScrollThumbColor="@color/colorPrimaryDarker"
-            app:fastScrollAutoHideDelay="3000"
+            app:fastScrollAutoHide="false"
             android:background="@color/colorBackground">
         </com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView>
 
