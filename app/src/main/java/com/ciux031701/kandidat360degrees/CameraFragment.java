@@ -216,7 +216,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         mSurfaceViewOnTop.setZOrderOnTop(true);
         mSurfaceViewOnTop.getHolder().setFormat(PixelFormat.TRANSPARENT);
 
-        getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         return root;
     }
 
