@@ -52,7 +52,7 @@
         android:text="@string/accept"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
+        android:background="@drawable/rounded_button"
         android:textColor="@android:color/white"
         android:textSize="15sp"
         android:textAllCaps="false"

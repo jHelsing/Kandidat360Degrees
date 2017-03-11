@@ -28,7 +28,8 @@
             android:id="@+id/shareButton"
             android:gravity="center|bottom"
             android:layout_height="wrap_content"
-            android:padding="25dp"/>
+            android:padding="25dp"
+            android:background="@drawable/rounded_button"/>
 
     </LinearLayout>
 
