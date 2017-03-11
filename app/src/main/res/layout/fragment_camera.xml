@@ -73,7 +73,7 @@
         android:adjustViewBounds="false" />
 
     <TextView
-        android:text="Please hold phone vertically"
+        android:text="@string/hold_phone_vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/holdVerticallyText"
