@@ -46,7 +46,7 @@ public class FriendsAdapter extends RecyclerView.Adapter implements FastScrollRe
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
-        TextView titleTextView = (TextView) holder.itemView.findViewById(R.id.friends_list_title);
+        TextView titleTextView = (TextView) holder.itemView.findViewById(R.id.friends_list_letter);
         ImageView thumbnailImageView = (ImageView) holder.itemView.findViewById(R.id.friends_list_thumbnail);
         FriendTuple data = mDataSource.get(position);
         titleTextView.setText(data.getUserName());
@@ -55,7 +55,7 @@ public class FriendsAdapter extends RecyclerView.Adapter implements FastScrollRe
         holder.itemView.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                String selectedUser = ((TextView) holder.itemView.findViewById(R.id.friends_list_title)).getText().toString();
+                String selectedUser = ((TextView) holder.itemView.findViewById(R.id.friends_list_letter)).getText().toString();
                 //TODO: Go to the selectedUser's profile instead of MrCool's
                 Fragment fragment = new ProfileFragment();
                 Bundle setArgs = new Bundle();
@@ -94,7 +94,7 @@ public class FriendsAdapter extends RecyclerView.Adapter implements FastScrollRe
         public ViewHolder(View itemView) {
             super(itemView);
 
-            titleTextView = (TextView) itemView.findViewById(R.id.friends_list_title);
+            titleTextView = (TextView) itemView.findViewById(R.id.friends_list_letter);
             thumbnailImageView = (ImageView) itemView.findViewById(R.id.friends_list_thumbnail);
         }
     }
