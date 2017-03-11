@@ -35,4 +35,5 @@ dependencies {
     compile project(':libs:opencv')
     compile files('libs/PanoramaGL_0.2-beta.jar')
     compile 'com.android.support:recyclerview-v7:25.2.0'
+    compile 'com.google.android.gms:play-services-panorama:10.0.1'
 }
