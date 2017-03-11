@@ -166,7 +166,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 if(!captureInProgress && !finalizationInProgress) {
                     //Take a picture
                     captureInProgress = true;
-                    angleProgressBar.setVisibility(View.VISIBLE);
+                    //angleProgressBar.setVisibility(View.VISIBLE);
                     startGyroDegree=lastDegree;
                     backButton.setVisibility(View.GONE);
                     if(mCam != null && safeToTakePicture){
