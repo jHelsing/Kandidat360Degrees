@@ -40,7 +40,7 @@
         opencv:srcCompat="@drawable/temp_hold_vertically" />
 
     <ImageButton
-        android:id="@+id/captureButton"
+        android:id="@+id/sendToShareButton"
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_centerHorizontal="true"
@@ -56,7 +56,7 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:padding="10dp"
-        android:layout_alignBottom="@+id/captureButton"
+        android:layout_alignBottom="@+id/sendToShareButton"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_marginRight="27dp"

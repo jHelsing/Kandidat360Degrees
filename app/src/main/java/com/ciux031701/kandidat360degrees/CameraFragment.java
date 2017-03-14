@@ -2,7 +2,6 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -19,13 +18,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.GpsSatellite;
-import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.widget.DrawerLayout;
-import android.util.FloatMath;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -33,23 +27,10 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.panorama.Panorama;
-import com.google.android.gms.panorama.PanoramaApi.PanoramaResult;
-
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
 
 import java.io.IOException;
 import java.util.List;
@@ -59,15 +40,12 @@ import java.util.List;
  * Created by boking on 2017-02-17.
  */
 
-public class CameraFragment extends Fragment implements SensorEventListener, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
-
-    private GoogleApiClient mClient;
+public class CameraFragment extends Fragment implements SensorEventListener {
 
     private TextView holdVerticallyText;
     private ImageButton backButton;
     private ImageView holdVerticallyImage;
     private ImageButton captureButton;
-    private ImageButton fullscreenButton;
     private ImageView previewImage;
 
     private SurfaceView mSurfaceView, mSurfaceViewOnTop;
@@ -84,7 +62,6 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
 
     private boolean isVertical;
     private boolean captureInProgress;
-    private boolean finalizationInProgress;
 
     private boolean safeToTakePicture = true; //is it safe to capture a picture?
 
@@ -99,25 +76,6 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
     private float orientation[];
     float rField[], iField[];
 
-    //Camera zoom stuff
-    private static final String TAG = "Touch";
-    @SuppressWarnings("unused")
-    private static final float MIN_ZOOM = 1f,MAX_ZOOM = 1f;
-    // These matrices will be used to scale points of the image
-    Matrix matrix = new Matrix();
-    Matrix savedMatrix = new Matrix();
-    // The 3 states (events) which the user is trying to perform
-    static final int NONE = 0;
-    static final int DRAG = 1;
-    static final int ZOOM = 2;
-    int mode = NONE;
-    // these PointF objects are used to record the point(s) the user is touching
-    PointF start = new PointF();
-    PointF mid = new PointF();
-    float oldDist = 1f;
-
-    private float mx,my;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_camera, container, false);
@@ -126,7 +84,6 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
 
         isVertical = false;
         captureInProgress = false;
-        finalizationInProgress = false;
         highestGyroDegree=0;
         isHalfWay=false;
         lastProgressAngle=0;
@@ -138,15 +95,11 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
         sensorManager.registerListener(this,accelerometer,SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(this,magnetometer,SensorManager.SENSOR_DELAY_UI);
 
-
-
         //GUI: buttons & views
         angleProgressBar = (ProgressBar)root.findViewById(R.id.angleProgressBar);
         angleProgressBar.setVisibility(View.GONE);
         previewImage = (ImageView)root.findViewById(R.id.previewImage);
-        fullscreenButton = (ImageButton)root.findViewById(R.id.fullscreenButton);
-        fullscreenButton.setVisibility(View.GONE);
-        captureButton = (ImageButton)root.findViewById(R.id.captureButton);
+        captureButton = (ImageButton)root.findViewById(R.id.sendToShareButton);
         holdVerticallyText = (TextView)root.findViewById(R.id.holdVerticallyText);
         holdVerticallyImage = (ImageView)root.findViewById(R.id.holdVerticallyImage);
         backButton = (ImageButton)root.findViewById(R.id.backButton);
@@ -154,38 +107,15 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
         captureButton.setVisibility(View.GONE);
         previewImage.setVisibility(View.GONE);
 
-        fullscreenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent myIntent = new Intent(getActivity(), ImageViewActivity.class);
-                //myIntent.putExtra("image", bitmap); //Optional parameters
-                startActivity(myIntent);
-            }
-        });
-
-        //for backbutton: if is in finalization - return to camera. if is in camera-mode - return to explore.
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(finalizationInProgress){
-                    backButton.setBackgroundResource(R.drawable.temp_return);
-                    angleProgressBar.setProgress(0);
-                    highestGyroDegree=0;
-                    isHalfWay=false;
-                    lastProgressAngle=0;
-                    lastDegree = 0;
-                    finalizationInProgress = false;
-                    mCam.startPreview();
-                    fullscreenButton.setVisibility(View.GONE);
-                    previewImage.setVisibility(View.GONE);
-                    captureButton.setBackgroundResource(R.drawable.temp_capture);
-                }else {
-                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                    Fragment fragment = new ExploreFragment();
-                    FragmentManager fragmentManager = getActivity().getFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.content_frame,fragment).commit();
-                    //fragmentTransaction.addToBackStack(null);
-                }
+                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                Fragment fragment = new ExploreFragment();
+                FragmentManager fragmentManager = getActivity().getFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.content_frame,fragment).commit();
+                //fragmentTransaction.addToBackStack(null);
+
             }
         });
 
@@ -195,7 +125,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!captureInProgress && !finalizationInProgress) {
+                if(!captureInProgress) {
                     //Take a picture
                     captureInProgress = true;
                     //angleProgressBar.setVisibility(View.VISIBLE);
@@ -206,35 +136,10 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
                         safeToTakePicture = false;
                         mCam.takePicture(null,null,jpegCallback);
                     }
-                }else if (finalizationInProgress) {
-                    //Switch fragment to upload with picture as param
-                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                    Bitmap tempPicture = BitmapFactory.decodeResource(getResources(), R.drawable.panorama_example_2);
-                    args = new Bundle();
-                    args.putParcelable("picture", tempPicture);
-
-                    ShareFragment fragment = new ShareFragment();
-                    FragmentManager fragmentManager = getFragmentManager();
-                    fragment.setArguments(args);
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-
                 }else {
-                    //Show the final picture/panorama:
-                    angleProgressBar.setVisibility(View.GONE);
-                    captureInProgress = false;
-                    finalizationInProgress = true;
-                    if(mCam != null){
-                        mCam.stopPreview();
-                    }
-                    Bitmap temp = BitmapFactory.decodeResource(getResources(), R.drawable.panorama_example_2);
-                    previewImage.setImageBitmap(temp);
-                    captureButton.setBackgroundResource(R.drawable.temp_check);
-                    backButton.setBackgroundResource(R.drawable.temp_cross);
-                    //fullscreenButton.setVisibility(View.VISIBLE);
-                    backButton.setVisibility(View.VISIBLE);
-                    previewImage.setVisibility(View.VISIBLE);
-                    mSurfaceViewOnTop.setVisibility(View.GONE);
-                    mSurfaceView.setVisibility(View.GONE);
+                    ImageViewFragment fragment = new ImageViewFragment();
+                    FragmentManager fragmentManager = getFragmentManager();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
                 }
 
             }
@@ -247,8 +152,9 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
         mSurfaceViewOnTop = (SurfaceView)root.findViewById(R.id.surfaceViewOnTop);
         mSurfaceViewOnTop.setZOrderOnTop(true);
         mSurfaceViewOnTop.getHolder().setFormat(PixelFormat.TRANSPARENT);
+        mSurfaceView.setVisibility(View.GONE);
+        mSurfaceViewOnTop.setVisibility(View.GONE);
 
-        //getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         return root;
     }
 
@@ -256,15 +162,11 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mClient = new GoogleApiClient.Builder(getActivity(), this, this)
-                .addApi(Panorama.API)
-                .build();
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        mClient.connect();
     }
 
     //To save pictures & show the last taken picture:
@@ -409,7 +311,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
                 if(orientation[1] < 1.75 && orientation[1] > 1.25 || orientation[1] < -1.25 && orientation[1] > -1.75){
                     if(!isVertical) {
                         isVertical = true;
-                        if(!captureInProgress && !finalizationInProgress) {
+                        if(!captureInProgress) {
                             holdVerticallyImage.setVisibility(View.GONE);
                             holdVerticallyText.setVisibility(View.GONE);
                             captureButton.setVisibility(View.VISIBLE);
@@ -421,7 +323,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
                 }else{
                     if(isVertical) {
                         isVertical = false;
-                        if(!captureInProgress && !finalizationInProgress) {
+                        if(!captureInProgress) {
                             holdVerticallyImage.setVisibility(View.VISIBLE);
                             holdVerticallyText.setVisibility(View.VISIBLE);
                             captureButton.setVisibility(View.GONE);
@@ -455,7 +357,6 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
 
     }
 
-
     private Camera.Size getBestPreviewSize(Camera.Parameters parameters){
         Camera.Size bestSize = null;
         List<Camera.Size> sizeList = parameters.getSupportedPreviewSizes();
@@ -468,148 +369,4 @@ public class CameraFragment extends Fragment implements SensorEventListener, Goo
         return bestSize;
     }
 
-    //Handles manual zooming ontouch of previewimage, commented out since testing other imageviewer.
-    /*@Override
-    public boolean onTouch(View view, MotionEvent event) {
-
-        previewImage.setScaleType(ImageView.ScaleType.MATRIX);
-        float scale;
-
-        dumpEvent(event);
-        // Handle touch events here...
-
-        switch (event.getAction() & MotionEvent.ACTION_MASK)
-        {
-            case MotionEvent.ACTION_DOWN:   // first finger down only
-                savedMatrix.set(matrix);
-                start.set(event.getX(), event.getY());
-                Log.d(TAG, "mode=DRAG"); // write to LogCat
-                mode = DRAG;
-                break;
-
-            case MotionEvent.ACTION_UP: // first finger lifted
-
-            case MotionEvent.ACTION_POINTER_UP: // second finger lifted
-
-                mode = NONE;
-                Log.d(TAG, "mode=NONE");
-                break;
-
-            case MotionEvent.ACTION_POINTER_DOWN: // first and second finger down
-
-                oldDist = spacing(event);
-                Log.d(TAG, "oldDist=" + oldDist);
-                if (oldDist > 5f) {
-                    savedMatrix.set(matrix);
-                    midPoint(mid, event);
-                    mode = ZOOM;
-                    Log.d(TAG, "mode=ZOOM");
-                }
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-
-                if (mode == DRAG)
-                {
-                    matrix.set(savedMatrix);
-                    matrix.postTranslate(event.getX() - start.x, event.getY() - start.y); // create the transformation in the matrix  of points
-                }
-                else if (mode == ZOOM)
-                {
-                    // pinch zooming
-                    float newDist = spacing(event);
-                    Log.d(TAG, "newDist=" + newDist);
-                    if (newDist > 5f)
-                    {
-                        matrix.set(savedMatrix);
-                        scale = newDist / oldDist; // setting the scaling of the
-                        // matrix...if scale > 1 means
-                        // zoom in...if scale < 1 means
-                        // zoom out
-                        matrix.postScale(scale, scale, mid.x, mid.y);
-                    }
-                }
-                break;
-        }
-
-        previewImage.setImageMatrix(matrix); // display the transformation on screen
-
-        return true; // indicate event was handled
-    }*
-
-    private float spacing(MotionEvent event)
-    {
-        float x = event.getX(0) - event.getX(1);
-        float y = event.getY(0) - event.getY(1);
-        return (float)Math.sqrt(x * x + y * y);
-    }
-
-    private void midPoint(PointF point, MotionEvent event)
-    {
-        float x = event.getX(0) + event.getX(1);
-        float y = event.getY(0) + event.getY(1);
-        point.set(x / 2, y / 2);
-    }
-
-    //Show an event in the LogCat view, for debugging
-    private void dumpEvent(MotionEvent event)
-    {
-        String names[] = { "DOWN", "UP", "MOVE", "CANCEL", "OUTSIDE","POINTER_DOWN", "POINTER_UP", "7?", "8?", "9?" };
-        StringBuilder sb = new StringBuilder();
-        int action = event.getAction();
-        int actionCode = action & MotionEvent.ACTION_MASK;
-        sb.append("event ACTION_").append(names[actionCode]);
-
-        if (actionCode == MotionEvent.ACTION_POINTER_DOWN || actionCode == MotionEvent.ACTION_POINTER_UP)
-        {
-            sb.append("(pid ").append(action >> MotionEvent.ACTION_POINTER_ID_SHIFT);
-            sb.append(")");
-        }
-
-        sb.append("[");
-        for (int i = 0; i < event.getPointerCount(); i++)
-        {
-            sb.append("#").append(i);
-            sb.append("(pid ").append(event.getPointerId(i));
-            sb.append(")=").append((int) event.getX(i));
-            sb.append(",").append((int) event.getY(i));
-            if (i + 1 < event.getPointerCount())
-                sb.append(";");
-        }
-
-        sb.append("]");
-        Log.d("Touch Events ---------", sb.toString());
-    }
-    */
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(TAG, "connection failed: " + connectionResult);
-    }
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        System.out.println("trying to fix shizzle");
-        Uri uri = Uri.parse("android.resource://" + getActivity().getPackageName() + "/"+ R.drawable.example_panorama);
-        Panorama.PanoramaApi.loadPanoramaInfo(mClient, uri).setResultCallback(
-                new ResultCallback<PanoramaResult>() {
-                    @Override
-                    public void onResult(PanoramaResult result) {
-                        if (result.getStatus().isSuccess()) {
-                            Intent viewerIntent = result.getViewerIntent();
-                            Log.i(TAG, "found viewerIntent: " + viewerIntent);
-                            if (viewerIntent != null) {
-                                startActivity(viewerIntent);
-                            }
-                        } else {
-                            Log.e(TAG, "error: " + result);
-                        }
-                    }
-                });
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.i(TAG, "connection suspended: " + i);
-    }
 }
