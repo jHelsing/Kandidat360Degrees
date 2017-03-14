@@ -15,7 +15,7 @@
         android:layout_weight="1">
 
         <Switch
-            android:text="Share with public"
+            android:text="@string/share_public"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/publicSwitch"
@@ -23,12 +23,13 @@
             android:textAllCaps="false" />
 
         <Button
-            android:text="Share panorama"
+            android:text="@string/share_panorama"
             android:layout_width="match_parent"
             android:id="@+id/shareButton"
             android:gravity="center|bottom"
             android:layout_height="wrap_content"
-            android:padding="25dp"/>
+            android:padding="25dp"
+            android:background="@drawable/rounded_button"/>
 
     </LinearLayout>
 

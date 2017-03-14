@@ -2,7 +2,6 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -12,32 +11,26 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.GpsSatellite;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,7 +46,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private ImageButton backButton;
     private ImageView holdVerticallyImage;
     private ImageButton captureButton;
-    private ImageButton fullscreenButton;
     private ImageView previewImage;
 
     private SurfaceView mSurfaceView, mSurfaceViewOnTop;
@@ -70,7 +62,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     private boolean isVertical;
     private boolean captureInProgress;
-    private boolean finalizationInProgress;
 
     private boolean safeToTakePicture = true; //is it safe to capture a picture?
 
@@ -93,7 +84,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
         isVertical = false;
         captureInProgress = false;
-        finalizationInProgress = false;
         highestGyroDegree=0;
         isHalfWay=false;
         lastProgressAngle=0;
@@ -105,15 +95,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         sensorManager.registerListener(this,accelerometer,SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(this,magnetometer,SensorManager.SENSOR_DELAY_UI);
 
-
-
         //GUI: buttons & views
         angleProgressBar = (ProgressBar)root.findViewById(R.id.angleProgressBar);
         angleProgressBar.setVisibility(View.GONE);
         previewImage = (ImageView)root.findViewById(R.id.previewImage);
-        fullscreenButton = (ImageButton)root.findViewById(R.id.fullscreenButton);
-        fullscreenButton.setVisibility(View.GONE);
-        captureButton = (ImageButton)root.findViewById(R.id.captureButton);
+        captureButton = (ImageButton)root.findViewById(R.id.sendToShareButton);
         holdVerticallyText = (TextView)root.findViewById(R.id.holdVerticallyText);
         holdVerticallyImage = (ImageView)root.findViewById(R.id.holdVerticallyImage);
         backButton = (ImageButton)root.findViewById(R.id.backButton);
@@ -121,39 +107,15 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         captureButton.setVisibility(View.GONE);
         previewImage.setVisibility(View.GONE);
 
-        //for fullscreenbutton: change to ImageViewActivity
-        fullscreenButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent myIntent = new Intent(getActivity(), ImageViewActivity.class);
-                //myIntent.putExtra("image", bitmap); //Optional parameters
-                startActivity(myIntent);
-            }
-        });
-
-        //for backbutton: if is in finalization - return to camera. if is in camera-mode - return to explore.
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(finalizationInProgress){
-                    backButton.setBackgroundResource(R.drawable.temp_return);
-                    angleProgressBar.setProgress(0);
-                    highestGyroDegree=0;
-                    isHalfWay=false;
-                    lastProgressAngle=0;
-                    lastDegree = 0;
-                    finalizationInProgress = false;
-                    mCam.startPreview();
-                    fullscreenButton.setVisibility(View.GONE);
-                    previewImage.setVisibility(View.GONE);
-                    captureButton.setBackgroundResource(R.drawable.temp_capture);
-                }else {
-                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                    Fragment fragment = new ExploreFragment();
-                    FragmentManager fragmentManager = getActivity().getFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.content_frame,fragment).commit();
-                    //fragmentTransaction.addToBackStack(null);
-                }
+                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                Fragment fragment = new ExploreFragment();
+                FragmentManager fragmentManager = getActivity().getFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.content_frame,fragment).commit();
+                //fragmentTransaction.addToBackStack(null);
+
             }
         });
 
@@ -163,10 +125,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!captureInProgress && !finalizationInProgress) {
+                if(!captureInProgress) {
                     //Take a picture
                     captureInProgress = true;
-                    angleProgressBar.setVisibility(View.VISIBLE);
+                    //angleProgressBar.setVisibility(View.VISIBLE);
                     startGyroDegree=lastDegree;
                     backButton.setVisibility(View.GONE);
                     if(mCam != null && safeToTakePicture){
@@ -174,35 +136,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                         safeToTakePicture = false;
                         mCam.takePicture(null,null,jpegCallback);
                     }
-                }else if (finalizationInProgress) {
-                    //Switch fragment to upload with picture as param
-                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                    Bitmap tempPicture = BitmapFactory.decodeResource(getResources(), R.drawable.panorama_example_2);
-                    args = new Bundle();
-                    args.putParcelable("picture", tempPicture);
-
-                    ShareFragment fragment = new ShareFragment();
-                    FragmentManager fragmentManager = getFragmentManager();
-                    fragment.setArguments(args);
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-
                 }else {
-                    //Show the final picture/panorama:
-                    angleProgressBar.setVisibility(View.GONE);
-                    captureInProgress = false;
-                    finalizationInProgress = true;
-                    if(mCam != null){
-                        mCam.stopPreview();
-                    }
-                    Bitmap temp = BitmapFactory.decodeResource(getResources(), R.drawable.panorama_example_2);
-                    previewImage.setImageBitmap(temp);
-                    captureButton.setBackgroundResource(R.drawable.temp_check);
-                    backButton.setBackgroundResource(R.drawable.temp_cross);
-                    fullscreenButton.setVisibility(View.VISIBLE);
-                    backButton.setVisibility(View.VISIBLE);
-                    previewImage.setVisibility(View.VISIBLE);
-                    mSurfaceViewOnTop.setVisibility(View.GONE);
-                    mSurfaceView.setVisibility(View.GONE);
+                    ImageViewFragment fragment = new ImageViewFragment();
+                    FragmentManager fragmentManager = getFragmentManager();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
                 }
 
             }
@@ -215,9 +152,21 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         mSurfaceViewOnTop = (SurfaceView)root.findViewById(R.id.surfaceViewOnTop);
         mSurfaceViewOnTop.setZOrderOnTop(true);
         mSurfaceViewOnTop.getHolder().setFormat(PixelFormat.TRANSPARENT);
+        mSurfaceView.setVisibility(View.GONE);
+        mSurfaceViewOnTop.setVisibility(View.GONE);
 
-        getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         return root;
+    }
+
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     //To save pictures & show the last taken picture:
@@ -362,7 +311,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 if(orientation[1] < 1.75 && orientation[1] > 1.25 || orientation[1] < -1.25 && orientation[1] > -1.75){
                     if(!isVertical) {
                         isVertical = true;
-                        if(!captureInProgress && !finalizationInProgress) {
+                        if(!captureInProgress) {
                             holdVerticallyImage.setVisibility(View.GONE);
                             holdVerticallyText.setVisibility(View.GONE);
                             captureButton.setVisibility(View.VISIBLE);
@@ -374,7 +323,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 }else{
                     if(isVertical) {
                         isVertical = false;
-                        if(!captureInProgress && !finalizationInProgress) {
+                        if(!captureInProgress) {
                             holdVerticallyImage.setVisibility(View.VISIBLE);
                             holdVerticallyText.setVisibility(View.VISIBLE);
                             captureButton.setVisibility(View.GONE);
@@ -408,7 +357,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     }
 
-
     private Camera.Size getBestPreviewSize(Camera.Parameters parameters){
         Camera.Size bestSize = null;
         List<Camera.Size> sizeList = parameters.getSupportedPreviewSizes();
@@ -420,4 +368,5 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         }
         return bestSize;
     }
+
 }

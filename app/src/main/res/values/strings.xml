@@ -19,4 +19,13 @@
     <string name="email">Email</string>
     <string name="retype_password">Re-type password</string>
     <string name="min_5_chars">Minimum of five characters</string>
+    <!-- Camera -->
+    <string name="hold_phone_vertical">Please, hold phone vertically</string>
+    <!-- Share -->
+    <string name="share_public">Share with public</string>
+    <string name="share_panorama">Share panorama</string>
+    <!-- Notifications -->
+    <string name="accept">Accept</string>
+    <string name="cancel">Cancel</string>
+
 </resources>

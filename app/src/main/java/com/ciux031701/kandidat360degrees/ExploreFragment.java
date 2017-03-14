@@ -4,6 +4,8 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -25,7 +27,9 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -38,12 +42,16 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
+import java.util.List;
+
 /**
  * Created by boking on 2017-02-14.
  */
 
-public class ExploreFragment extends Fragment{
+public class ExploreFragment extends Fragment implements SearchView.OnQueryTextListener {
 
+    private Geocoder geocoder;
     MapView mMapView;
     private GoogleMap googleMap;
 
@@ -71,9 +79,9 @@ public class ExploreFragment extends Fragment{
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         isShowingPublic = true;
-        cameraButton = (ImageButton)root.findViewById(R.id.cameraButton);
-        mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
-        toolbarMenuButton = (ImageButton)root.findViewById(R.id.toolbarMenuButton);
+        cameraButton = (ImageButton) root.findViewById(R.id.cameraButton);
+        mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
+        toolbarMenuButton = (ImageButton) root.findViewById(R.id.toolbarMenuButton);
         toolbarMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -122,7 +130,7 @@ public class ExploreFragment extends Fragment{
                     @Override
                     public void onInfoWindowClick(Marker marker) {
                         //get to full screen view?
-                        marker.setRotation(marker.getRotation()+20);
+                        marker.setRotation(marker.getRotation() + 20);
                     }
                 });
                 try {
@@ -156,7 +164,7 @@ public class ExploreFragment extends Fragment{
 
     //Get info for specific image from DB here.
     //Use the marker as a reference when doing so.
-    public View onMarkerClicked(Marker marker){
+    public View onMarkerClicked(Marker marker) {
         View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_window, null);
 
         // Getting reference to the TextView to set latitude
@@ -177,20 +185,20 @@ public class ExploreFragment extends Fragment{
         searchView.setQueryHint("Search!");
         int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
         View searchPlate = searchView.findViewById(searchPlateId);
-        if (searchPlate!=null) {
+        if (searchPlate != null) {
             searchPlate.setBackgroundColor(Color.DKGRAY);
             int searchTextId = searchPlate.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
             TextView searchText = (TextView) searchPlate.findViewById(searchTextId);
-            if (searchText!=null) {
+            if (searchText != null) {
                 searchText.setTextColor(Color.WHITE);
                 searchText.setHintTextColor(Color.WHITE);
             }
         }
-        ((EditText)searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setTextColor(Color.BLACK);
-        ((EditText)searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(Color.LTGRAY);
+        ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setTextColor(Color.BLACK);
+        ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(Color.LTGRAY);
         searchView.setBackgroundColor(Color.WHITE);
-
-        super.onCreateOptionsMenu(menu,inflater);
+        searchView.setOnQueryTextListener(this);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
@@ -198,12 +206,12 @@ public class ExploreFragment extends Fragment{
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.togglePermission:
-                if(isShowingPublic) {
+                if (isShowingPublic) {
                     toolbarMenu.getItem(0).setIcon(R.drawable.temp_earthblack);
                     //Reload markers for the private map
                     isShowingPublic = false;
 
-                }else{
+                } else {
                     toolbarMenu.getItem(0).setIcon(R.drawable.temp_earthwhite);
                     //Reload markers for the public map
                     isShowingPublic = true;
@@ -215,4 +223,34 @@ public class ExploreFragment extends Fragment{
         }
     }
 
+    public void performSearch(String query) throws IOException {
+        geocoder = new Geocoder(getActivity());
+        List<Address> list = geocoder.getFromLocationName(query,1);
+        if(!(list.size() == 0)) {
+            Address address = list.get(0);
+            double lat = address.getLatitude();
+            double lng = address.getLongitude();
+            LatLng latlng = new LatLng(lat, lng);
+            CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latlng, 10);
+            googleMap.moveCamera(update);
+        }else{
+            Toast.makeText(getActivity(), "Could not find "+query+".", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        searchView.clearFocus();
+        try {
+            performSearch(query);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        return false;
+    }
 }

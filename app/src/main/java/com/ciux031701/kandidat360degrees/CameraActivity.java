@@ -1,115 +1,77 @@
 package com.ciux031701.kandidat360degrees;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.panorama.Panorama;
+import com.google.android.gms.panorama.PanoramaApi.PanoramaResult;
+
 import android.app.Activity;
-import android.app.FragmentManager;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.SurfaceView;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.ImageButton;
-
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Mat;
 
 /**
- * Created by boking on 2017-02-26.
+ * Displays examples of integrating with the panorama viewer API.
  */
+public class CameraActivity extends Activity implements ConnectionCallbacks,
+        OnConnectionFailedListener {
 
-public class CameraActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
+    public static final String TAG = CameraActivity.class.getSimpleName();
 
-    private CameraBridgeViewBase mOpenCvCameraView;
-    private ImageButton backButton;
+    private GoogleApiClient mClient;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON, WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-        setContentView(R.layout.fragment_camera);
-
-        backButton = (ImageButton)findViewById(R.id.backButton);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent myIntent = new Intent(CameraActivity.this, MainActivity.class);
-                myIntent.putExtra("username", "placeholder");
-                startActivity(myIntent);
-            }
-        });
-
-        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.javaCameraView);
-        mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
-        mOpenCvCameraView.setCvCameraViewListener(this);
-        //mOpenCvCameraView.setMaxFrameSize(720, 480);
-
+        mClient = new GoogleApiClient.Builder(this, this, this)
+                .addApi(Panorama.API)
+                .build();
     }
 
     @Override
-    public void onCameraViewStarted(int width, int height) {
-
+    public void onStart() {
+        super.onStart();
+        mClient.connect();
     }
 
     @Override
-    public void onCameraViewStopped() {
-
+    public void onConnected(Bundle connectionHint) {
+        Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + R.drawable.example_panorama);
+        Panorama.PanoramaApi.loadPanoramaInfo(mClient, uri).setResultCallback(
+                new ResultCallback<PanoramaResult>() {
+                    @Override
+                    public void onResult(PanoramaResult result) {
+                        if (result.getStatus().isSuccess()) {
+                            Intent viewerIntent = result.getViewerIntent();
+                            Log.i(TAG, "found viewerIntent: " + viewerIntent);
+                            if (viewerIntent != null) {
+                                startActivity(viewerIntent);
+                            }
+                        } else {
+                            Log.e(TAG, "error: " + result);
+                        }
+                    }
+                });
     }
 
     @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        return inputFrame.rgba();
-    }
-
-    BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
-
-        @Override
-        public void onManagerConnected(int status) {
-            switch (status) {
-                case LoaderCallbackInterface.SUCCESS:
-                {
-                    Log.i("opencv", "OpenCV loaded successfully");
-                    mOpenCvCameraView.enableView();
-                } break;
-                default:
-                {
-                    super.onManagerConnected(status);
-                } break;
-            }
-        }
-    };
-
-    @Override
-    public void onPause()
-    {
-        super.onPause();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
+    public void onConnectionSuspended(int cause) {
+        Log.i(TAG, "connection suspended: " + cause);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (!OpenCVLoader.initDebug()) {
-            Log.d("opencv", "Internal OpenCV library not found. Using OpenCV Manager for initialization");
-            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this, mLoaderCallback);
-        } else {
-            Log.d("opencv", "OpenCV library found inside package. Using it!");
-            mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
-        }
+    public void onConnectionFailed(ConnectionResult status) {
+        Log.e(TAG, "connection failed: " + status);
+        // TODO fill in
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mOpenCvCameraView != null)
-            mOpenCvCameraView.disableView();
+    public void onStop() {
+        super.onStop();
+        mClient.disconnect();
     }
-
 }

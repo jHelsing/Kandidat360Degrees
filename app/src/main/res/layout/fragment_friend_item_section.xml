@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+    android:layout_marginRight="@dimen/activity_horizontal_margin"
+    android:gravity="center_vertical">
+
+    <View
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@+id/friends_list_title"
+        android:layout_toStartOf="@+id/friends_list_title"
+        android:id="@+id/friends_divider1"
+        android:layout_weight="1"
+        android:layout_width="150dp" />
+
+    <TextView
+        android:id="@+id/friends_list_letter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:text="A"
+        android:layout_weight="0"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="@dimen/activity_horizontal_margin" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/friends_list_title"
+        android:layout_toEndOf="@+id/friends_list_title"
+        android:id="@+id/friends_divider2"
+        android:layout_weight="1" />
+
+</LinearLayout>

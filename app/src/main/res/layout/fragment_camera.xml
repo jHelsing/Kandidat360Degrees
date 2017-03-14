@@ -40,12 +40,13 @@
         opencv:srcCompat="@drawable/temp_hold_vertically" />
 
     <ImageButton
-        android:id="@+id/captureButton"
-        android:background="@drawable/temp_capture"
+        android:id="@+id/sendToShareButton"
         android:layout_width="70dp"
         android:layout_height="70dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="490dp"/>
+        android:layout_marginTop="490dp"
+        opencv:srcCompat="@drawable/open_camera_icon"
+        android:background="@null" />
 
     <ImageButton
         opencv:srcCompat="@drawable/temp_fullscreen"
@@ -55,11 +56,12 @@
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:padding="10dp"
-        android:layout_alignBottom="@+id/captureButton"
+        android:layout_alignBottom="@+id/sendToShareButton"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_marginRight="27dp"
-        android:layout_marginEnd="27dp" />
+        android:layout_marginEnd="27dp"
+        android:visibility="gone" />
 
     <ImageView
         android:layout_width="match_parent"
@@ -67,11 +69,11 @@
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:id="@+id/previewImage"
-        android:scaleType="fitXY"
-        android:layout_height="120dp" />
+        android:layout_height="match_parent"
+        android:adjustViewBounds="false" />
 
     <TextView
-        android:text="Please hold phone vertically"
+        android:text="@string/hold_phone_vertical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/holdVerticallyText"

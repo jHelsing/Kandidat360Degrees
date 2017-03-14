@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000"
+    android:orientation="vertical">
+
+    <ImageButton
+        android:id="@+id/viewingBackButton"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:padding="5dp"
+        android:background="@drawable/temp_return"
+        android:elevation="1dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="10dp" />
+
+    <HorizontalScrollView
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:id="@+id/horizontalScrollView"
+        android:fadingEdge="none"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
+        android:layout_width="wrap_content">
+
+        <ImageView
+            android:id="@+id/imageviewfirst"
+            android:layout_height="fill_parent"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/panorama_large2"
+            android:layout_width="wrap_content"
+            android:adjustViewBounds="true" />
+    </HorizontalScrollView>
+
+    <ImageButton
+        android:id="@+id/sendToShareButton"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_centerHorizontal="false"
+        android:background="@null"
+        android:layout_marginTop="100dp"
+        android:src="@drawable/temp_check"
+        android:scaleType="fitXY"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:layout_marginBottom="10dp" />
+</RelativeLayout>
