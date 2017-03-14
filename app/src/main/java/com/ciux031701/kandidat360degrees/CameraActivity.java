@@ -40,7 +40,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
             @Override
             public void onClick(View view) {
                 Intent myIntent = new Intent(CameraActivity.this, MainActivity.class);
-                myIntent.putExtra("username", Session.getUsername());
+                myIntent.putExtra("username", "placeholder");
                 startActivity(myIntent);
             }
         });

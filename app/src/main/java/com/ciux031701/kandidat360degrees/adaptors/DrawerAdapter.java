@@ -37,19 +37,21 @@ public class DrawerAdapter extends ArrayAdapter<String> {
         TextView itemTextView = (TextView) customView.findViewById(R.id.itemTextView);
         itemTextView.setGravity(Gravity.CENTER_VERTICAL);
 
-                //The image will be different for each row
-        if(option.equals("Camera")){
+        //The image will be different for each row
+        if (option.equals("Camera")) {
             itemImageView.setImageResource(R.drawable.camera_icon);
-        }else if(option.equals("Explore")){
+        } else if (option.equals("Explore")) {
             itemImageView.setImageResource(R.drawable.temp_mapsicon);
-        }else if (option.equals("Notifications")){
+        } else if (option.equals("Notifications")) {
             itemImageView.setImageResource(R.drawable.temp_notifications);
-        }else if(option.equals("Friends")){
+        } else if (option.equals("Friends")) {
             itemImageView.setImageResource(R.drawable.temp_friends);
-        }else if(option.equals("Upload")){
+        } else if (option.equals("Upload")) {
             itemImageView.setImageResource(R.drawable.temp_upload);
-        }else if(option.equals("Settings")){
+        } else if (option.equals("Settings")) {
             itemImageView.setImageResource(R.drawable.temp_settings);
+        } else if (option.equals("Settings")) {
+            itemImageView.setImageResource(R.drawable.temp_cross);
         }
         itemTextView.setText(option);
         //same with image when we have those resources

@@ -1,4 +1,4 @@
-package com.ciux031701.kandidat360degrees.FTPBackend;
+package com.ciux031701.kandidat360degrees.Communication;
 
 /**
  *

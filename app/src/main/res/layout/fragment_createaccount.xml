@@ -86,4 +86,14 @@
             android:layout_marginTop="@dimen/create_acc_vertical_margin" android:background="@color/colorPrimary"
             android:textColor="@android:color/white" android:textAllCaps="false" android:textSize="18sp"/>
 
+    <TextView
+        android:text="Error text."
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/accErrorTextView"
+        android:textAlignment="center"
+        android:textColor="@android:color/holo_red_dark"
+        android:textStyle="normal|italic"
+        android:layout_margin="10dp" />
+
 </LinearLayout>

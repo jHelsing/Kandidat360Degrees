@@ -10,12 +10,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.ciux031701.kandidat360degrees.FTPBackend.FTPHandler;
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.ciux031701.kandidat360degrees.Communication.Session;
 
 /**
  * Created by boking on 2017-02-14.
@@ -30,7 +30,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private View drawerFooter;
     private TextView usernameText;
 
-    private Session loginSession;
     Bundle b;
     Bundle setArgs;
 
@@ -46,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(b != null)
             userName = b.getString("username");
 
-        loginSession = new Session(userName);
 
         mListOptions = getResources().getStringArray(R.array.list_options);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -62,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ProfileFragment fragment = new ProfileFragment();
                 FragmentManager fragmentManager = getFragmentManager();
                 setArgs = new Bundle();
-                setArgs.putString("username", loginSession.getUsername());
+                setArgs.putString("username", Session.getUser());
                 fragment.setArguments(setArgs);
                 fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
                 setTitle("Profile");
@@ -72,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         mDrawerList.addHeaderView(drawerHeader, null, false);
-        mDrawerList.addFooterView(drawerFooter, null, false);
+        //mDrawerList.addFooterView(drawerFooter, null, false);
 
         mDrawerList.setAdapter(new DrawerAdapter(this,getApplicationContext(), mListOptions));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
@@ -124,6 +122,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     break;
                 case 5:
                     fragmentClass = SettingsFragment.class;
+                    break;
+                case 6:
+                    Session.delete();
+                    fragmentClass = LoginFragment.class;
                     break;
                 default:
                     fragmentClass = ExploreFragment.class;

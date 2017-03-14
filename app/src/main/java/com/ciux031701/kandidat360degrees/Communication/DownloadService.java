@@ -1,4 +1,4 @@
-package com.ciux031701.kandidat360degrees.FTPBackend;
+package com.ciux031701.kandidat360degrees.Communication;
 
 import android.app.Activity;
 import android.app.IntentService;
@@ -29,16 +29,16 @@ public class DownloadService extends IntentService {
         // Create the correct path for the file to be downloaded, both on the server and locally
         String localFilePath = "";
         String serverFilePath = "";
-        switch (intent.getStringExtra("IMAGETYPE")) {
-            case "PREVIEW":
+        switch ((ImageType)intent.getSerializableExtra("IMAGETYPE")) {
+            case PREVIEW:
                 localFilePath = FTPInfo.PREVIEW_LOCAL_LOCATION;
                 serverFilePath = FTPInfo.PREVIEW_SERVER_LOCATION;
                 break;
-            case "PANORAMA":
+            case PANORAMA:
                 localFilePath = FTPInfo.PANORAMA_LOCAL_LOCATION;
                 serverFilePath = FTPInfo.PANORAMA_SERVER_LOCATION;
                 break;
-            case "PROFILE":
+            case PROFILE:
                 localFilePath = FTPInfo.PROFILE_LOCAL_LOCATION;
                 serverFilePath = FTPInfo.PROFILE_SERVER_LOCATION;
                 break;

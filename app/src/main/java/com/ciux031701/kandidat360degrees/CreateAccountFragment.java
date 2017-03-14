@@ -13,6 +13,12 @@ import android.text.TextWatcher;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.widget.TextView;
+import com.ciux031701.kandidat360degrees.Communication.*;
+import com.ciux031701.kandidat360degrees.Communication.JRequest.*;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import static com.ciux031701.kandidat360degrees.R.id.textView;
 
@@ -25,12 +31,17 @@ public class CreateAccountFragment extends Fragment {
     EditText usernameText;
     EditText passwordText;
     EditText repeatPasswordText;
+    EditText emailText;
+    TextView errorText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_createaccount, container, false);
 
+        errorText = (TextView)root.findViewById(R.id.accErrorTextView);
+        errorText.setVisibility(View.INVISIBLE);
         usernameText = (EditText) root.findViewById(R.id.createAccUsernameField); //username input
+        emailText = (EditText) root.findViewById(R.id.createAccEmailField);
         passwordText = (EditText) root.findViewById(R.id.createAccPassword1Field); //first password input
         repeatPasswordText = (EditText) root.findViewById(R.id.createAccPassword2Field); //repeat password
 
@@ -47,8 +58,62 @@ public class CreateAccountFragment extends Fragment {
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
-                Toast.makeText(getActivity(), "Account created",Toast.LENGTH_SHORT).show();
-                getFragmentManager().popBackStack();
+                String username = usernameText.getText().toString();
+                String email = emailText.getText().toString();
+                String password = passwordText.getText().toString();
+                String repeatPassword = repeatPasswordText.getText().toString();
+                if(!password.equals(repeatPassword)){
+                    errorText.setText("Passwords must match.");
+                    errorText.setVisibility(View.VISIBLE);
+                    return;
+                }
+                else
+                    errorText.setVisibility(View.INVISIBLE);
+
+                JReqRegister registerReq = new JReqRegister(username, password, email);
+                registerReq.setJResultListener(
+                        new JResultListener(){
+                            @Override
+                            public void onHasResult(JSONObject result) {
+                                try {
+                                    boolean error = result.getBoolean("error");
+                                    String message = result.getString("message");
+                                    if(!error){
+                                        Toast.makeText(getActivity(), "Account created",Toast.LENGTH_SHORT).show();
+                                        getFragmentManager().popBackStack();
+                                    }
+                                    else if(message.equals("ERR_USER")) {
+                                        errorText.setText("Invalid username.");
+                                        errorText.setVisibility(View.VISIBLE);
+                                    }
+                                    else if(message.equals("ERR_PASSWORD")) {
+                                        errorText.setText("Invalid password.");
+                                        errorText.setVisibility(View.VISIBLE);
+                                    }
+                                    else if(message.equals("ERR_EMAIL")) {
+                                        errorText.setText("Invalid e-mail.");
+                                        errorText.setVisibility(View.VISIBLE);
+                                    }
+                                    else if(message.equals("ERR_USER_EXISTS")) {
+                                        errorText.setText("Username taken.");
+                                        errorText.setVisibility(View.VISIBLE);
+                                    }
+                                    else if(message.equals("ERR_EMAIL_EXISTS")) {
+                                        errorText.setText("E-mail already registered.");
+                                        errorText.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                                catch(JSONException je){
+                                    je.printStackTrace();
+                                }
+
+                            }
+                        }
+                );
+                JRequester.setRequest(registerReq);
+                JRequester.sendRequest();
+
+
             }
         });
         

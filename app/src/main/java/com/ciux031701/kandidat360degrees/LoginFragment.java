@@ -2,17 +2,24 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.ciux031701.kandidat360degrees.Communication.*;
+import com.ciux031701.kandidat360degrees.Communication.JRequest.JResultListener;
+import android.content.Intent;
+import android.widget.Toast;
+
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
@@ -25,19 +32,68 @@ public class LoginFragment extends Fragment {
     Button createAccountButton;
     TextView title;
     LinearLayout mainLayout;
+    EditText usernameField;
+    EditText passwordField;
+    TextView errorView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        //If there is a saved session, skip login.
+        if (Session.load()) {
+            Intent myIntent = new Intent(getActivity(), MainActivity.class);
+            myIntent.putExtra("username", Session.getUser()); //Optional parameters
+            startActivity(myIntent);
+        }
+
         View root = inflater.inflate(R.layout.fragment_login, container, false);
+
+        usernameField = (EditText)root.findViewById(R.id.usernameFIeld);
+        passwordField = (EditText)root.findViewById(R.id.passwordField);
+        errorView = (TextView)root.findViewById(R.id.errorView);
+        errorView.setVisibility(View.INVISIBLE);
 
         //GUI
         loginButton = (Button)root.findViewById(R.id.loginButton);
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent myIntent = new Intent(getActivity(), MainActivity.class);
-                myIntent.putExtra("username", "usernamefromlogin"); //Optional parameters
-                startActivity(myIntent);
+                Session.setUser(usernameField.getText().toString());
+                String password = passwordField.getText().toString();
+                JReqLogin loginReq = new JReqLogin(Session.getUser(), password);
+                loginReq.setJResultListener(
+                        new JResultListener(){
+                            @Override
+                            public void onHasResult(JSONObject result) {
+                                boolean error;
+                                String sessionId = null;
+                                String message = null;
+                                try{
+                                    error = result.getBoolean("error");
+                                    message = result.getString("message");
+                                    sessionId = result.getString("id");
+                                }
+                                catch(JSONException je){
+                                    error = true;
+                                }
+                                if(!error){
+                                    Session.setId(sessionId);
+                                    Session.save();
+                                    Toast.makeText(getActivity(), "Logging in...",Toast.LENGTH_SHORT).show();
+                                    Intent myIntent = new Intent(getActivity(), MainActivity.class);
+                                    myIntent.putExtra("username", Session.getUser()); //Optional parameters
+                                    startActivity(myIntent);
+
+                                }
+                                else if(message.equals("ERR_USER") | message.equals("ERR_PASS")){
+                                    errorView.setText("Incorrect username or password.");
+                                    errorView.setVisibility(View.VISIBLE);
+                                }
+                            }
+                        }
+                );
+                JRequester.setRequest(loginReq);
+                JRequester.sendRequest();
             }
         });
 
