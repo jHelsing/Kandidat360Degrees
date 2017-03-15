@@ -8,10 +8,13 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.ciux031701.kandidat360degrees.FriendTuple;
@@ -48,26 +51,38 @@ public class FriendsAdapter extends RecyclerView.Adapter implements FastScrollRe
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         TextView titleTextView = (TextView) holder.itemView.findViewById(R.id.friends_list_title);
         ImageView thumbnailImageView = (ImageView) holder.itemView.findViewById(R.id.friends_list_thumbnail);
+        RelativeLayout friendlistDetails = (RelativeLayout) holder.itemView.findViewById(R.id.friendlist_details);
+        LinearLayout friendlistSectionHeader = (LinearLayout) holder.itemView.findViewById(R.id.friendlist_section_header);
         FriendTuple data = mDataSource.get(position);
-        titleTextView.setText(data.getUserName());
-        thumbnailImageView.setImageDrawable(data.getProfilePicture());
+        if(data.getUserName().length() > 1) {
+            friendlistDetails.setVisibility(View.VISIBLE);
+            friendlistSectionHeader.setVisibility(View.GONE);
+            titleTextView.setText(data.getUserName());
+            thumbnailImageView.setImageDrawable(data.getProfilePicture());
 
-        holder.itemView.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                String selectedUser = ((TextView) holder.itemView.findViewById(R.id.friends_list_title)).getText().toString();
-                //TODO: Go to the selectedUser's profile instead of MrCool's
-                Fragment fragment = new ProfileFragment();
-                Bundle setArgs = new Bundle();
-                setArgs.putString("username", selectedUser);
-                fragment.setArguments(setArgs);
-                FragmentManager fragmentManager = ((FragmentActivity) context).getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-            }
-        });
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String selectedUser = ((TextView) holder.itemView.findViewById(R.id.friends_list_title)).getText().toString();
+                    //TODO: Go to the selectedUser's profile instead of MrCool's
+                    Fragment fragment = new ProfileFragment();
+                    Bundle setArgs = new Bundle();
+                    setArgs.putString("username", selectedUser);
+                    fragment.setArguments(setArgs);
+                    FragmentManager fragmentManager = ((FragmentActivity) context).getFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.content_frame, fragment);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
+                }
+            });
+        } else {
+            TextView friendlistSectionHeaderText = (TextView) holder.itemView.findViewById(R.id.friends_list_letter);
+            friendlistDetails.setVisibility(View.GONE);
+            friendlistSectionHeader.setVisibility(View.VISIBLE);
+            friendlistSectionHeaderText.setText(getSectionName(position));
+
+        }
     }
 
     @Override

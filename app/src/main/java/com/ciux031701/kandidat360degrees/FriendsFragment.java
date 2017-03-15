@@ -33,6 +33,7 @@ public class FriendsFragment extends Fragment {
     private TextView toolbarTitle;
     private final ArrayList<FriendTuple> friendList = new ArrayList<>();
     private RecyclerView mRecyclerView;
+    private boolean firstView = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -58,6 +59,7 @@ public class FriendsFragment extends Fragment {
         //The ListView:
         mRecyclerView = (RecyclerView) root.findViewById(R.id.friends_recycle_view);
 
+        if(!firstView){
         //TODO: Retrieve data from database to friendList instead!
         //Test for implementing a sorted arraylist that is sorted by names
         friendList.add(new FriendTuple( "Jonathan", getActivity()));
@@ -82,7 +84,10 @@ public class FriendsFragment extends Fragment {
         friendList.add(new FriendTuple( "Axel", getActivity()));
         friendList.add(new FriendTuple( "Steve", getActivity()));
 
-        sortFriendListByName();
+            sortFriendlistByName();
+            addSectionHeadersToFriendlist();
+            firstView = true;
+        }
 
         FriendsAdapter adapter = new FriendsAdapter(getActivity(),friendList);
         mRecyclerView.setAdapter(adapter);
@@ -92,7 +97,7 @@ public class FriendsFragment extends Fragment {
         return root;
     }
 
-    public void sortFriendListByName() {
+    public void sortFriendlistByName() {
         Collections.sort(friendList, new Comparator<FriendTuple>() {
             @Override
             public int compare(FriendTuple o1, FriendTuple o2) {
@@ -101,6 +106,18 @@ public class FriendsFragment extends Fragment {
                 return s1.compareToIgnoreCase(s2);
             }
         });
+    }
+
+    public void addSectionHeadersToFriendlist() {
+        char currentLetter = friendList.get(0).getUserName().charAt(0);
+        friendList.add(0,new FriendTuple(currentLetter + "", getActivity()));
+        for(int i = 1; i < friendList.size()-1; i++){
+            currentLetter = friendList.get(i).getUserName().charAt(0);
+            char nextLetter = friendList.get(i+1).getUserName().charAt(0);
+            if(currentLetter != nextLetter){
+                friendList.add(i+1,new FriendTuple(nextLetter + "", getActivity()));
+            }
+        }
     }
 
     @Override
