@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
     <include
         android:id="@+id/tool_bar"
         layout="@layout/tool_bar_text"
@@ -12,7 +15,8 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:weightSum="1">
 
         <Switch
             android:text="@string/share_public"
@@ -20,7 +24,28 @@
             android:layout_height="wrap_content"
             android:id="@+id/publicSwitch"
             android:textSize="18sp"
-            android:textAllCaps="false" />
+            android:textAllCaps="false"/>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorBackground"
+            android:layout_weight="1">
+
+            <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
+                android:id="@+id/share_friends_recycle_view"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                tools:listitem="@layout/friends_list_item"
+                app:fastScrollPopupBgColor="@color/colorPrimaryDarker"
+                app:fastScrollPopupTextColor="@android:color/white"
+                app:fastScrollThumbColor="@color/colorPrimaryDarker"
+                app:fastScrollAutoHide="false"
+                android:background="@color/colorBackground">
+            </com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView>
+
+        </LinearLayout>
 
         <Button
             android:text="@string/share_panorama"
@@ -29,7 +54,8 @@
             android:gravity="center|bottom"
             android:layout_height="wrap_content"
             android:padding="25dp"
-            android:background="@drawable/rounded_button"/>
+            android:background="@drawable/rounded_button"
+            android:layout_weight="0"/>
 
     </LinearLayout>
 
