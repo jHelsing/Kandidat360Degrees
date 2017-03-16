@@ -27,9 +27,9 @@ public class ProfileFlowAdapter extends ArrayAdapter<FlowPicture> {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View customView = inflater.inflate(R.layout.picture_profile_layout,parent,false);
 
-        ImageView imageView = (ImageView) customView.findViewById(R.id.flowPicture);
-        TextView locationText = (TextView) customView.findViewById(R.id.locationText);
-        TextView dateText = (TextView) customView.findViewById(R.id.dateText);
+        ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
+        TextView locationText = (TextView) customView.findViewById(R.id.locationview);
+        TextView dateText = (TextView) customView.findViewById(R.id.dateView);
 
         locationText.setText(singlePic.getLocation());
         dateText.setText(singlePic.getDate());

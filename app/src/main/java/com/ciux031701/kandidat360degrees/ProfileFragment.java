@@ -60,7 +60,7 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        mapViewImage = (ImageView) root.findViewById(R.id.mapViewImage);
+        mapViewImage = (ImageView) root.findViewById(R.id.profileMapView);
         mapView = (MapView)root.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.onResume(); // needed to get the map to display immediately
@@ -104,7 +104,7 @@ public class ProfileFragment extends Fragment {
                 }
             }
         });
-        pictureListView = (ListView)root.findViewById(R.id.pictureListView);
+        pictureListView = (ListView)root.findViewById(R.id.profilePictureListView);
         profileFlowAdapter = new ProfileFlowAdapter(getActivity(),pictureArray);
         pictureListView.setAdapter(profileFlowAdapter);
 
