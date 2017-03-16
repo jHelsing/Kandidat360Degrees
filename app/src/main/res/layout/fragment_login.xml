@@ -49,6 +49,16 @@
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin" />
 
+        <TextView
+            android:text="text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/errorView"
+            android:textColor="@android:color/holo_red_dark"
+            android:layout_marginRight="20dp"
+            android:layout_marginLeft="20dp"
+            android:elevation="0dp" />
+
         <Button
             android:text="@string/log_in"
             android:layout_width="match_parent"
@@ -76,14 +86,5 @@
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:focusableInTouchMode="true" />
-
-        <TextView
-            android:text="Error text."
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/errorView"
-            android:layout_weight="0.17"
-            android:textColor="@android:color/holo_red_dark"
-            android:textAlignment="center" />
 
 </LinearLayout>

@@ -2,6 +2,7 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -24,7 +25,7 @@ import org.json.JSONObject;
 import static android.content.Context.INPUT_METHOD_SERVICE;
 
 /**
- * Created by Anna on 2017-02-23.
+ * Created by Anna on 2017-02-23. Modified by Amar on 2017-03-16.
  */
 
 public class LoginFragment extends Fragment {
@@ -82,8 +83,10 @@ public class LoginFragment extends Fragment {
 
                                 }
                                 else if(message.equals("ERR_USER") | message.equals("ERR_PASS")){
-                                    errorView.setText("Incorrect username or password.");
+                                    errorView.setText("Please, make sure that your username or password is correct.");
                                     errorView.setVisibility(View.VISIBLE);
+                                    usernameField.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                    passwordField.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
                                 }
                             }
                         }
