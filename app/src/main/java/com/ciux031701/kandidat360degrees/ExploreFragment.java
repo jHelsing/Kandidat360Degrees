@@ -2,6 +2,7 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Address;
@@ -42,6 +43,7 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 import java.io.IOException;
 import java.util.List;
@@ -265,7 +267,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         // Initialize the manager with the context and the map.
         // (Activity extends context, so we can pass 'this' in the constructor.)
         mClusterManager = new ClusterManager<MyItem>(getActivity(), googleMap);
-
+        mClusterManager.setRenderer(new CustomMarkerRenderer(getActivity(),googleMap, mClusterManager));
         // Point the map's listeners at the listeners implemented by the cluster
         // manager.
         googleMap.setOnCameraIdleListener(mClusterManager);
@@ -289,4 +291,20 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         }
     }
 
+    public class CustomMarkerRenderer extends DefaultClusterRenderer<MyItem>{
+
+        public CustomMarkerRenderer(Context context, GoogleMap map,
+                                    ClusterManager<MyItem> clusterManager) {
+            super(context, map, clusterManager);
+        }
+
+
+        @Override
+        protected void onBeforeClusterItemRendered(MyItem item,
+                                                   MarkerOptions markerOptions) {
+            markerOptions.icon(BitmapDescriptorFactory
+                    .defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+        }
+    }
 }
+
