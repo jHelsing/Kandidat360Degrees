@@ -55,7 +55,7 @@ public class CreateAccountFragment extends Fragment {
                 final String repeatPassword = repeatPasswordText.getText().toString();
                 if(!password.equals(repeatPassword)){
                     passwordInformationText.setVisibility(View.VISIBLE);
-                    passwordInformationText.setText("Passwords must match.");
+                    passwordInformationText.setText(getResources().getText(R.string.password_match));
                     passwordInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
                     passwordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
                     repeatPasswordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
@@ -78,78 +78,73 @@ public class CreateAccountFragment extends Fragment {
                                         Toast.makeText(getActivity(), "Account created",Toast.LENGTH_SHORT).show();
                                         getFragmentManager().popBackStack();
                                     }
+
+                                    boolean usernameError = false;
                                     if(message.contains("ERR_USER_TOO_SHORT")) {
-                                        usernameInformationText.setVisibility(View.VISIBLE);
-                                        usernameInformationText.setText("Username cannot be shorter than 5 characters.");
-                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                        usernameInformationText.setText(getResources().getText(R.string.username_short));
+                                        usernameError = true;
                                     } else if(message.contains("ERR_USER_TOO_LONG")) {
-                                        usernameInformationText.setVisibility(View.VISIBLE);
-                                        usernameInformationText.setText("Username cannot be longer than 30 characters.");
-                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                        usernameInformationText.setText(getResources().getText(R.string.username_long));
+                                        usernameError = true;
                                     } else if(message.contains("ERR_USER_EXISTS")) {
-                                        usernameInformationText.setVisibility(View.VISIBLE);
-                                        usernameInformationText.setText("Username is already taken.");
-                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                        usernameInformationText.setText(getResources().getText(R.string.username_taken));
+                                        usernameError = true;
                                     } else if(message.contains("ERR_USER_INVALID_CHARACTER")) {
-                                        usernameInformationText.setVisibility(View.VISIBLE);
-                                        usernameInformationText.setText("Username can only contain letters a-z/A-Z and numbers 0-9.");
-                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                        usernameInformationText.setText(getResources().getText(R.string.username_characters));;
+                                        usernameError = true;
                                     } else if(message.contains("ERR_USER_INVALID_START")) {
-                                        usernameInformationText.setVisibility(View.VISIBLE);
-                                        usernameInformationText.setText("Username needs to start with at least 3 letters.");
-                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                        usernameInformationText.setText(getResources().getText(R.string.username_start));
+                                        usernameError = true;
                                     } else if(message.contains("ERR_USER_INVALID_NUM_POS")) {
-                                        usernameInformationText.setVisibility(View.VISIBLE);
-                                        usernameInformationText.setText("Username can only have numbers at the end.");
-                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                        usernameInformationText.setText(getResources().getText(R.string.username_end));
+                                        usernameError = true;
                                     } else {
                                         usernameInformationText.setVisibility(View.INVISIBLE);
                                         usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_green_dark) , PorterDuff.Mode.SRC_ATOP);
                                     }
+                                    if(usernameError){
+                                        usernameInformationText.setVisibility(View.VISIBLE);
+                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                    }
 
+                                    boolean passwordError = false;
                                     if(message.contains("ERR_PASSWORD_TOO_LONG")) {
-                                        passwordInformationText.setText("Password cannot be longer than 30 characters.");
-                                        passwordInformationText.setVisibility(View.VISIBLE);
-                                        passwordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
-                                        repeatPasswordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
-                                        passwordInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                        passwordInformationText.setText(getResources().getText(R.string.password_long));
+                                        passwordError = true;
                                     } else if(message.contains("ERR_PASSWORD_TOO_SHORT")) {
-                                        passwordInformationText.setText("Password cannot be shorter than 5 characters.");
-                                        passwordInformationText.setVisibility(View.VISIBLE);
-                                        passwordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
-                                        repeatPasswordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
-                                        passwordInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                        passwordInformationText.setText(getResources().getText(R.string.password_short));
+                                        passwordError = true;
                                     } else if(message.contains("ERR_PASSWORD_INVALID_CHARACTER")) {
-                                        passwordInformationText.setText("Password can only contain letters a-z/A-Z and numbers 0-9.");
-                                        passwordInformationText.setVisibility(View.VISIBLE);
-                                        passwordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
-                                        repeatPasswordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
-                                        passwordInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                        passwordInformationText.setText(getResources().getText(R.string.password_characters));
+                                        passwordError = true;
                                     } else {
                                         passwordInformationText.setVisibility(View.INVISIBLE);
                                         passwordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_green_dark) , PorterDuff.Mode.SRC_ATOP);
                                         repeatPasswordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_green_dark) , PorterDuff.Mode.SRC_ATOP);
                                     }
+                                    if (passwordError){
+                                        passwordInformationText.setVisibility(View.VISIBLE);
+                                        passwordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                        repeatPasswordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                        passwordInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                    }
 
+                                    boolean emailError = false;
                                     if(message.contains("ERR_EMAIL_EXISTS")) {
-                                        emailInformationText.setText("E-mail address already exists.");
-                                        emailText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
-                                        emailInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-                                        emailInformationText.setVisibility(View.VISIBLE);
+                                        emailInformationText.setText(getResources().getText(R.string.email_taken));
+                                        emailError = true;
                                     } else if(message.contains("ERR_EMAIL")) {
-                                        emailInformationText.setText("E-mail address is invalid.");
-                                        emailText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
-                                        emailInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
-                                        emailInformationText.setVisibility(View.VISIBLE);
+                                        emailInformationText.setText(getResources().getText(R.string.email_invalid));
+                                        emailError = true;
                                     } else{
                                         emailInformationText.setVisibility(View.INVISIBLE);
                                         emailText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_green_dark) , PorterDuff.Mode.SRC_ATOP);
+                                    }
+                                    if(emailError){
+                                        emailText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                        emailInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                        emailInformationText.setVisibility(View.VISIBLE);
                                     }
                                 }
                                 catch(JSONException je){
