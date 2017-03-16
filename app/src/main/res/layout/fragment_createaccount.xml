@@ -50,6 +50,18 @@
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
 
+    <TextView
+        android:text="Email text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/createEmailErrorText"
+        android:textStyle="normal|italic"
+        android:elevation="0dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:textColor="@android:color/holo_red_dark"
+        android:visibility="invisible" />
+
     <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -61,12 +73,13 @@
             android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
 
     <TextView
-            android:text="@string/min_5_chars"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/createAccPasswordInfoView"
-            android:textStyle="normal|italic" android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"/>
+        android:id="@+id/createAccPasswordInfoView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:text="@string/min_5_chars"
+        android:textStyle="normal|italic" />
 
     <EditText
             android:layout_width="match_parent"
@@ -85,15 +98,5 @@
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:layout_marginTop="@dimen/create_acc_vertical_margin" android:background="@drawable/rounded_button"
             android:textColor="@android:color/white" android:textAllCaps="false" android:textSize="18sp"/>
-
-    <TextView
-        android:text="Error text."
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/accErrorTextView"
-        android:textAlignment="center"
-        android:textColor="@android:color/holo_red_dark"
-        android:textStyle="normal|italic"
-        android:layout_margin="10dp" />
 
 </LinearLayout>

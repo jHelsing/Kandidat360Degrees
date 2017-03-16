@@ -1,10 +1,10 @@
 package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,10 +20,8 @@ import com.ciux031701.kandidat360degrees.Communication.JRequest.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import static com.ciux031701.kandidat360degrees.R.id.textView;
-
 /**
- * Created by Anna on 2017-02-22.
+ * Created by Anna on 2017-02-22. Modified by Amar on 2017-03-16.
  */
 
 public class CreateAccountFragment extends Fragment {
@@ -32,22 +30,22 @@ public class CreateAccountFragment extends Fragment {
     EditText passwordText;
     EditText repeatPasswordText;
     EditText emailText;
-    TextView errorText;
+    TextView EmailInformationText;
+    TextView passwordInformationText;
+    TextView usernameInformationText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_createaccount, container, false);
 
-        errorText = (TextView)root.findViewById(R.id.accErrorTextView);
-        errorText.setVisibility(View.INVISIBLE);
+        EmailInformationText = (TextView)root.findViewById(R.id.createEmailErrorText);
+        passwordInformationText = (TextView)root.findViewById(R.id.createAccPasswordInfoView);
+        usernameInformationText = (TextView)root.findViewById(R.id.createAccUsernameInfoView);
+
         usernameText = (EditText) root.findViewById(R.id.createAccUsernameField); //username input
         emailText = (EditText) root.findViewById(R.id.createAccEmailField);
         passwordText = (EditText) root.findViewById(R.id.createAccPassword1Field); //first password input
         repeatPasswordText = (EditText) root.findViewById(R.id.createAccPassword2Field); //repeat password
-
-        //To change the color of the text field depending on number of characters:
-        listenerEditText(root,usernameText);
-        listenerEditText(root,passwordText);
 
         //To change the color of the text field depending on if the two password fields have equal text
         listenerRepeatPasswordText(root);
@@ -58,17 +56,19 @@ public class CreateAccountFragment extends Fragment {
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
-                String username = usernameText.getText().toString();
+                final String username = usernameText.getText().toString();
                 String email = emailText.getText().toString();
                 String password = passwordText.getText().toString();
                 String repeatPassword = repeatPasswordText.getText().toString();
                 if(!password.equals(repeatPassword)){
-                    errorText.setText("Passwords must match.");
-                    errorText.setVisibility(View.VISIBLE);
+                    passwordInformationText.setText("Passwords must match.");
+                    passwordInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                    passwordText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
                     return;
+                } else {
+
                 }
-                else
-                    errorText.setVisibility(View.INVISIBLE);
+                    passwordInformationText.setVisibility(View.INVISIBLE);
 
                 JReqRegister registerReq = new JReqRegister(username, password, email);
                 registerReq.setJResultListener(
@@ -78,29 +78,65 @@ public class CreateAccountFragment extends Fragment {
                                 try {
                                     boolean error = result.getBoolean("error");
                                     String message = result.getString("message");
+                                    Log.d("Databas", message);
                                     if(!error){
                                         Toast.makeText(getActivity(), "Account created",Toast.LENGTH_SHORT).show();
                                         getFragmentManager().popBackStack();
                                     }
-                                    else if(message.equals("ERR_USER")) {
-                                        errorText.setText("Invalid username.");
-                                        errorText.setVisibility(View.VISIBLE);
+                                    if(message.contains("ERR_USER_TOO_SHORT")) {
+                                        usernameInformationText.setVisibility(View.VISIBLE);
+                                        usernameInformationText.setText("The username cannot be shorter than 5 characters.");
+                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                    } else if(message.contains("ERR_USER_TOO_LONG")) {
+                                        usernameInformationText.setVisibility(View.VISIBLE);
+                                        usernameInformationText.setText("The username cannot be longer than 30 characters.");
+                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                    } else if(message.contains("ERR_USER_EXISTS")) {
+                                        usernameInformationText.setVisibility(View.VISIBLE);
+                                        usernameInformationText.setText("The username is already taken.");
+                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                    } else if(message.contains("ERR_USER_INVALID_CHARACTER")) {
+                                        usernameInformationText.setVisibility(View.VISIBLE);
+                                        usernameInformationText.setText("The username can only contain letters a-z and numbers 0-9.");
+                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                    } else if(message.contains("ERR_USER_INVALID_START")) {
+                                        usernameInformationText.setVisibility(View.VISIBLE);
+                                        usernameInformationText.setText("The username needs to start with at least 3 letters.");
+                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                    } else if(message.contains("ERR_USER_INVALID_NUM_POS")) {
+                                        usernameInformationText.setVisibility(View.VISIBLE);
+                                        usernameInformationText.setText("The username can only have numbers at the end.");
+                                        usernameInformationText.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                    } else {
+                                        usernameInformationText.setVisibility(View.INVISIBLE);
+                                        usernameText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_green_dark) , PorterDuff.Mode.SRC_ATOP);
                                     }
-                                    else if(message.equals("ERR_PASSWORD")) {
-                                        errorText.setText("Invalid password.");
-                                        errorText.setVisibility(View.VISIBLE);
-                                    }
-                                    else if(message.equals("ERR_EMAIL")) {
-                                        errorText.setText("Invalid e-mail.");
-                                        errorText.setVisibility(View.VISIBLE);
-                                    }
-                                    else if(message.equals("ERR_USER_EXISTS")) {
-                                        errorText.setText("Username taken.");
-                                        errorText.setVisibility(View.VISIBLE);
-                                    }
-                                    else if(message.equals("ERR_EMAIL_EXISTS")) {
-                                        errorText.setText("E-mail already registered.");
-                                        errorText.setVisibility(View.VISIBLE);
+                                    if(message.contains("ERR_PASSWORD_TOO_LONG")) {
+                                        EmailInformationText.setText("Invalid password.");
+                                        EmailInformationText.setVisibility(View.VISIBLE);
+                                    } else if(message.contains("ERR_PASSWORD_TOO_SHORT")) {
+                                        EmailInformationText.setText("Invalid password.");
+                                        EmailInformationText.setVisibility(View.VISIBLE);
+                                    } else if(message.contains("ERR_PASSWORD_INVALID_CHARACTER")) {
+                                        EmailInformationText.setText("Invalid password.");
+                                        EmailInformationText.setVisibility(View.VISIBLE);
+                                    } else
+                                        EmailInformationText.setVisibility(View.INVISIBLE);
+                                    if(message.contains("ERR_EMAIL")) {
+                                        EmailInformationText.setText("Invalid e-mail.");
+                                        EmailInformationText.setVisibility(View.VISIBLE);
+                                    } else if(message.contains("ERR_EMAIL_EXISTS")) {
+                                        EmailInformationText.setText("E-mail is already registered.");
+                                        EmailInformationText.setVisibility(View.VISIBLE);
+                                    } else{
+                                        EmailInformationText.setVisibility(View.INVISIBLE);
+                                        emailText.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_green_dark) , PorterDuff.Mode.SRC_ATOP);
                                     }
                                 }
                                 catch(JSONException je){
@@ -145,27 +181,4 @@ public class CreateAccountFragment extends Fragment {
         repeatPasswordText.addTextChangedListener(txwatcher2);
     }
 
-
-    //Adds TextWatcher to field. Changes the color to red if length < 5 and > 0, otherwise it is black
-    private void listenerEditText(View root,final EditText field){
-        final TextWatcher txwatcher1 = new TextWatcher() {
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            public void afterTextChanged(Editable s) {
-                field.removeTextChangedListener(this);
-                //Not correct if input is shorter than 5 characters
-                if(s.length() < 5 && s.length() > 0){
-                    field.setTextColor(Color.RED);
-                } else {
-                    field.setTextColor(Color.BLACK);
-                }
-                field.addTextChangedListener(this);
-            }
-        };
-        field.addTextChangedListener(txwatcher1);
-    }
 }
