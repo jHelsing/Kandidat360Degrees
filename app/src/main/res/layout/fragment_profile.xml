@@ -17,12 +17,13 @@
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="@dimen/activity_horizontal_margin">s
+                android:padding="@dimen/activity_horizontal_margin">
             <ImageView
                     android:id="@+id/profileProfileImage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/anonymous_profile" />
+                    app:srcCompat="@drawable/anonymous_profile"
+                    android:contentDescription="@string/profile_image"/>
 
             <LinearLayout
                     android:layout_width="match_parent"
@@ -30,27 +31,22 @@
                     android:orientation="vertical"
                     android:layout_marginStart="@dimen/activity_horizontal_margin"
                     android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_gravity="center_vertical">
+                    android:layout_gravity="center_vertical" android:layout_weight="1">
 
                 <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
-                    <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/profileUsernameIcon"
-                            app:srcCompat="@drawable/username_profile_icon"
-                            android:layout_gravity="center_vertical"/>
-
                     <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:id="@+id/profileUserNameTextField"
                             android:text="@string/username"
-                            android:textSize="24sp" android:layout_marginStart="8dp"
-                            android:layout_marginLeft="8dp"/>
+                            android:textSize="24sp"
+                            android:drawableLeft="@drawable/username_profile_icon"
+                            android:drawableStart="@drawable/username_profile_icon"
+                            android:drawablePadding="8dp"/>
 
                 </LinearLayout>
 
@@ -61,64 +57,73 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/activity_vertical_margin">
 
-                    <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/profilePanoramaCountIcon"
-                            app:srcCompat="@drawable/upload_icon"
-                            android:layout_gravity="center_vertical"/>
                     <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:id="@+id/profilePanoramaCountTextField"
                             android:text="@string/count"
-                            android:layout_marginLeft="8dp"
-                            android:layout_marginStart="8dp"
-                            android:layout_gravity="center_vertical"/>
-
-                    <ImageView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/profileFavCountIcon"
-                            app:srcCompat="@drawable/ic_favorite"
                             android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                            android:layout_marginStart="@dimen/activity_horizontal_margin"/>
+                            android:drawableLeft="@drawable/upload_icon"
+                            android:drawableStart="@drawable/upload_icon"
+                            android:drawablePadding="8dp"
+                            android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                            android:layout_marginRight="@dimen/activity_horizontal_margin"/>
+
                     <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:id="@+id/profileFavCountTextField"
                             android:text="@string/count"
-                            android:layout_marginLeft="8dp"
-                            android:layout_marginStart="8dp"
+                            android:drawableLeft="@drawable/ic_favorite"
+                            android:drawableStart="@drawable/ic_favorite"
+                            android:drawablePadding="8dp"
                             android:layout_gravity="center_vertical"/>
 
                 </LinearLayout>
 
             </LinearLayout>
-
             <ImageButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    app:srcCompat="@drawable/disable_map_view_icon_profile"
+                    android:background="@color/colorBackground"
+                    android:layout_weight="0"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
+                    android:layout_gravity="bottom"
+                    android:contentDescription="@string/change_map_view_on_profile_from_list"
+                    android:id="@+id/profileSwitchModeButton"/>
+            <ImageButton
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    app:srcCompat="@drawable/more_settings_icon"
+                    android:layout_weight="0"
+                    android:background="@color/colorBackground"
+                    android:layout_gravity="bottom"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
+                    android:contentDescription="@string/profile_options_three_dot_button_text"
+                    android:id="@+id/profileSettingsButton"/>
 
         </LinearLayout>
         <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="@android:color/darker_gray"
-                android:layout_marginBottom="10dp"/>
+        />
     </LinearLayout>
 
     <ListView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/profilePictureListView"
-        android:divider="@color/common_google_signin_btn_text_dark_disabled"
-        android:dividerHeight="10.0sp" />
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/profilePictureListView"
+            android:divider="@color/colorBackground"
+            android:dividerHeight="0dp"
+            android:fadeScrollbars="false"
+            android:fastScrollEnabled="false"/>
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/profileMapView"
-        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

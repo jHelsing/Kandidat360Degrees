@@ -29,4 +29,9 @@
     <string name="cancel">Cancel</string>
     <!-- Profile -->
     <string name="count">Count</string>
+    <string name="temp_location">Silver parks lake, WY</string>
+    <string name="temp_date">2017&#8211;02&#8211;08</string>
+    <string name="change_map_view_on_profile_from_list">Change to view profile as a map instead of list</string>
+    <string name="profile_options_three_dot_button_text">Open a options menu for additional profile options</string>
+    <string name="profile_image">The profile image of the user</string>
 </resources>

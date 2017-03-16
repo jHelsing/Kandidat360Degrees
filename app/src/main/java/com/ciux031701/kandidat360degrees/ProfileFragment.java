@@ -43,7 +43,7 @@ public class ProfileFragment extends Fragment {
     private Toolbar toolbar;
     private ImageButton toolbarMenuButton;
     private DrawerLayout mDrawerLayout;
-    private ImageView mapViewImage;
+    private ImageButton mapViewImage;
     private MapView mapView;
     private GoogleMap googleMap;
 
@@ -60,8 +60,8 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        mapViewImage = (ImageView) root.findViewById(R.id.profileMapView);
-        mapView = (MapView)root.findViewById(R.id.mapView);
+        mapViewImage = (ImageButton) root.findViewById(R.id.profileSwitchModeButton);
+        mapView = (MapView)root.findViewById(R.id.profileMapView);
         mapView.onCreate(savedInstanceState);
         mapView.onResume(); // needed to get the map to display immediately
         mapView.setVisibility(View.GONE);

@@ -1,59 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical" android:layout_width="match_parent"
-              android:layout_height="wrap_content" android:background="@color/colorPrimary">
-
-    <ImageView
-        android:layout_width="wrap_content"
-        app:srcCompat="@drawable/example_panorama"
-        android:id="@+id/panoramaPreview"
-        android:scaleType="fitXY"
-        android:layout_height="80dp" />
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorBackground">
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:orientation="vertical"
+        android:background="@color/colorPrimary"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin">
 
         <ImageView
-                android:layout_width="26dp"
-                android:id="@+id/imageView2"
-                android:layout_height="26dp"
-                android:padding="5dp"
-                android:layout_gravity="center_vertical" app:srcCompat="@drawable/profile_location_icon"/>
+                android:layout_width="wrap_content"
+                app:srcCompat="@drawable/example_panorama"
+                android:id="@+id/panoramaPreview"
+                android:scaleType="fitXY"
+                android:layout_height="80dp" />
 
         <TextView
-            android:text="Silver parks lake, WY"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/locationview"
-            android:layout_weight="1"
-            android:textColor="@android:color/white"
-            android:padding="10dp"
-            android:textSize="15sp" />
+                android:text="@string/temp_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"
+                android:padding="10dp"
+                android:textSize="15sp"
+                android:id="@+id/locationText"
+                android:drawableLeft="@drawable/profile_location_icon"
+                android:drawableStart="@drawable/profile_location_icon"
+                android:drawablePadding="@dimen/activity_horizontal_margin"/>
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingRight="10dp"
+                android:paddingEnd="10dp">
+
+            <TextView
+                    android:text="@string/temp_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:padding="10dp"
+                    android:textSize="15sp"
+                    android:id="@+id/dateText"
+                    android:drawableLeft="@drawable/profile_time_icon"
+                    android:drawableStart="@drawable/profile_time_icon"
+                    android:drawablePadding="@dimen/activity_horizontal_margin" android:layout_weight="1"/>
+            <TextView
+                    android:text="@string/count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@android:color/white"
+                    android:id="@+id/favCounter"
+                    android:drawableRight="@drawable/ic_favorite_no_click"
+                    android:drawableEnd="@drawable/ic_favorite_no_click"
+                    android:drawablePadding="8dp"
+                    android:layout_weight="0"/>
+
+        </LinearLayout>
+
     </LinearLayout>
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
 
-        <ImageView
-                android:layout_width="28dp"
-                android:id="@+id/imageView3"
-                android:layout_height="28dp"
-                android:padding="5dp"
-                android:layout_gravity="center_vertical" app:srcCompat="@drawable/profile_time_icon"/>
+</FrameLayout>
 
-        <TextView
-            android:text="2017-02-08"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/dateView"
-            android:textColor="@android:color/white"
-            android:padding="10dp"
-            android:layout_weight="1"
-            android:textSize="15sp" />
-    </LinearLayout>
-
-</LinearLayout>
