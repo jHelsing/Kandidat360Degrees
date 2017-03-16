@@ -40,11 +40,7 @@ public class LoginFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         //If there is a saved session, skip login.
-        if (Session.load()) {
-            Intent myIntent = new Intent(getActivity(), MainActivity.class);
-            myIntent.putExtra("username", Session.getUser()); //Optional parameters
-            startActivity(myIntent);
-        }
+        inSession();
 
         View root = inflater.inflate(R.layout.fragment_login, container, false);
 
@@ -123,5 +119,36 @@ public class LoginFragment extends Fragment {
         });
 
         return root;
+    }
+
+    private void inSession(){
+        //Check if a session is saved locally.
+        if (Session.load()) {
+            //Send a request to see if it matches a remote session.
+            //If it does, skip login.
+            JReqCheckSession checkSessionReq = new JReqCheckSession();
+            checkSessionReq.setJResultListener(
+                    new JResultListener(){
+                        @Override
+                        public void onHasResult(JSONObject result) {
+                            try {
+                                boolean error = result.getBoolean("error");
+                                if(!error){
+                                    Intent myIntent = new Intent(getActivity(), MainActivity.class);
+                                    myIntent.putExtra("username", Session.getUser()); //Optional parameters
+                                    startActivity(myIntent);
+                                }
+                            }
+                            catch(JSONException je){
+                                je.printStackTrace();
+                            }
+
+                        }
+                    }
+            );
+            JRequester.setRequest(checkSessionReq);
+            JRequester.sendRequest();
+
+        }
     }
 }

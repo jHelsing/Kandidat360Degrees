@@ -2,6 +2,7 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -10,12 +11,18 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.ciux031701.kandidat360degrees.Communication.JReqDestroySession;
+import com.ciux031701.kandidat360degrees.Communication.JRequest;
+import com.ciux031701.kandidat360degrees.Communication.JRequester;
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.ciux031701.kandidat360degrees.Communication.Session;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by boking on 2017-02-14.
@@ -124,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     fragmentClass = SettingsFragment.class;
                     break;
                 case 6:
-                    Session.delete();
+                    destroySession();
                     fragmentClass = LoginFragment.class;
                     break;
                 default:
@@ -156,6 +163,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         fragment.setArguments(setArgs);
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
         setTitle("Explore");
+    }
+
+    private void destroySession(){
+        Session.delete();
+        JReqDestroySession destroySession = new JReqDestroySession();
+        JRequester.setRequest(destroySession);
+        JRequester.sendRequest();
     }
 
 }
