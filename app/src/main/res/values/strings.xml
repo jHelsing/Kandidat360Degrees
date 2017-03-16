@@ -28,6 +28,7 @@
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
     <!-- Profile -->
+    <string name="profile">Profile</string>
     <string name="count">Count</string>
     <string name="temp_location">Silver parks lake, WY</string>
     <string name="temp_date">2017&#8211;02&#8211;08</string>

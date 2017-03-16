@@ -33,17 +33,16 @@ import java.util.ArrayList;
 
 
 /**
- * Created by boking on 2017-02-21.
+ * Created by boking on 2017-02-21. Modified by Jonathan on 2017-03-16.
  */
 
 public class ProfileFragment extends Fragment {
-    TextView textView;
     Bundle args;
     String username;
     private Toolbar toolbar;
     private ImageButton toolbarMenuButton;
     private DrawerLayout mDrawerLayout;
-    private ImageButton mapViewImage;
+    private ImageButton viewSwitchButton;
     private MapView mapView;
     private GoogleMap googleMap;
 
@@ -56,11 +55,13 @@ public class ProfileFragment extends Fragment {
     ArrayList<FlowPicture> pictures;
     FlowPicture[] pictureArray;
 
+    private boolean listMode = true;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        mapViewImage = (ImageButton) root.findViewById(R.id.profileSwitchModeButton);
+        viewSwitchButton = (ImageButton) root.findViewById(R.id.profileSwitchModeButton);
         mapView = (MapView)root.findViewById(R.id.profileMapView);
         mapView.onCreate(savedInstanceState);
         mapView.onResume(); // needed to get the map to display immediately
@@ -70,7 +71,7 @@ public class ProfileFragment extends Fragment {
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         toolbarTitle = (TextView)root.findViewById(R.id.toolbarTitle);
-        toolbarTitle.setText("Profile");
+        toolbarTitle.setText(getText(R.string.profile));
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
         toolbarMenuButton = (ImageButton)root.findViewById(R.id.toolbarMenuButton);
         toolbarMenuButton.setOnClickListener(new View.OnClickListener() {
@@ -85,21 +86,25 @@ public class ProfileFragment extends Fragment {
         username = args.getString("username");
 
         //Get pictures, total likes nbr of friends or whatever we decide to display from db
-        pictures = new ArrayList<FlowPicture>();
+        pictures = new ArrayList<>();
         loadPicturesFromDB();
 
         //Converts arraylist to array
         pictureArray = new FlowPicture[pictures.size()];
         pictureArray = pictures.toArray(pictureArray);
 
-        mapViewImage.setOnClickListener(new View.OnClickListener() {
+        viewSwitchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(pictureListView.getVisibility()==View.VISIBLE){
+                if(listMode){
                     pictureListView.setVisibility(View.GONE);
+                    listMode = false;
+                    viewSwitchButton.setImageDrawable(getResources().getDrawable(R.drawable.enabled_map_view_profile_icon));
                     mapView.setVisibility(View.VISIBLE);
                 } else {
                     pictureListView.setVisibility(View.VISIBLE);
+                    listMode = true;
+                    viewSwitchButton.setImageDrawable(getResources().getDrawable(R.drawable.disable_map_view_icon_profile));
                     mapView.setVisibility(View.GONE);
                 }
             }
@@ -114,6 +119,38 @@ public class ProfileFragment extends Fragment {
             e.printStackTrace();
         }
 
+        fetchMap();
+
+        return root;
+    }
+
+    //Get info for specific image from DB here.
+    //Use the marker as a reference when doing so.
+    public View onMarkerClicked(Marker marker){
+        View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_window, null);
+
+        // Getting reference to the TextView to set latitude
+        infoWindowText = (TextView) v.findViewById(R.id.infoWindowText);
+        infoWindowImage = (ImageView) v.findViewById(R.id.infoWindowImage);
+
+        infoWindowText.setText(marker.getPosition().toString());
+        return v;
+    }
+
+    //Use this to fill up pictures.
+    public void loadPicturesFromDB(){
+        //Example of how to add
+        //Drawable currentPic = image from database convertet to a Drawable. Uses template picture without third argument
+        pictures.add(new FlowPicture("Gothenburg","2017-02-08",""));
+        pictures.add(new FlowPicture("Stockholm","2017-02-28",""));
+        pictures.add(new FlowPicture("Malmö","2017-03-03",""));
+    }
+
+
+    /**
+     * Fetches the map for the mapView
+     */
+    private void fetchMap() {
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap mMap) {
@@ -164,29 +201,5 @@ public class ProfileFragment extends Fragment {
                 //googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             }
         });
-
-        return root;
-    }
-
-    //Get info for specific image from DB here.
-    //Use the marker as a reference when doing so.
-    public View onMarkerClicked(Marker marker){
-        View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_window, null);
-
-        // Getting reference to the TextView to set latitude
-        infoWindowText = (TextView) v.findViewById(R.id.infoWindowText);
-        infoWindowImage = (ImageView) v.findViewById(R.id.infoWindowImage);
-
-        infoWindowText.setText(marker.getPosition().toString());
-        return v;
-    }
-
-    //Use this to fill upp pictures.
-    public void loadPicturesFromDB(){
-        //Example of how to add
-        //Drawable currentPic = image from database convertet to a Drawable. Uses template picture without third argument
-        pictures.add(new FlowPicture("Gothenburg","2017-02-08",""));
-        pictures.add(new FlowPicture("Stockholm","2017-02-28",""));
-        pictures.add(new FlowPicture("Malmö","2017-03-03",""));
     }
 }
