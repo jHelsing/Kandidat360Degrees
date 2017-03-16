@@ -45,6 +45,7 @@ public class ProfileFragment extends Fragment {
     private ImageButton viewSwitchButton;
     private MapView mapView;
     private GoogleMap googleMap;
+    private View root;
 
     private TextView infoWindowText;
     private ImageView infoWindowImage;
@@ -56,16 +57,15 @@ public class ProfileFragment extends Fragment {
     FlowPicture[] pictureArray;
 
     private boolean listMode = true;
+    private boolean first = true;
+    private Bundle instanceState;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_profile, container, false);
+        root = inflater.inflate(R.layout.fragment_profile, container, false);
+        instanceState = savedInstanceState;
 
         viewSwitchButton = (ImageButton) root.findViewById(R.id.profileSwitchModeButton);
-        mapView = (MapView)root.findViewById(R.id.profileMapView);
-        mapView.onCreate(savedInstanceState);
-        mapView.onResume(); // needed to get the map to display immediately
-        mapView.setVisibility(View.GONE);
         toolbar = (Toolbar) root.findViewById(R.id.tool_bar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -96,10 +96,19 @@ public class ProfileFragment extends Fragment {
         viewSwitchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(first) {
+                    mapView = (MapView)root.findViewById(R.id.profileMapView);
+                    mapView.onCreate(instanceState);
+                    mapView.onResume(); // needed to get the map to display immediately
+                    mapView.setVisibility(View.GONE);
+                    first = false;
+                    instanceState = null;
+                }
                 if(listMode){
                     pictureListView.setVisibility(View.GONE);
                     listMode = false;
                     viewSwitchButton.setImageDrawable(getResources().getDrawable(R.drawable.enabled_map_view_profile_icon));
+                    setUpMap();
                     mapView.setVisibility(View.VISIBLE);
                 } else {
                     pictureListView.setVisibility(View.VISIBLE);
@@ -109,17 +118,10 @@ public class ProfileFragment extends Fragment {
                 }
             }
         });
+
         pictureListView = (ListView)root.findViewById(R.id.profilePictureListView);
         profileFlowAdapter = new ProfileFlowAdapter(getActivity(),pictureArray);
         pictureListView.setAdapter(profileFlowAdapter);
-
-        try {
-            MapsInitializer.initialize(getActivity().getApplicationContext());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        fetchMap();
 
         return root;
     }
@@ -144,6 +146,16 @@ public class ProfileFragment extends Fragment {
         pictures.add(new FlowPicture("Gothenburg","2017-02-08",""));
         pictures.add(new FlowPicture("Stockholm","2017-02-28",""));
         pictures.add(new FlowPicture("Malmö","2017-03-03",""));
+    }
+
+    private void setUpMap() {
+        try {
+            MapsInitializer.initialize(getActivity().getApplicationContext());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        fetchMap();
     }
 
 
