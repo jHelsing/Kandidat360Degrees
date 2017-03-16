@@ -41,6 +41,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterManager;
 
 import java.io.IOException;
 import java.util.List;
@@ -68,6 +69,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     private Menu toolbarMenu;
 
     private boolean isShowingPublic;
+
+    private ClusterManager<MyItem>  mClusterManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -115,6 +118,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             public void onMapReady(GoogleMap mMap) {
 
                 googleMap = mMap;
+                setUpClusterer();
                 googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
                     @Override
                     public View getInfoWindow(Marker marker) {
@@ -253,4 +257,36 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     public boolean onQueryTextChange(String newText) {
         return false;
     }
+
+
+    private void setUpClusterer() {
+        // Position the map.
+
+        // Initialize the manager with the context and the map.
+        // (Activity extends context, so we can pass 'this' in the constructor.)
+        mClusterManager = new ClusterManager<MyItem>(getActivity(), googleMap);
+
+        // Point the map's listeners at the listeners implemented by the cluster
+        // manager.
+        googleMap.setOnCameraIdleListener(mClusterManager);
+        googleMap.setOnMarkerClickListener(mClusterManager);
+
+        // Add cluster items (markers) to the cluster manager.
+        addItems();
+    }
+    private void addItems() {
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(57.4, 12), 10));
+        double lat = 57.7;
+        double lng = 12.2;
+
+        // Add ten cluster items in close proximity, for purposes of this example.
+        for (int i = 0; i < 10; i++) {
+            double offset = i / 60d;
+            lat = lat + offset;
+            lng = lng + offset;
+            MyItem offsetItem = new MyItem(lat, lng);
+            mClusterManager.addItem(offsetItem);
+        }
+    }
+
 }
