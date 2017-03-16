@@ -24,6 +24,8 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
@@ -164,11 +166,14 @@ public class ProfileFragment extends Fragment {
         TextView favCountView = (TextView) root.findViewById(R.id.profileFavCountTextView);
         userNameView.setText(username);
 
+        DecimalFormat df = new DecimalFormat("#.##");
+        df.setRoundingMode(RoundingMode.CEILING);
+
         String panoramaString = null;
         if (panoramaCount >= 1000 && panoramaCount < 1000000) {
             panoramaString = (panoramaCount/1000.0)+"k";
         } else if (panoramaCount >= 1000000) {
-            panoramaString = ((float) Math.round(panoramaCount/1000000.0)) + "M";
+            panoramaString = df.format(panoramaCount/1000000) + "M";
         }
         panoramaCountView.setText(panoramaString);
 
@@ -176,7 +181,7 @@ public class ProfileFragment extends Fragment {
         if (favCount >= 1000 && favCount < 1000000) {
             favString = (favCount/1000.0)+"k";
         } else if (favCount >= 1000000) {
-            favString = ((float) Math.round(favCount/1000000.0)) + "M";
+            favString = df.format(favCount/1000000) + "M";
         }
         favCountView.setText(favString);
     }
