@@ -1,70 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical" android:layout_width="match_parent"
+              android:layout_height="wrap_content" android:background="@color/colorPrimary">
 
     <ImageView
         android:layout_width="wrap_content"
         app:srcCompat="@drawable/example_panorama"
-        android:id="@+id/flowPicture"
+        android:id="@+id/panoramaPreview"
         android:scaleType="fitXY"
         android:layout_height="80dp" />
 
     <LinearLayout
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary">
+        android:layout_height="match_parent">
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
+        <ImageView
                 android:layout_width="26dp"
-                app:srcCompat="@drawable/temp_pinpoint"
                 android:id="@+id/imageView2"
                 android:layout_height="26dp"
                 android:padding="5dp"
-                android:layout_gravity="center_vertical" />
+                android:layout_gravity="center_vertical" app:srcCompat="@drawable/profile_location_icon"/>
 
-            <TextView
-                android:text="Silver parks lake, WY"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/locationText"
-                android:layout_weight="1"
-                android:textColor="@android:color/white"
-                android:padding="10dp"
-                android:textSize="15sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
+        <TextView
+            android:text="Silver parks lake, WY"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content"
+            android:id="@+id/locationview"
+            android:layout_weight="1"
+            android:textColor="@android:color/white"
+            android:padding="10dp"
+            android:textSize="15sp" />
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-            <ImageView
+        <ImageView
                 android:layout_width="28dp"
-                app:srcCompat="@drawable/temp_calendar"
                 android:id="@+id/imageView3"
                 android:layout_height="28dp"
                 android:padding="5dp"
-                android:layout_gravity="center_vertical" />
+                android:layout_gravity="center_vertical" app:srcCompat="@drawable/profile_time_icon"/>
 
-            <TextView
-                android:text="2017-02-08"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/dateText"
-                android:textColor="@android:color/white"
-                android:padding="10dp"
-                android:layout_weight="1"
-                android:textSize="15sp" />
-        </LinearLayout>
-
+        <TextView
+            android:text="2017-02-08"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/dateView"
+            android:textColor="@android:color/white"
+            android:padding="10dp"
+            android:layout_weight="1"
+            android:textSize="15sp" />
     </LinearLayout>
 
 </LinearLayout>

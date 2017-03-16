@@ -1,146 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/common_google_signin_btn_text_dark_disabled">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/colorBackground">
     <include
         android:id="@+id/tool_bar"
-        layout="@layout/tool_bar"
-        ></include>
+        layout="@layout/tool_bar" />
 
     <LinearLayout
-        android:orientation="horizontal" android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/common_google_signin_btn_text_dark_disabled">
-
-        <ImageView
-            app:srcCompat="@drawable/profile_example"
-            android:id="@+id/imageView"
-            android:layout_row="0"
-            android:layout_column="0"
-            android:layout_marginBottom="20dp"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
-            android:layout_marginTop="30dp"
-            android:layout_width="60dp"
-            android:layout_height="60dp" />
-
-        <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingTop="10dp">
+            android:layout_height="wrap_content">
+        <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/activity_horizontal_margin">s
+            <ImageView
+                    android:id="@+id/profileProfileImage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:srcCompat="@drawable/anonymous_profile" />
 
             <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    app:srcCompat="@drawable/profile_icon"
-                    android:id="@+id/imageView5"
-                    android:padding="2dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_height="27dp"
-                    android:layout_width="27dp" />
-
-                <TextView
-                    android:text="Mister Cool"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/usernameText"
-                    android:layout_gravity="center_vertical"
-                    android:textSize="20sp"
-                    android:paddingLeft="5dp"
-                    android:textColor="@android:color/black" />
+                    android:orientation="vertical"
+                    android:layout_marginStart="@dimen/activity_horizontal_margin"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_gravity="center_vertical">
+
+                <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                    <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/profileUsernameIcon"
+                            app:srcCompat="@drawable/username_profile_icon"
+                            android:layout_gravity="center_vertical"/>
+
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/profileUserNameTextField"
+                            android:text="@string/username"
+                            android:textSize="24sp" android:layout_marginStart="8dp"
+                            android:layout_marginLeft="8dp"/>
+
+                </LinearLayout>
+
+
+
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/activity_vertical_margin">
+
+                    <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/profilePanoramaCountIcon"
+                            app:srcCompat="@drawable/upload_icon"
+                            android:layout_gravity="center_vertical"/>
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/profilePanoramaCountTextField"
+                            android:text="@string/count"
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_gravity="center_vertical"/>
+
+                    <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/profileFavCountIcon"
+                            app:srcCompat="@drawable/ic_favorite"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                            android:layout_marginStart="@dimen/activity_horizontal_margin"/>
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/profileFavCountTextField"
+                            android:text="@string/count"
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginStart="8dp"
+                            android:layout_gravity="center_vertical"/>
+
+                </LinearLayout>
+
             </LinearLayout>
 
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    app:srcCompat="@android:drawable/ic_dialog_email"
-                    android:id="@+id/imageView4"
-                    android:padding="2dp"
-                    android:layout_height="27dp"
-                    android:layout_width="27dp" />
-
-                <TextView
+            <ImageButton
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="username@domain.com"
-                    android:id="@+id/emailText"
-                    android:layout_gravity="center_vertical"
-                    android:paddingStart="5dp"
-                    android:paddingLeft="5dp"/>
-
-            </LinearLayout>
-
-            <RelativeLayout
-                android:orientation="horizontal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <ImageView
-                    app:srcCompat="@drawable/temp_gender"
-                    android:id="@+id/imageView6"
-                    android:padding="2dp"
-                    android:layout_gravity="center_vertical"
-                    android:layout_height="27dp"
-                    android:layout_width="27dp" />
-
-                <ImageView
-                    app:srcCompat="@drawable/temp_mapsicon"
-                    android:id="@+id/mapViewImage"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_marginRight="60dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_gravity="right"
-                    android:layout_marginTop="5dp" />
-
-                <ImageView
-                    app:srcCompat="@drawable/temp_threedots"
-                    android:id="@+id/imageView8"
-                    android:layout_height="30dp"
-                    android:layout_width="30dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="15dp"
-                    android:layout_gravity="right"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginTop="5dp" />
-
-                <TextView
-                    android:text="Male"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/textView3"
-                    android:layout_gravity="center_vertical"
-                    android:paddingLeft="5dp"
-                    android:layout_centerVertical="true"
-                    android:layout_toRightOf="@+id/imageView6"
-                    android:layout_toEndOf="@+id/imageView6" />
-
-            </RelativeLayout>
+                    android:layout_height="wrap_content"/>
 
         </LinearLayout>
-
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginBottom="10dp"/>
     </LinearLayout>
 
     <ListView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-        android:background="@android:color/white"
-        android:id="@+id/pictureListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/profilePictureListView"
         android:divider="@color/common_google_signin_btn_text_dark_disabled"
-        android:dividerHeight="10.0sp"
-        android:layout_marginTop="5dp" />
+        android:dividerHeight="10.0sp" />
 
     <com.google.android.gms.maps.MapView
-        android:id="@+id/mapView"
+        android:id="@+id/profileMapView"
+        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

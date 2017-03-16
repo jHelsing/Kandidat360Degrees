@@ -27,5 +27,6 @@
     <!-- Notifications -->
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
-
+    <!-- Profile -->
+    <string name="count">Count</string>
 </resources>
