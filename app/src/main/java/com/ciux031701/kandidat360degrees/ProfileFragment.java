@@ -1,22 +1,17 @@
 package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.ListAdapter;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.view.*;
+import android.widget.*;
 
+import com.ciux031701.kandidat360degrees.Communication.Session;
 import com.ciux031701.kandidat360degrees.adaptors.FlowPicture;
 import com.ciux031701.kandidat360degrees.adaptors.ProfileFlowAdapter;
 import com.google.android.gms.maps.GoogleMap;
@@ -29,6 +24,7 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 
@@ -38,7 +34,7 @@ import java.util.ArrayList;
 
 public class ProfileFragment extends Fragment {
     Bundle args;
-    String username;
+    private String username;
     private Toolbar toolbar;
     private ImageButton toolbarMenuButton;
     private DrawerLayout mDrawerLayout;
@@ -46,6 +42,7 @@ public class ProfileFragment extends Fragment {
     private MapView mapView;
     private GoogleMap googleMap;
     private View root;
+    private ImageButton profileMenuButton;
 
     private TextView infoWindowText;
     private ImageView infoWindowImage;
@@ -84,6 +81,9 @@ public class ProfileFragment extends Fragment {
         //Get for which username this profile is for
         args = getArguments();
         username = args.getString("username");
+
+        setUpProfileInformation(1111111, 1001);
+        setUpProfileMenuButton();
 
         //Get pictures, total likes nbr of friends or whatever we decide to display from db
         pictures = new ArrayList<>();
@@ -156,6 +156,63 @@ public class ProfileFragment extends Fragment {
         }
 
         fetchMap();
+    }
+
+    private void setUpProfileInformation(int panoramaCount, int favCount) {
+        TextView userNameView = (TextView) root.findViewById(R.id.profileUserNameTextView);
+        TextView panoramaCountView = (TextView) root.findViewById(R.id.profilePanoramaCountTextView);
+        TextView favCountView = (TextView) root.findViewById(R.id.profileFavCountTextView);
+        userNameView.setText(username);
+
+        String panoramaString = null;
+        if (panoramaCount >= 1000 && panoramaCount < 1000000) {
+            panoramaString = (panoramaCount/1000.0)+"k";
+        } else if (panoramaCount >= 1000000) {
+            panoramaString = ((float) Math.round(panoramaCount/1000000.0)) + "M";
+        }
+        panoramaCountView.setText(panoramaString);
+
+        String favString = null;
+        if (favCount >= 1000 && favCount < 1000000) {
+            favString = (favCount/1000.0)+"k";
+        } else if (favCount >= 1000000) {
+            favString = ((float) Math.round(favCount/1000000.0)) + "M";
+        }
+        favCountView.setText(favString);
+    }
+
+    private void setUpProfileMenuButton() {
+        profileMenuButton = (ImageButton) root.findViewById(R.id.profileSettingsButton);
+        profileMenuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popupMenu = new PopupMenu(getActivity(), profileMenuButton);
+                Menu menu = popupMenu.getMenu();
+                // TODO Add checks to see if person already is friend
+                menu.add(R.string.add_friend);
+                menu.add(R.string.remove_friend);
+                if (username == Session.getUser())
+                    menu.add(R.string.acc_settings);
+                popupMenu.show();
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getTitle().toString()) {
+                            case "Add friend":
+                                // TODO send add friend request to username from session.getUser()
+                                break;
+                            case "Remove friend":
+                                // TODO send request to remove friend from session.getUser() for username
+                                break;
+                            case "Settings":
+                                // TODO change fragment to settings
+                                break;
+                        }
+                        return false;
+                    }
+                });
+            }
+        });
     }
 
 

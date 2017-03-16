@@ -35,4 +35,8 @@
     <string name="change_map_view_on_profile_from_list">Change to view profile as a map instead of list</string>
     <string name="profile_options_three_dot_button_text">Open a options menu for additional profile options</string>
     <string name="profile_image">The profile image of the user</string>
+    <!-- Profile popup menu -->
+    <string name="add_friend">Add friend</string>
+    <string name="remove_friend">Remove friend</string>
+    <string name="acc_settings">Settings</string>
 </resources>
