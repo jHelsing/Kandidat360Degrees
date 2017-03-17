@@ -69,25 +69,7 @@ public class NotificationFragment extends Fragment {
 
         NotificationAdapter adapter = new NotificationAdapter(getActivity(), items);
         listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView adapterView, View view, int i, long l) {
-                if (items[i].getType() == NotificationAdapter.TYPE_IMAGE_UPLOAD){
-                    //Go to the user's profile - map view and show the image
-                    String selectedUser = "Username1";
-                    //TODO: Go to the selectedUser's profile instead of MrCool's
-                    Fragment fragment = new ProfileFragment();
-                    Bundle setArgs = new Bundle();
-                    setArgs.putString("username", selectedUser);
-                    fragment.setArguments(setArgs);
-                    FragmentManager fragmentManager = getActivity().getFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    fragmentTransaction.replace(R.id.content_frame, fragment);
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.commit();
-                }
-            }
-        });
+        addListenerToNotificationItems(items);
 
         //Buttons:
         View inflatedView = getActivity().getLayoutInflater().inflate(R.layout.notification_friend_item, null);
@@ -107,6 +89,27 @@ public class NotificationFragment extends Fragment {
         });
 
         return root;
+    }
+
+    private void addListenerToNotificationItems(final NotificationViewItem[] items){
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView adapterView, View view, int i, long l) {
+                if (items[i].getType() == NotificationAdapter.TYPE_IMAGE_UPLOAD){
+                    //Go to the user's profile - map view and show the image
+                    String selectedUser = "Username1";
+                    Fragment fragment = new ProfileFragment();
+                    Bundle setArgs = new Bundle();
+                    setArgs.putString("username", selectedUser);
+                    fragment.setArguments(setArgs);
+                    FragmentManager fragmentManager = getActivity().getFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.content_frame, fragment);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
+                }
+            }
+        });
     }
 }
 

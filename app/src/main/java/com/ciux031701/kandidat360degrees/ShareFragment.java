@@ -69,7 +69,7 @@ public class ShareFragment extends Fragment {
         publicSwitch = (Switch)root.findViewById(R.id.publicSwitch);
         addListenerToShareButton(shareButton);
         addListenerToSwitch(publicSwitch);
-        
+
         //The picture to be shared:
         args = getArguments();
         if(args!=null){
