@@ -35,8 +35,6 @@ import java.util.Comparator;
  */
 
 public class ShareFragment extends Fragment {
-
-    private TextView textView;
     private Toolbar toolbar;
     private ImageButton toolbarMenuButton;
     private DrawerLayout mDrawerLayout;
@@ -53,13 +51,12 @@ public class ShareFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View root = inflater.inflate(R.layout.fragment_share, container, false);
 
+        //The toolbar:
         toolbar = (Toolbar) root.findViewById(R.id.tool_bar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
-        shareButton = (Button)root.findViewById(R.id.shareButton);
-        publicSwitch = (Switch)root.findViewById(R.id.publicSwitch);
         toolbarMenuButton = (ImageButton)root.findViewById(R.id.toolbarMenuButton);
         toolbarMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,34 +64,12 @@ public class ShareFragment extends Fragment {
                 mDrawerLayout.openDrawer(Gravity.LEFT);
             }
         });
-        shareButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //arguments so that the explore view can show some kind of loading Toast "Sharing..."
-                Toast.makeText(getActivity(), "Sharing...",
-                        Toast.LENGTH_SHORT).show();
-                args = new Bundle();
-                args.putString("shared", "somekindofID");
-                Fragment fragment = new ExploreFragment();
-                FragmentManager fragmentManager = getActivity().getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-            }
-        });
-        publicSwitch.setChecked(true);
-        publicSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    //Switch is ON
-                }else{
-                    //Switch is OFF
-                }
-            }
-        });
 
+        shareButton = (Button)root.findViewById(R.id.shareButton);
+        publicSwitch = (Switch)root.findViewById(R.id.publicSwitch);
+        addListenerToShareButton(shareButton);
+        addListenerToSwitch(publicSwitch);
+        
         //The picture to be shared:
         args = getArguments();
         if(args!=null){
@@ -163,6 +138,39 @@ public class ShareFragment extends Fragment {
                 friendList.add(i+1,new FriendTuple(nextLetter + "", getActivity()));
             }
         }
+    }
+
+    private void addListenerToShareButton(Button shareButton) {
+        shareButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //arguments so that the explore view can show some kind of loading Toast "Sharing..."
+                Toast.makeText(getActivity(), "Sharing...",
+                        Toast.LENGTH_SHORT).show();
+                args = new Bundle();
+                args.putString("shared", "somekindofID");
+                Fragment fragment = new ExploreFragment();
+                FragmentManager fragmentManager = getActivity().getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.content_frame, fragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }
+        });
+    }
+
+    private void addListenerToSwitch(Switch publicSwitch) {
+        publicSwitch.setChecked(true);
+        publicSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    //Switch is ON
+                }else{
+                    //Switch is OFF
+                }
+            }
+        });
     }
 
 }
