@@ -19,7 +19,9 @@ import com.ciux031701.kandidat360degrees.representation.FriendTuple;
 import com.ciux031701.kandidat360degrees.ProfileFragment;
 import com.ciux031701.kandidat360degrees.R;
 
+
 import java.util.ArrayList;
+
 /**
  * Created by Anna on 2017-03-07. Modified by Amar 2017-03-09.
  */
@@ -28,7 +30,7 @@ public class FriendsAdapter extends FriendsListAdapter {
     private ArrayList<FriendTuple> friendRequests;
 
     public FriendsAdapter(Context context, ArrayList<FriendTuple> friends, ArrayList<FriendTuple> friendRequests) {
-        super(context,friends);
+        super(context, friends);
         this.friendRequests = friendRequests;
     }
 
@@ -56,68 +58,112 @@ public class FriendsAdapter extends FriendsListAdapter {
         Button acceptButton = (Button) holder.itemView.findViewById(R.id.buttonAcceptFriendRequest);
         Button cancelButton = (Button) holder.itemView.findViewById(R.id.buttonCancelFriendRequest);
 
-        if (position == 0){
-            TextView friendlistSectionHeaderText = (TextView) holder.itemView.findViewById(R.id.friends_list_letter);
-            friendlistDetails.setVisibility(View.GONE);
-            friendlistSectionHeader.setVisibility(View.VISIBLE);
-            friendlistSectionHeaderText.setText(friendRequests.get(position).getUserName());
-        } else if (position < friendRequests.size()) {
-            //List friend requests
-            FriendTuple data = friendRequests.get(position);
-            friendlistDetails.setVisibility(View.VISIBLE);
-            friendlistSectionHeader.setVisibility(View.GONE);
-            titleTextView.setText(data.getUserName());
-            thumbnailImageView.setImageDrawable(data.getProfilePicture());
-            acceptButton.setVisibility(View.VISIBLE);
-            cancelButton.setVisibility(View.VISIBLE);
-            acceptButton.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View view){
-                    //TODO: add the friend to the database, remove from friend request list. Then reload the fragment?
-                }
-            });
-            cancelButton.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View view){
-                    //TODO: remove from friend request list. Then reload the fragment?
-                }
-            });
-        } else {
-            //List the user's friends
-            ArrayList<FriendTuple> mDataSource = getDataSource();
-            FriendTuple data = mDataSource.get(position-friendRequests.size());
-            acceptButton.setVisibility(View.GONE);
-            cancelButton.setVisibility(View.GONE);
-            if(data.getUserName().length() > 1) {
-                friendlistDetails.setVisibility(View.VISIBLE);
-                friendlistSectionHeader.setVisibility(View.GONE);
-                titleTextView.setText(data.getUserName());
-                thumbnailImageView.setImageDrawable(data.getProfilePicture());
-
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        String selectedUser = ((TextView) holder.itemView.findViewById(R.id.friends_list_title)).getText().toString();
-                        //TODO: Go to the selectedUser's profile instead of MrCool's
-                        Fragment fragment = new ProfileFragment();
-                        Bundle setArgs = new Bundle();
-                        setArgs.putString("username", selectedUser);
-                        fragment.setArguments(setArgs);
-                        FragmentManager fragmentManager = ((FragmentActivity) context).getFragmentManager();
-                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                        fragmentTransaction.replace(R.id.content_frame, fragment);
-                        fragmentTransaction.addToBackStack(null);
-                        fragmentTransaction.commit();
-                    }
-                });
-            } else {
-                TextView friendlistSectionHeaderText = (TextView) holder.itemView.findViewById(R.id.friends_list_letter);
-                friendlistDetails.setVisibility(View.GONE);
-                friendlistSectionHeader.setVisibility(View.VISIBLE);
-                friendlistSectionHeaderText.setText(getSectionName(position-friendRequests.size()));
-
-            }
+        if (isFirstPosition(position)) { //show "friend requests"-header
+            showFriendRequestHeader(position, friendlistDetails, friendlistSectionHeader, holder);
+        } else if (isFriendRequest(position)) { //show friend request
+            showFriendRequestItem(position, friendlistDetails, friendlistSectionHeader, titleTextView, thumbnailImageView, acceptButton, cancelButton);
+        } else if (isFriend(position, getDataSource())) { //show friend
+            showFriendItem(position,acceptButton,cancelButton,friendlistDetails,friendlistSectionHeader,titleTextView,thumbnailImageView,holder,context);
+        } else { //show section header
+            showFriendHeader(position,acceptButton,cancelButton,holder,friendlistDetails,friendlistSectionHeader);
         }
+    }
+
+    private boolean isFriendRequest(int position) {
+        return position < friendRequests.size();
+    }
+
+    private boolean isFirstPosition(int position) {
+        return position == 0;
+    }
+
+    private boolean isFriend(int position, ArrayList<FriendTuple> mDataSource) {
+        return position > friendRequests.size() && (mDataSource.get(position-friendRequests.size()).getUserName().length() > 1);
+    }
+
+    private void showFriendRequestHeader(int position, RelativeLayout friendlistDetails, LinearLayout friendlistSectionHeader,
+                                         RecyclerView.ViewHolder holder) {
+        TextView friendlistSectionHeaderText = (TextView) holder.itemView.findViewById(R.id.friends_list_letter);
+        friendlistDetails.setVisibility(View.GONE);
+        friendlistSectionHeader.setVisibility(View.VISIBLE);
+        friendlistSectionHeaderText.setText(friendRequests.get(position).getUserName());
+    }
+
+    private void showFriendRequestItem(int position, RelativeLayout friendlistDetails, LinearLayout friendlistSectionHeader,
+                                       TextView titleTextView, ImageView thumbnailImageView, Button acceptButton, Button cancelButton) {
+        FriendTuple data = friendRequests.get(position);
+        friendlistDetails.setVisibility(View.VISIBLE);
+        friendlistSectionHeader.setVisibility(View.GONE);
+        titleTextView.setText(data.getUserName());
+        thumbnailImageView.setImageDrawable(data.getProfilePicture());
+        acceptButton.setVisibility(View.VISIBLE);
+        cancelButton.setVisibility(View.VISIBLE);
+
+        addListenerToAcceptButton(acceptButton);
+        addListenerToCancelButton(cancelButton);
+    }
+
+    private void addListenerToAcceptButton(Button acceptButton){
+        acceptButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO: add the friend to the database, remove from friend request list. Then reload the fragment?
+            }
+        });
+    }
+
+    private void addListenerToCancelButton(Button cancelButton){
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //TODO: remove from friend request list. Then reload the fragment?
+            }
+        });
+    }
+
+    private void showFriendItem(int position, Button acceptButton, Button cancelButton, RelativeLayout friendlistDetails, LinearLayout friendlistSectionHeader,
+                                TextView titleTextView, ImageView thumbnailImageView, final RecyclerView.ViewHolder holder, final Context context) {
+        //List the user's friends
+        ArrayList<FriendTuple> mDataSource = getDataSource();
+        FriendTuple data = mDataSource.get(position - friendRequests.size());
+        acceptButton.setVisibility(View.GONE);
+        cancelButton.setVisibility(View.GONE);
+
+        friendlistDetails.setVisibility(View.VISIBLE);
+        friendlistSectionHeader.setVisibility(View.GONE);
+        titleTextView.setText(data.getUserName());
+        thumbnailImageView.setImageDrawable(data.getProfilePicture());
+
+        addListenerToView(holder,context);
+    }
+
+    private void addListenerToView(final RecyclerView.ViewHolder holder, final Context context){
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String selectedUser = ((TextView) holder.itemView.findViewById(R.id.friends_list_title)).getText().toString();
+                Fragment fragment = new ProfileFragment();
+                Bundle setArgs = new Bundle();
+                setArgs.putString("username", selectedUser);
+                fragment.setArguments(setArgs);
+                FragmentManager fragmentManager = ((FragmentActivity) context).getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.content_frame, fragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
+            }
+        });
+    }
+
+    private void showFriendHeader(int position, Button acceptButton, Button cancelButton, RecyclerView.ViewHolder holder, RelativeLayout friendlistDetails,
+                                  LinearLayout friendlistSectionHeader) {
+        acceptButton.setVisibility(View.GONE);
+        cancelButton.setVisibility(View.GONE);
+
+        TextView friendlistSectionHeaderText = (TextView) holder.itemView.findViewById(R.id.friends_list_letter);
+        friendlistDetails.setVisibility(View.GONE);
+        friendlistSectionHeader.setVisibility(View.VISIBLE);
+        friendlistSectionHeaderText.setText(getSectionName(position - friendRequests.size()));
     }
 
 }
