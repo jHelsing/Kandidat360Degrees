@@ -65,7 +65,7 @@
 
 
         <RelativeLayout
-            android:id="@+id/recipe_list_text_layout"
+            android:id="@+id/layout_friends_list_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -82,6 +82,36 @@
                 />
 
         </RelativeLayout>
+
+        <Button
+            android:text="@string/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:textAppearance="@style/TextAppearance.AppCompat"
+            android:textColor="@color/colorPrimary"
+            android:textSize="15sp"
+            android:id="@+id/buttonCancelFriendRequest"
+            android:layout_alignBottom="@+id/friends_list_thumbnail"
+            android:layout_toRightOf="@+id/layout_friends_list_title"
+            android:layout_toLeftOf="@+id/buttonAcceptFriendRequest"
+            android:layout_toStartOf="@+id/buttonAcceptFriendRequest"
+            android:layout_marginRight="24dp"
+            android:layout_marginEnd="24dp" />
+
+        <Button
+            android:text="@string/accept"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_button"
+            android:textColor="@android:color/white"
+            android:textSize="15sp"
+            android:textAllCaps="false"
+            android:id="@+id/buttonAcceptFriendRequest"
+            android:layout_alignBaseline="@+id/buttonCancelFriendRequest"
+            android:layout_alignBottom="@+id/buttonCancelFriendRequest"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true" />
 
     </RelativeLayout>
 </LinearLayout>

@@ -33,6 +33,7 @@ public class FriendsFragment extends Fragment {
     private DrawerLayout mDrawerLayout;
     private TextView toolbarTitle;
     private final ArrayList<FriendTuple> friendList = new ArrayList<>();
+    private final ArrayList<FriendTuple> friendRequestList = new ArrayList<>();
     private RecyclerView mRecyclerView;
     private boolean firstView = false;
 
@@ -46,10 +47,10 @@ public class FriendsFragment extends Fragment {
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        toolbarTitle = (TextView)root.findViewById(R.id.toolbarTitle);
+        toolbarTitle = (TextView) root.findViewById(R.id.toolbarTitle);
         toolbarTitle.setText("Friends");
-        mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
-        toolbarMenuButton = (ImageButton)root.findViewById(R.id.toolbarMenuButton);
+        mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
+        toolbarMenuButton = (ImageButton) root.findViewById(R.id.toolbarMenuButton);
         toolbarMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -60,37 +61,42 @@ public class FriendsFragment extends Fragment {
         //The ListView:
         mRecyclerView = (RecyclerView) root.findViewById(R.id.friends_recycle_view);
 
-        if(!firstView){
-        //TODO: Retrieve data from database to friendList instead!
-        //Test for implementing a sorted arraylist that is sorted by names
-        friendList.add(new FriendTuple( "Jonathan", getActivity()));
-        friendList.add(new FriendTuple( "John", getActivity()));
-        friendList.add(new FriendTuple( "Amar", getActivity()));
-        friendList.add(new FriendTuple( "Bertil", getActivity()));
-        friendList.add(new FriendTuple( "Åsa", getActivity()));
-        friendList.add(new FriendTuple( "Bengt", getActivity()));
-        friendList.add(new FriendTuple( "Peter", getActivity()));
-        friendList.add(new FriendTuple( "Sigrid", getActivity()));
-        friendList.add(new FriendTuple( "Marcus", getActivity()));
-        friendList.add(new FriendTuple( "Daniel", getActivity()));
-        friendList.add(new FriendTuple( "Astrid", getActivity()));
-        friendList.add(new FriendTuple( "Linea", getActivity()));
-        friendList.add(new FriendTuple( "Olof", getActivity()));
-        friendList.add(new FriendTuple( "Fredrik", getActivity()));
-        friendList.add(new FriendTuple( "Isabell", getActivity()));
-        friendList.add(new FriendTuple( "Greta", getActivity()));
-        friendList.add(new FriendTuple( "Alexander", getActivity()));
-        friendList.add(new FriendTuple( "Linda", getActivity()));
-        friendList.add(new FriendTuple( "Sebastian", getActivity()));
-        friendList.add(new FriendTuple( "Axel", getActivity()));
-        friendList.add(new FriendTuple( "Steve", getActivity()));
+        if (!firstView) {
+            //TODO: Retrieve data from database to friendList instead!
+            //Test for implementing a sorted arraylist that is sorted by names
+            friendList.add(new FriendTuple("Jonathan", getActivity()));
+            friendList.add(new FriendTuple("John", getActivity()));
+            friendList.add(new FriendTuple("Amar", getActivity()));
+            friendList.add(new FriendTuple("Bertil", getActivity()));
+            friendList.add(new FriendTuple("Åsa", getActivity()));
+            friendList.add(new FriendTuple("Bengt", getActivity()));
+            friendList.add(new FriendTuple("Peter", getActivity()));
+            friendList.add(new FriendTuple("Sigrid", getActivity()));
+            friendList.add(new FriendTuple("Marcus", getActivity()));
+            friendList.add(new FriendTuple("Daniel", getActivity()));
+            friendList.add(new FriendTuple("Astrid", getActivity()));
+            friendList.add(new FriendTuple("Linea", getActivity()));
+            friendList.add(new FriendTuple("Olof", getActivity()));
+            friendList.add(new FriendTuple("Fredrik", getActivity()));
+            friendList.add(new FriendTuple("Isabell", getActivity()));
+            friendList.add(new FriendTuple("Greta", getActivity()));
+            friendList.add(new FriendTuple("Alexander", getActivity()));
+            friendList.add(new FriendTuple("Linda", getActivity()));
+            friendList.add(new FriendTuple("Sebastian", getActivity()));
+            friendList.add(new FriendTuple("Axel", getActivity()));
+            friendList.add(new FriendTuple("Steve", getActivity()));
 
-            sortFriendlistByName();
+            friendRequestList.add(new FriendTuple("Maja",getActivity()));
+            friendRequestList.add(new FriendTuple("Sofia",getActivity()));
+
+            sortFriendlistByName(friendList);
+            sortFriendlistByName(friendRequestList);
+            friendRequestList.add(0,new FriendTuple("Friend requests", getActivity()));
             addSectionHeadersToFriendlist();
             firstView = true;
         }
 
-        FriendsAdapter adapter = new FriendsAdapter(getActivity(),friendList);
+        FriendsAdapter adapter = new FriendsAdapter(getActivity(), friendList, friendRequestList);
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         //TODO: Add separators to the RecyclerView
@@ -98,7 +104,7 @@ public class FriendsFragment extends Fragment {
         return root;
     }
 
-    public void sortFriendlistByName() {
+    public void sortFriendlistByName(ArrayList<FriendTuple> friendList) {
         Collections.sort(friendList, new Comparator<FriendTuple>() {
             @Override
             public int compare(FriendTuple o1, FriendTuple o2) {
@@ -111,12 +117,12 @@ public class FriendsFragment extends Fragment {
 
     public void addSectionHeadersToFriendlist() {
         char currentLetter = friendList.get(0).getUserName().charAt(0);
-        friendList.add(0,new FriendTuple(currentLetter + "", getActivity()));
-        for(int i = 1; i < friendList.size()-1; i++){
+        friendList.add(0, new FriendTuple(currentLetter + "", getActivity()));
+        for (int i = 1; i < friendList.size() - 1; i++) {
             currentLetter = friendList.get(i).getUserName().charAt(0);
-            char nextLetter = friendList.get(i+1).getUserName().charAt(0);
-            if(currentLetter != nextLetter){
-                friendList.add(i+1,new FriendTuple(nextLetter + "", getActivity()));
+            char nextLetter = friendList.get(i + 1).getUserName().charAt(0);
+            if (currentLetter != nextLetter) {
+                friendList.add(i + 1, new FriendTuple(nextLetter + "", getActivity()));
             }
         }
     }
@@ -124,6 +130,6 @@ public class FriendsFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         //inflater.inflate(R.menu.toolmenu_search, menu);
-        super.onCreateOptionsMenu(menu,inflater);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 }
