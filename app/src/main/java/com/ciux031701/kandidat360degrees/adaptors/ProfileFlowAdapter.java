@@ -9,13 +9,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.ciux031701.kandidat360degrees.R;
+import com.ciux031701.kandidat360degrees.representation.PanoramaProfile;
+import com.google.android.gms.panorama.Panorama;
 
 /**
  * Created by boking on 2017-02-21.
  */
 
-public class ProfileFlowAdapter extends ArrayAdapter<FlowPicture> {
-    public ProfileFlowAdapter(Context context, FlowPicture[] pictures) {
+public class ProfileFlowAdapter extends ArrayAdapter<PanoramaProfile> {
+    public ProfileFlowAdapter(Context context, PanoramaProfile[] pictures) {
         super(context, R.layout.picture_profile_layout,pictures);
 
     }
@@ -23,7 +25,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<FlowPicture> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent){
 
-        FlowPicture singlePic = getItem(position);
+        PanoramaProfile singlePic = getItem(position);
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View customView = inflater.inflate(R.layout.picture_profile_layout,parent,false);
 

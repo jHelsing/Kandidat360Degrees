@@ -12,8 +12,8 @@ import android.view.*;
 import android.widget.*;
 
 import com.ciux031701.kandidat360degrees.communication.Session;
-import com.ciux031701.kandidat360degrees.adaptors.FlowPicture;
 import com.ciux031701.kandidat360degrees.adaptors.ProfileFlowAdapter;
+import com.ciux031701.kandidat360degrees.representation.PanoramaProfile;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.panorama.Panorama;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -51,8 +52,8 @@ public class ProfileFragment extends Fragment {
 
     private ListView pictureListView;
     private ListAdapter profileFlowAdapter;
-    private ArrayList<FlowPicture> pictures;
-    private FlowPicture[] pictureArray;
+    private ArrayList<PanoramaProfile> pictures;
+    private PanoramaProfile[] pictureArray;
 
     private boolean listMode = true;
     private boolean first = true;
@@ -91,7 +92,7 @@ public class ProfileFragment extends Fragment {
         loadPicturesFromDB();
 
         //Converts arraylist to array
-        pictureArray = new FlowPicture[pictures.size()];
+        pictureArray = new PanoramaProfile[pictures.size()];
         pictureArray = pictures.toArray(pictureArray);
 
         viewSwitchButton.setOnClickListener(new View.OnClickListener() {
@@ -146,9 +147,12 @@ public class ProfileFragment extends Fragment {
     public void loadPicturesFromDB(){
         //Example of how to add
         //Drawable currentPic = image from database convertet to a Drawable. Uses template picture without third argument
-        pictures.add(new FlowPicture("Gothenburg","2017-02-08",""));
-        pictures.add(new FlowPicture("Stockholm","2017-02-28",""));
-        pictures.add(new FlowPicture("Malmö","2017-03-03",""));
+        PanoramaProfile pp = new PanoramaProfile(0,null,false, "2017-02-08", "Gothenburg", 5);
+        pictures.add(pp);
+        pp = new PanoramaProfile(0,null,false, "2017-02-28", "Stockholm", 0);
+        pictures.add(pp);
+        pp = new PanoramaProfile(0,null,false, "2017-03-03", "Malmö", 2);
+        pictures.add(pp);
     }
 
     private void setUpMap() {

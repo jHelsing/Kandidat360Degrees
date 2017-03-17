@@ -39,8 +39,8 @@ public class PanoramaProfile {
         return date;
     }
 
-    public boolean isFavorited() {
-        return favorited;
+    public boolean isFavorite() {
+        return favorite;
     }
 
     public Drawable getPreview() {
