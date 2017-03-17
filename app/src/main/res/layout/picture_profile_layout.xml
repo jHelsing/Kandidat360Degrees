@@ -17,7 +17,7 @@
 
         <ImageView
                 android:layout_width="wrap_content"
-                app:srcCompat="@drawable/example_panorama"
+                app:srcCompat="@drawable/example_panorama_small"
                 android:id="@+id/panoramaPreview"
                 android:scaleType="fitXY"
                 android:layout_height="80dp" />
