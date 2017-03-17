@@ -28,6 +28,7 @@ import com.google.android.gms.panorama.Panorama;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Map;
 
 
 /**
@@ -259,20 +260,7 @@ public class ProfileFragment extends Fragment {
                     }
                 });
 
-                try {
-                    // Customise the styling of the base map using a JSON object defined
-                    // in a raw resource file.
-                    boolean success = googleMap.setMapStyle(
-                            MapStyleOptions.loadRawResourceStyle(
-                                    getActivity(), R.raw.style_json));
-
-                    if (!success) {
-                        Log.e("explore", "Style parsing failed.");
-                    }
-                } catch (Resources.NotFoundException e) {
-                    Log.e("explore", "Can't find style. Error: ", e);
-                }
-
+                ((MainActivity) getActivity()).mapStyling(googleMap);
 
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
                 // For dropping a marker at a point on the Map

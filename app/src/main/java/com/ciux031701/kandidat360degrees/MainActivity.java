@@ -2,9 +2,11 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -14,8 +16,10 @@ import com.ciux031701.kandidat360degrees.communication.JReqDestroySession;
 import com.ciux031701.kandidat360degrees.communication.JRequester;
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.ciux031701.kandidat360degrees.communication.Session;
+import com.google.android.gms.maps.model.MapStyleOptions;
 
 /**
  * Created by boking on 2017-02-14.
@@ -163,6 +167,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         JReqDestroySession destroySession = new JReqDestroySession();
         JRequester.setRequest(destroySession);
         JRequester.sendRequest();
+    }
+
+    public void mapStyling(GoogleMap map) {
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            boolean success = map.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            this, R.raw.style_json));
+
+            if (!success) {
+                Log.e("explore", "Style parsing failed.");
+            }
+        } catch (Resources.NotFoundException e) {
+            Log.e("explore", "Can't find style. Error: ", e);
+        }
     }
 
 }

@@ -139,24 +139,14 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                         marker.setRotation(marker.getRotation() + 20);
                     }
                 });
-                try {
-                    // Customise the styling of the base map using a JSON object defined
-                    // in a raw resource file.
-                    boolean success = googleMap.setMapStyle(
-                            MapStyleOptions.loadRawResourceStyle(
-                                    getActivity(), R.raw.style_json));
 
-                    if (!success) {
-                        Log.e("explore", "Style parsing failed.");
-                    }
-                } catch (Resources.NotFoundException e) {
-                    Log.e("explore", "Can't find style. Error: ", e);
-                }
+                ((MainActivity) getActivity()).mapStyling(googleMap);
 
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
                 // For dropping a marker at a point on the Map
                 LatLng gothenburg = new LatLng(57.4, 12);
-                googleMap.addMarker(new MarkerOptions().position(gothenburg).title("Here we go bois").snippet("its happening!").icon(BitmapDescriptorFactory
+                googleMap.addMarker(new MarkerOptions().position(gothenburg).title("Here we go bois")
+                        .snippet("its happening!").icon(BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                 // For zooming automatically to the location of the marker
                 //CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(12).build();
