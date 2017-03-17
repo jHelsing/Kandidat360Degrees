@@ -91,7 +91,7 @@ public class FriendsFragment extends Fragment {
 
             sortFriendlistByName(friendList);
             sortFriendlistByName(friendRequestList);
-            friendRequestList.add(0,new FriendTuple("Friend requests", getActivity()));
+            friendRequestList.add(0,new FriendTuple(getResources().getString(R.string.friend_requests), getActivity()));
             addSectionHeadersToFriendlist();
             firstView = true;
         }

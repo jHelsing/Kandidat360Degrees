@@ -52,4 +52,6 @@
     <string name="add_friend">Add friend</string>
     <string name="remove_friend">Remove friend</string>
     <string name="acc_settings">Settings</string>
+    <!-- Friends -->
+    <string name="friend_requests">Friend requests</string>
 </resources>
