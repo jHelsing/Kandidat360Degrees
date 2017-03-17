@@ -1,10 +1,11 @@
-package com.ciux031701.kandidat360degrees;
+package com.ciux031701.kandidat360degrees.representation;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.widget.ImageView;
+import com.ciux031701.kandidat360degrees.R;
 
 /**
  * Created by AMAR on 2017-03-09.

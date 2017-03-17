@@ -17,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.ciux031701.kandidat360degrees.adaptors.FriendsAdapter;
+import com.ciux031701.kandidat360degrees.representation.FriendTuple;
 
 import java.util.ArrayList;
 import java.util.Collections;

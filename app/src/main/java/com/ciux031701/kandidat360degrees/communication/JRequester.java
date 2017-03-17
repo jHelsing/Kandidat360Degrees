@@ -1,12 +1,9 @@
-package com.ciux031701.kandidat360degrees.Communication;
+package com.ciux031701.kandidat360degrees.communication;
 
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.*;
-import com.android.volley.toolbox.StringRequest;
 import com.ciux031701.kandidat360degrees.ThreeSixtyWorld;
 
 import org.json.JSONException;

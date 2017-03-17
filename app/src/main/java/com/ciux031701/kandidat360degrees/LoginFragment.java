@@ -13,8 +13,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.ciux031701.kandidat360degrees.Communication.*;
-import com.ciux031701.kandidat360degrees.Communication.JRequest.JResultListener;
+import com.ciux031701.kandidat360degrees.communication.*;
+import com.ciux031701.kandidat360degrees.communication.JRequest.JResultListener;
 import android.content.Intent;
 import android.widget.Toast;
 

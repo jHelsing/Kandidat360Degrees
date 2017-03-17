@@ -22,8 +22,8 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ciux031701.kandidat360degrees.adaptors.FriendsAdapter;
 import com.ciux031701.kandidat360degrees.adaptors.ShareAdapter;
+import com.ciux031701.kandidat360degrees.representation.FriendTuple;
 
 import java.util.ArrayList;
 import java.util.Collections;

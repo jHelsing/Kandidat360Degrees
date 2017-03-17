@@ -2,7 +2,6 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -11,18 +10,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.ciux031701.kandidat360degrees.Communication.JReqDestroySession;
-import com.ciux031701.kandidat360degrees.Communication.JRequest;
-import com.ciux031701.kandidat360degrees.Communication.JRequester;
+import com.ciux031701.kandidat360degrees.communication.JReqDestroySession;
+import com.ciux031701.kandidat360degrees.communication.JRequester;
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.ciux031701.kandidat360degrees.Communication.Session;
-
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.ciux031701.kandidat360degrees.communication.Session;
 
 /**
  * Created by boking on 2017-02-14.

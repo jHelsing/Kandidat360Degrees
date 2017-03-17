@@ -1,7 +1,6 @@
 package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -12,7 +11,7 @@ import android.util.Log;
 import android.view.*;
 import android.widget.*;
 
-import com.ciux031701.kandidat360degrees.Communication.Session;
+import com.ciux031701.kandidat360degrees.communication.Session;
 import com.ciux031701.kandidat360degrees.adaptors.FlowPicture;
 import com.ciux031701.kandidat360degrees.adaptors.ProfileFlowAdapter;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,7 +26,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 
 
@@ -51,10 +49,10 @@ public class ProfileFragment extends Fragment {
     private ImageView infoWindowImage;
     private TextView toolbarTitle;
 
-    ListView pictureListView;
-    ListAdapter profileFlowAdapter;
-    ArrayList<FlowPicture> pictures;
-    FlowPicture[] pictureArray;
+    private ListView pictureListView;
+    private ListAdapter profileFlowAdapter;
+    private ArrayList<FlowPicture> pictures;
+    private FlowPicture[] pictureArray;
 
     private boolean listMode = true;
     private boolean first = true;

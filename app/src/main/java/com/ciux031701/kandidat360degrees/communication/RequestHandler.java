@@ -1,4 +1,4 @@
-package com.ciux031701.kandidat360degrees.Communication;
+package com.ciux031701.kandidat360degrees.communication;
 
 
 import android.content.Context;

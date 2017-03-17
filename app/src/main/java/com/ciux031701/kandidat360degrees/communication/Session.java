@@ -1,7 +1,6 @@
-package com.ciux031701.kandidat360degrees.Communication;
+package com.ciux031701.kandidat360degrees.communication;
 import com.ciux031701.kandidat360degrees.ThreeSixtyWorld;
 import android.content.SharedPreferences;
-import com.google.gson.Gson;
 
 /**
  * Created by boking on 2017-02-21.

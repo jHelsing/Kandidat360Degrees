@@ -48,11 +48,11 @@
         </activity>
 
         <service
-            android:name=".Communication.DownloadService"
+            android:name=".communication.DownloadService"
             android:enabled="true"
             android:exported="true"></service>
         <service
-            android:name=".Communication.UploadService"
+            android:name=".communication.UploadService"
             android:exported="false"></service>
     </application>
 

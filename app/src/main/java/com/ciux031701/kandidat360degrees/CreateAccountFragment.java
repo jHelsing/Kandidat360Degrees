@@ -11,8 +11,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import android.widget.TextView;
-import com.ciux031701.kandidat360degrees.Communication.*;
-import com.ciux031701.kandidat360degrees.Communication.JRequest.*;
+import com.ciux031701.kandidat360degrees.communication.*;
+import com.ciux031701.kandidat360degrees.communication.JRequest.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;

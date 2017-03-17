@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.ciux031701.kandidat360degrees.FriendTuple;
+import com.ciux031701.kandidat360degrees.representation.FriendTuple;
 import com.ciux031701.kandidat360degrees.R;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
