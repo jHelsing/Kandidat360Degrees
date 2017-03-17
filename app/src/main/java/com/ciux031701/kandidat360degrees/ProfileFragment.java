@@ -2,6 +2,7 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
@@ -109,13 +110,15 @@ public class ProfileFragment extends Fragment {
                 if(listMode){
                     pictureListView.setVisibility(View.GONE);
                     listMode = false;
-                    viewSwitchButton.setImageDrawable(getResources().getDrawable(R.drawable.enabled_map_view_profile_icon));
+                    viewSwitchButton.setImageDrawable(getResources()
+                            .getDrawable(R.drawable.enabled_map_view_profile_icon));
                     setUpMap();
                     mapView.setVisibility(View.VISIBLE);
                 } else {
                     pictureListView.setVisibility(View.VISIBLE);
                     listMode = true;
-                    viewSwitchButton.setImageDrawable(getResources().getDrawable(R.drawable.disable_map_view_icon_profile));
+                    viewSwitchButton.setImageDrawable(getResources()
+                            .getDrawable(R.drawable.disable_map_view_icon_profile));
                     mapView.setVisibility(View.GONE);
                 }
             }
@@ -210,7 +213,11 @@ public class ProfileFragment extends Fragment {
                                 // TODO send request to remove friend from session.getUser() for username
                                 break;
                             case "Settings":
-                                // TODO change fragment to settings
+                                final FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                ft.replace(R.id.content_frame, new SettingsFragment(), "Settings");
+                                ft.addToBackStack("Settings");
+                                ft.commitAllowingStateLoss();
+                                getFragmentManager().executePendingTransactions();
                                 break;
                         }
                         return false;
@@ -268,7 +275,8 @@ public class ProfileFragment extends Fragment {
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
                 // For dropping a marker at a point on the Map
                 LatLng gothenburg = new LatLng(57.4, 12);
-                googleMap.addMarker(new MarkerOptions().position(gothenburg).title("Here we go bois").snippet("its happening!").icon(BitmapDescriptorFactory
+                googleMap.addMarker(new MarkerOptions().position(gothenburg).title("Here we go bois")
+                        .snippet("its happening!").icon(BitmapDescriptorFactory
                         .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                 // For zooming automatically to the location of the marker
                 //CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(12).build();
