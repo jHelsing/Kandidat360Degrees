@@ -60,7 +60,7 @@ public class FriendsAdapter extends FriendsListAdapter {
             TextView friendlistSectionHeaderText = (TextView) holder.itemView.findViewById(R.id.friends_list_letter);
             friendlistDetails.setVisibility(View.GONE);
             friendlistSectionHeader.setVisibility(View.VISIBLE);
-            friendlistSectionHeaderText.setText("Friend requests");
+            friendlistSectionHeaderText.setText(friendRequests.get(position).getUserName());
         } else if (position < friendRequests.size()) {
             //List friend requests
             FriendTuple data = friendRequests.get(position);
