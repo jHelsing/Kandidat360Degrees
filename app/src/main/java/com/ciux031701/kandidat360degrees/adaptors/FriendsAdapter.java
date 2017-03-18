@@ -3,6 +3,7 @@ package com.ciux031701.kandidat360degrees.adaptors;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.ContentProvider;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -15,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.ciux031701.kandidat360degrees.MainActivity;
 import com.ciux031701.kandidat360degrees.representation.FriendTuple;
 import com.ciux031701.kandidat360degrees.ProfileFragment;
 import com.ciux031701.kandidat360degrees.R;
@@ -63,7 +65,7 @@ public class FriendsAdapter extends FriendsListAdapter {
         } else if (isFriendRequest(position)) { //show friend request
             showFriendRequestItem(position, friendlistDetails, friendlistSectionHeader, titleTextView, thumbnailImageView, acceptButton, cancelButton);
         } else if (isFriend(position, getDataSource())) { //show friend
-            showFriendItem(position,acceptButton,cancelButton,friendlistDetails,friendlistSectionHeader,titleTextView,thumbnailImageView,holder,context);
+            showFriendItem(position,acceptButton,cancelButton,friendlistDetails,friendlistSectionHeader,titleTextView,thumbnailImageView,holder);
         } else { //show section header
             showFriendHeader(position,acceptButton,cancelButton,holder,friendlistDetails,friendlistSectionHeader);
         }
@@ -122,7 +124,7 @@ public class FriendsAdapter extends FriendsListAdapter {
     }
 
     private void showFriendItem(int position, Button acceptButton, Button cancelButton, RelativeLayout friendlistDetails, LinearLayout friendlistSectionHeader,
-                                TextView titleTextView, ImageView thumbnailImageView, final RecyclerView.ViewHolder holder, final Context context) {
+                                TextView titleTextView, ImageView thumbnailImageView, final RecyclerView.ViewHolder holder) {
         //List the user's friends
         ArrayList<FriendTuple> mDataSource = getDataSource();
         FriendTuple data = mDataSource.get(position - friendRequests.size());
@@ -134,7 +136,7 @@ public class FriendsAdapter extends FriendsListAdapter {
         titleTextView.setText(data.getUserName());
         thumbnailImageView.setImageDrawable(data.getProfilePicture());
 
-        addListenerToView(holder,context);
+        addListenerToView(holder, getContext());
     }
 
     private void addListenerToView(final RecyclerView.ViewHolder holder, final Context context){
@@ -142,15 +144,18 @@ public class FriendsAdapter extends FriendsListAdapter {
             @Override
             public void onClick(View view) {
                 String selectedUser = ((TextView) holder.itemView.findViewById(R.id.friends_list_title)).getText().toString();
-                Fragment fragment = new ProfileFragment();
-                Bundle setArgs = new Bundle();
-                setArgs.putString("username", selectedUser);
-                fragment.setArguments(setArgs);
-                FragmentManager fragmentManager = ((FragmentActivity) context).getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+
+                ((MainActivity) context).showProfile(selectedUser);
+
+                //Fragment fragment = new ProfileFragment();
+                //Bundle setArgs = new Bundle();
+                //setArgs.putString("username", selectedUser);
+                //fragment.setArguments(setArgs);
+                //FragmentManager fragmentManager = ((FragmentActivity) context).getFragmentManager();
+                //FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                //fragmentTransaction.replace(R.id.content_frame, fragment);
+                //fragmentTransaction.addToBackStack(null);
+                //fragmentTransaction.commit();
             }
         });
     }
