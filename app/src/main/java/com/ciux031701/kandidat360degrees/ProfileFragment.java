@@ -7,6 +7,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import com.ciux031701.kandidat360degrees.adaptors.ProfileFlowAdapter;
@@ -170,8 +171,24 @@ public class ProfileFragment extends Fragment {
         Bundle args = getArguments();
         username = args.getString("username");
         userNameView.setText(username);
-        int panoramaCount = args.getInt("uploadCount");
-        int favCount = args.getInt("favsCount");
+
+        int panoramaCount = 0;
+        try{
+            if(!((args.getString("uploadCount")).equals(null))){
+                panoramaCount = Integer.parseInt(args.getString("uploadCount"));
+            }
+        } catch (NumberFormatException e){
+            e.printStackTrace();
+        }
+
+        int favCount = 0;
+        try{
+            if(!((args.getString("favsCount")).equals(null))){
+                favCount = Integer.parseInt(args.getString("favsCount"));
+            }
+        } catch (NumberFormatException e){
+            e.printStackTrace();
+        }
 
         DecimalFormat df = new DecimalFormat("#.##");
         df.setRoundingMode(RoundingMode.CEILING);

@@ -204,17 +204,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onHasResult(JSONObject result) {
                         boolean error;
-                        String message = null;
-                        String username = "";
-                        int uploaded = -1, views = -1, favs = -1;
+                        String message = null, username = null, uploaded = null, views = null, favs = null;
                         JSONArray images = new JSONArray();
                         try{
                             error = result.getBoolean("error");
                             message = result.getString("message");
                             username = result.getString("user");
-                            uploaded = result.getInt("uploaded");
-                            views = result.getInt("views");
-                            favs = result.getInt("likes");
+                            uploaded = result.getString("uploaded");
+                            views = result.getString("views");
+                            favs = result.getString("likes");
                             images = result.getJSONArray("images");
                         }
                         catch(JSONException je){
@@ -233,9 +231,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             FragmentManager fragmentManager = getFragmentManager();
                             Bundle b = new Bundle();
                             b.putString("username",username);
-                            b.putInt("uploadCount",uploaded);
-                            b.putInt("viewsCount",views);
-                            b.putInt("favsCount",favs);
+                            b.putString("uploadCount",uploaded);
+                            b.putString("viewsCount",views);
+                            b.putString("favsCount",favs);
                             b.putIntArray("images",imgs);
                             fragment.setArguments(b);
                             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();

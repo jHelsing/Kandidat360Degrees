@@ -2,6 +2,7 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,12 +13,15 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-import com.ciux031701.kandidat360degrees.communication.*;
-import com.ciux031701.kandidat360degrees.communication.JRequest.JResultListener;
-import android.content.Intent;
 import android.widget.Toast;
 
+import com.ciux031701.kandidat360degrees.communication.JReqCheckSession;
+import com.ciux031701.kandidat360degrees.communication.JReqLogin;
+import com.ciux031701.kandidat360degrees.communication.JRequest.JResultListener;
+import com.ciux031701.kandidat360degrees.communication.JRequester;
+import com.ciux031701.kandidat360degrees.communication.Session;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -32,10 +36,10 @@ public class LoginFragment extends Fragment {
     Button loginButton;
     Button createAccountButton;
     TextView title;
-    LinearLayout mainLayout;
     EditText usernameField;
     EditText passwordField;
     TextView errorView;
+    ProgressBar loginProgressbar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -50,11 +54,15 @@ public class LoginFragment extends Fragment {
         errorView = (TextView)root.findViewById(R.id.errorView);
         errorView.setVisibility(View.INVISIBLE);
 
+        loginProgressbar = (ProgressBar) root.findViewById(R.id.loginProgressbar);
+
         //GUI
         loginButton = (Button)root.findViewById(R.id.loginButton);
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                loginProgressbar = (ProgressBar) getActivity().findViewById(R.id.loginProgressbar);
+                loginProgressbar.setVisibility(View.VISIBLE);
                 Session.setUser(usernameField.getText().toString());
                 String password = passwordField.getText().toString();
                 JReqLogin loginReq = new JReqLogin(Session.getUser(), password);
@@ -99,7 +107,7 @@ public class LoginFragment extends Fragment {
         title = (TextView)root.findViewById(R.id.appnameView);
         title.setBackgroundResource(R.color.colorPrimary);
 
-        mainLayout = (LinearLayout) root.findViewById(R.id.loginMainLayout);
+        LinearLayout mainLayout = (LinearLayout) root.findViewById(R.id.loginMainLayout);
         
         mainLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -153,5 +161,12 @@ public class LoginFragment extends Fragment {
             JRequester.sendRequest();
 
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if(loginProgressbar.getVisibility() == View.VISIBLE)
+            loginProgressbar.setVisibility(View.INVISIBLE);
     }
 }

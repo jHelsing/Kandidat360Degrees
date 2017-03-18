@@ -5,10 +5,13 @@ import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.widget.TextView;
 import com.ciux031701.kandidat360degrees.communication.*;
@@ -16,6 +19,8 @@ import com.ciux031701.kandidat360degrees.communication.JRequest.*;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import static android.content.Context.INPUT_METHOD_SERVICE;
 
 /**
  * Created by Anna on 2017-02-22. Modified by Amar on 2017-03-16.
@@ -157,6 +162,17 @@ public class CreateAccountFragment extends Fragment {
                 JRequester.sendRequest();
 
 
+            }
+        });
+
+        LinearLayout mainLayout = (LinearLayout) root.findViewById(R.id.accDetailsMainLayout);
+
+        mainLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event){
+                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                return true;
             }
         });
         
