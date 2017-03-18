@@ -143,19 +143,9 @@ public class FriendsAdapter extends FriendsListAdapter {
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String selectedUser = ((TextView) holder.itemView.findViewById(R.id.friends_list_title)).getText().toString();
-
+                String selectedUser = ((TextView) holder.itemView.findViewById(R.id.friends_list_title))
+                        .getText().toString();
                 ((MainActivity) context).showProfile(selectedUser);
-
-                //Fragment fragment = new ProfileFragment();
-                //Bundle setArgs = new Bundle();
-                //setArgs.putString("username", selectedUser);
-                //fragment.setArguments(setArgs);
-                //FragmentManager fragmentManager = ((FragmentActivity) context).getFragmentManager();
-                //FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                //fragmentTransaction.replace(R.id.content_frame, fragment);
-                //fragmentTransaction.addToBackStack(null);
-                //fragmentTransaction.commit();
             }
         });
     }
