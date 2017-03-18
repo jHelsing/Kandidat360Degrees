@@ -73,7 +73,6 @@ public class CreateAccountFragment extends Fragment {
                                 try {
                                     boolean error = result.getBoolean("error");
                                     String message = result.getString("message");
-                                    Log.d("Databas", message);
                                     if(!error){
                                         Toast.makeText(getActivity(), "Account created",Toast.LENGTH_SHORT).show();
                                         getFragmentManager().popBackStack();

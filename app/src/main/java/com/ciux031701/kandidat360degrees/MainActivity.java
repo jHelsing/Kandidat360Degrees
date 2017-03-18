@@ -2,6 +2,7 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -13,8 +14,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.communication.JReqDestroySession;
+import com.ciux031701.kandidat360degrees.communication.JReqProfile;
+import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.communication.JRequester;
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.google.android.gms.maps.GoogleMap;
@@ -22,6 +26,13 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.ciux031701.kandidat360degrees.communication.Session;
 import com.google.android.gms.maps.model.MapStyleOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 /**
  * Created by boking on 2017-02-14.
@@ -193,13 +204,53 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      */
     public void showProfile(String username) {
         // TODO Fetch profile information from backend, the specific user information
-
-        int favs = 0;
-        int panoramas = 0;
-        // Start the fragment and change the view.
-        Bundle profileInfo = new Bundle(4);
-        profileInfo.putString("USERNAME", username);
-        profileInfo.putInt("FAVS", favs);
-        profileInfo.putInt("PANORAMAS", panoramas);
+        JReqProfile profileReq = new JReqProfile(username, Session.getId());
+        profileReq.setJResultListener(
+                new JRequest.JResultListener(){
+                    @Override
+                    public void onHasResult(JSONObject result) {
+                        boolean error;
+                        String message = null;
+                        String username = "";
+                        int uploaded = -1, views = -1, favs = -1;
+                        JSONArray images = new JSONArray();
+                        try{
+                            error = result.getBoolean("error");
+                            message = result.getString("message");
+                            username = result.getString("user");
+                            uploaded = result.getInt("uploaded");
+                            views = result.getInt("views");
+                            favs = result.getInt("likes");
+                            images = result.getJSONArray("images");
+                        }
+                        catch(JSONException je){
+                            error = true;
+                        }
+                        if(!error){
+                            int imgs[] = new int[images.length()];
+                            for (int i=0; i < images.length(); i++){
+                                try{
+                                    imgs[i] = Integer.parseInt(images.get(i).toString());
+                                } catch (JSONException e){
+                                    e.printStackTrace();
+                                }
+                            }
+                            ProfileFragment fragment = new ProfileFragment();
+                            FragmentManager fragmentManager = getFragmentManager();
+                            Bundle b = new Bundle();
+                            b.putString("username",username);
+                            b.putInt("uploadCount",uploaded);
+                            b.putInt("viewsCount",views);
+                            b.putInt("favsCount",favs);
+                            b.putIntArray("images",imgs);
+                            fragment.setArguments(b);
+                            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                        } else{
+                            Toast.makeText(getApplicationContext(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+        JRequester.setRequest(profileReq);
+        JRequester.sendRequest();
     }
 }
