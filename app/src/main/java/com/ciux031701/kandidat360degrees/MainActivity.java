@@ -74,13 +74,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         drawerHeader.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ProfileFragment fragment = new ProfileFragment();
-                FragmentManager fragmentManager = getFragmentManager();
-                setArgs = new Bundle();
-                setArgs.putString("username", Session.getUser());
-                fragment.setArguments(setArgs);
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-                setTitle("Profile");
+                showProfile(Session.getUser());
                 mDrawerLayout.closeDrawer(mDrawerList);
                 mDrawerLayout.closeDrawers();
             }
