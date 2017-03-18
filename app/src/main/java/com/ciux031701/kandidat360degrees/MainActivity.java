@@ -3,7 +3,9 @@ package com.ciux031701.kandidat360degrees;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -80,12 +82,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         showExploreView();
-
-        /**
-         * Testing code for FTP connection will be commented when on git, just leave it be :D
-         */
-        //FTPHandler handler = new FTPHandler();
-        //handler.downloadPanoramaImage(this, 111);
     }
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -169,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         JRequester.sendRequest();
     }
 
-    public void mapStyling(GoogleMap map) {
+    public void loadMapStyling(GoogleMap map) {
         try {
             // Customise the styling of the base map using a JSON object defined
             // in a raw resource file.
@@ -185,4 +181,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    /**
+     * Call this method to display the profile fragment. This makes sure that the profile
+     * fragment recieves all the necessary information. This method does not load the panorama
+     * feed for the parameter username. It only loads the user information, total number of panoramas,
+     * total number of favorite-markings, profile image etc.
+     *
+     * The panorama feed for the user is instead loaded asynchronous in onCreateView in ProfileFragment.
+     *
+     * @param username - The username to show the profile page for.
+     */
+    public void showProfile(String username) {
+        // TODO Fetch profile information from backend, the specific user information
+
+        int favs = 0;
+        int panoramas = 0;
+        // Start the fragment and change the view.
+        Bundle profileInfo = new Bundle(4);
+        profileInfo.putString("USERNAME", username);
+        profileInfo.putInt("FAVS", favs);
+        profileInfo.putInt("PANORAMAS", panoramas);
+    }
 }

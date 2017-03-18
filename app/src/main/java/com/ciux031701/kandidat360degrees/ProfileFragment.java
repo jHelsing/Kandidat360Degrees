@@ -2,12 +2,10 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.*;
 import android.widget.*;
 
@@ -20,15 +18,12 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.panorama.Panorama;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Map;
 
 
 /**
@@ -260,7 +255,7 @@ public class ProfileFragment extends Fragment {
                     }
                 });
 
-                ((MainActivity) getActivity()).mapStyling(googleMap);
+                ((MainActivity) getActivity()).loadMapStyling(googleMap);
 
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
                 // For dropping a marker at a point on the Map
