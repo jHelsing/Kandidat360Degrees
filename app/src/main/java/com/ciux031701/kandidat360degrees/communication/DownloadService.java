@@ -30,7 +30,7 @@ public class DownloadService extends IntentService {
         String localFilePath = "";
         String serverFilePath = "";
         String filename = "";
-        ImageType type = (ImageType) intent.getSerializableExtra("ImageType");
+        ImageType type = (ImageType) intent.getSerializableExtra("IMAGETYPE");
         switch (type) {
             case PREVIEW:
                 localFilePath = FTPInfo.PREVIEW_LOCAL_LOCATION;
@@ -167,7 +167,6 @@ public class DownloadService extends IntentService {
         intent.putExtra("IMAGEID", fileName);
         intent.putExtra("RESULT", result);
         intent.putExtra("FILEPATH", outputPath);
-        intent.putExtra("TYPE", type);
         sendBroadcast(intent);
         this.stopSelf();
     }

@@ -3,16 +3,12 @@ package com.ciux031701.kandidat360degrees;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.app.IntentService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.os.Bundle;
-import android.provider.ContactsContract;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -35,8 +31,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -64,7 +58,7 @@ public class ProfileFragment extends Fragment {
     private boolean first = true;
     private Bundle instanceState;
 
-    private BroadcastReceiver profileImageReciever = new ProfileImageBroadcastReciever();
+    private BroadcastReceiver profileImageReciever = new ProfileImageBroadcastReceiver();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -327,25 +321,20 @@ public class ProfileFragment extends Fragment {
         });
     }
 
-    public class ProfileImageBroadcastReciever extends BroadcastReceiver {
+    public class ProfileImageBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            ImageType intentType = (ImageType) intent.getSerializableExtra("TYPE");
-            if(intent.getStringExtra("IMAGEID") == username && ImageType.PROFILE == intentType
-                    && intent.getIntExtra("RESULT", -100) == Activity.RESULT_OK) {
-                // Profile image for the user was sucessfully downloaded and loaded, it should now be shown on screen.
+            if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
                 Log.d("Profile", "Profile image found and results from download are OK.");
-                String path = context.getFilesDir() + "/profiles/"
-                        + "amarillo" + ".jpg";
-                Drawable profileImage = Drawable.createFromPath(path);
-                ((ImageView) root.findViewById(R.id.profileProfileImage)).setImageDrawable(profileImage);
-            } else {
-                Log.d("Profile", "Profile image not found or results from download are CANCELED");
-                // If there wasn't any profile image or if the profile image failed to load,
-                // it should not change the profile image from anonymous.
             }
 
+            String path = context.getFilesDir() + "/profiles/"
+                    + username + ".jpg";
+            Drawable profileImage = Drawable.createFromPath(path);
+            ((ImageView) root.findViewById(R.id.profileProfileImage)).setImageDrawable(profileImage);
+            File file = new File(path);
+            file.delete();
         }
     }
 }
