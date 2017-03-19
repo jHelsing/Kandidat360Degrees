@@ -42,8 +42,6 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        textView = (TextView) root.findViewById(R.id.textView1);
-        textView.setText("settings");
         return root;
     }
 }
