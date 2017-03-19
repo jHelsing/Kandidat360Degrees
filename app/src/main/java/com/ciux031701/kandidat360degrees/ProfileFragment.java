@@ -58,8 +58,6 @@ public class ProfileFragment extends Fragment {
     private boolean first = true;
     private Bundle instanceState;
 
-    private BroadcastReceiver profileImageReciever = new ProfileImageBroadcastReceiver();
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_profile, container, false);
@@ -185,7 +183,7 @@ public class ProfileFragment extends Fragment {
         intent.setAction(DownloadService.NOTIFICATION);
         IntentFilter filter = new IntentFilter();
         filter.addAction(DownloadService.NOTIFICATION);
-        getActivity().registerReceiver(profileImageReciever, filter);
+        getActivity().registerReceiver(new ProfileImageBroadcastReceiver(), filter);
         getActivity().startService(intent);
     }
 
@@ -334,7 +332,10 @@ public class ProfileFragment extends Fragment {
             Drawable profileImage = Drawable.createFromPath(path);
             ((ImageView) root.findViewById(R.id.profileProfileImage)).setImageDrawable(profileImage);
             File file = new File(path);
-            file.delete();
+            if (!file.delete()) {
+                Log.d("Profile", "Profile image has been deleted");
+            }
+            context.unregisterReceiver(this);
         }
     }
 }
