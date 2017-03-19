@@ -1,8 +1,18 @@
 package com.ciux031701.kandidat360degrees;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.app.IntentService;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -11,8 +21,10 @@ import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import com.ciux031701.kandidat360degrees.adaptors.ProfileFlowAdapter;
+import com.ciux031701.kandidat360degrees.communication.DownloadService;
+import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.communication.Session;
-import com.ciux031701.kandidat360degrees.representation.PanoramaProfile;
+import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
@@ -22,6 +34,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -42,12 +57,14 @@ public class ProfileFragment extends Fragment {
 
     private ListView pictureListView;
     private ListAdapter profileFlowAdapter;
-    private ArrayList<PanoramaProfile> pictures;
-    private PanoramaProfile[] pictureArray;
+    private ArrayList<ProfilePanorama> pictures;
+    private int[] panoramaIDs;
 
     private boolean listMode = true;
     private boolean first = true;
     private Bundle instanceState;
+
+    private BroadcastReceiver profileImageReciever = new ProfileImageBroadcastReciever();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -78,10 +95,6 @@ public class ProfileFragment extends Fragment {
         //Get pictures, total likes nbr of friends or whatever we decide to display from db
         pictures = new ArrayList<>();
         loadPicturesFromDB();
-
-        //Converts arraylist to array
-        pictureArray = new PanoramaProfile[pictures.size()];
-        pictureArray = pictures.toArray(pictureArray);
 
         viewSwitchButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -114,7 +127,7 @@ public class ProfileFragment extends Fragment {
         });
 
         pictureListView = (ListView) root.findViewById(R.id.profilePictureListView);
-        profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictureArray);
+        profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
         pictureListView.setAdapter(profileFlowAdapter);
 
         return root;
@@ -135,13 +148,25 @@ public class ProfileFragment extends Fragment {
     //Use this to fill up pictures.
     private void loadPicturesFromDB() {
         // TODO load pictures from the imageid in the getArguments() into an array and start fetching all the images
+
+        panoramaIDs = getArguments().getIntArray("images");
+
+        for(int i=0; i<panoramaIDs.length; i++) {
+            // Fetch each image
+            Intent intent =  new Intent(getActivity(), DownloadService.class);
+            intent.putExtra("IMAGETYPE", "PREVIEW");
+            intent.putExtra("IMAGEID", panoramaIDs[i]);
+            intent.putExtra("TYPE", "DOWNLOAD");
+            getActivity().startService(intent);
+        }
+
         //Example of how to add
         //Drawable currentPic = image from database convertet to a Drawable. Uses template picture without third argument
-        PanoramaProfile pp = new PanoramaProfile(0, null, false, "2017-02-08", "Gothenburg", 5);
+        ProfilePanorama pp = new ProfilePanorama(0, null, false, "2017-02-08", "Gothenburg", 5);
         pictures.add(pp);
-        pp = new PanoramaProfile(0, null, false, "2017-02-28", "Stockholm", 0);
+        pp = new ProfilePanorama(0, null, false, "2017-02-28", "Stockholm", 0);
         pictures.add(pp);
-        pp = new PanoramaProfile(0, null, false, "2017-03-03", "Malmö", 2);
+        pp = new ProfilePanorama(0, null, false, "2017-03-03", "Malmö", 2);
         pictures.add(pp);
     }
 
@@ -156,10 +181,18 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Starts to fetch the profile picture of the user
+     * Starts to fetch the profile picture of the user from the server.
      */
     private void loadProfilePicture() {
-        // TODO start fetching the profile picture from the FTP backend
+        Intent intent =  new Intent(getActivity(), DownloadService.class);
+        intent.putExtra("IMAGETYPE", ImageType.PROFILE);
+        intent.putExtra("USERNAME", username);
+        intent.putExtra("TYPE", "DOWNLOAD");
+        intent.setAction(DownloadService.NOTIFICATION);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DownloadService.NOTIFICATION);
+        getActivity().registerReceiver(profileImageReciever, filter);
+        getActivity().startService(intent);
     }
 
     private void setUpProfileInformation() {
@@ -292,5 +325,27 @@ public class ProfileFragment extends Fragment {
                 //googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             }
         });
+    }
+
+    public class ProfileImageBroadcastReciever extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ImageType intentType = (ImageType) intent.getSerializableExtra("TYPE");
+            if(intent.getStringExtra("IMAGEID") == username && ImageType.PROFILE == intentType
+                    && intent.getIntExtra("RESULT", -100) == Activity.RESULT_OK) {
+                // Profile image for the user was sucessfully downloaded and loaded, it should now be shown on screen.
+                Log.d("Profile", "Profile image found and results from download are OK.");
+                String path = context.getFilesDir() + "/profiles/"
+                        + "amarillo" + ".jpg";
+                Drawable profileImage = Drawable.createFromPath(path);
+                ((ImageView) root.findViewById(R.id.profileProfileImage)).setImageDrawable(profileImage);
+            } else {
+                Log.d("Profile", "Profile image not found or results from download are CANCELED");
+                // If there wasn't any profile image or if the profile image failed to load,
+                // it should not change the profile image from anonymous.
+            }
+
+        }
     }
 }

@@ -9,7 +9,7 @@ import android.graphics.drawable.Drawable;
  * @author Jonathan
  * @version 0.1
  */
-public class PanoramaProfile {
+public class ProfilePanorama {
 
     private int favCount;
     private String location;
@@ -18,7 +18,7 @@ public class PanoramaProfile {
     private Drawable preview;
     private int panoramaID;
 
-    public PanoramaProfile(int panoramaID, Drawable preview, boolean favorite, String date, String location, int favCount) {
+    public ProfilePanorama(int panoramaID, Drawable preview, boolean favorite, String date, String location, int favCount) {
         this.panoramaID = panoramaID;
         this.preview = preview;
         this.favorite = favorite;

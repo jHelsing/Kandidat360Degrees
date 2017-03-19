@@ -29,25 +29,28 @@ public class DownloadService extends IntentService {
         // Create the correct path for the file to be downloaded, both on the server and locally
         String localFilePath = "";
         String serverFilePath = "";
-        switch ((ImageType)intent.getSerializableExtra("IMAGETYPE")) {
+        String filename = "";
+        ImageType type = (ImageType) intent.getSerializableExtra("ImageType");
+        switch (type) {
             case PREVIEW:
                 localFilePath = FTPInfo.PREVIEW_LOCAL_LOCATION;
                 serverFilePath = FTPInfo.PREVIEW_SERVER_LOCATION;
+                filename = intent.getIntExtra("IMAGEID", -1) + FTPInfo.FILETYPE;
                 break;
             case PANORAMA:
                 localFilePath = FTPInfo.PANORAMA_LOCAL_LOCATION;
                 serverFilePath = FTPInfo.PANORAMA_SERVER_LOCATION;
+                filename = intent.getIntExtra("IMAGEID", -1) + FTPInfo.FILETYPE;
                 break;
             case PROFILE:
                 localFilePath = FTPInfo.PROFILE_LOCAL_LOCATION;
                 serverFilePath = FTPInfo.PROFILE_SERVER_LOCATION;
+                filename = intent.getStringExtra("USERNAME") + FTPInfo.FILETYPE;
                 break;
             default:
                 this.stopSelf();
                 break;
         }
-        // Create the name of the file from the ID of the image and the filetype (JPG)
-        String filename = intent.getIntExtra("IMAGEID", -1) + FTPInfo.FILETYPE;
 
         // Make sure that the folder exists where we will store the picture
         File outputDir = new File(getApplicationContext().getFilesDir() + localFilePath);
@@ -66,11 +69,11 @@ public class DownloadService extends IntentService {
            } catch (java.io.IOException e) {
               Log.d("FTP", "File could not be created at location " + outputFile.getPath());
               publishResults(outputFile.getPath(), Activity.RESULT_CANCELED,
-                      intent.getIntExtra("IMAGEID", -1) + "");
+                      intent.getIntExtra("IMAGEID", -1) + "", type);
            }
         } else {
            publishResults(outputFile.getPath(), Activity.RESULT_OK,
-                   intent.getIntExtra("IMAGEID", -1) + "");
+                   intent.getIntExtra("IMAGEID", -1) + "", type);
         }
 
         // Start FTP communication
@@ -92,7 +95,7 @@ public class DownloadService extends IntentService {
               ftpClient.disconnect();
 
               publishResults(outputFile.getPath(), Activity.RESULT_CANCELED,
-                      intent.getIntExtra("IMAGEID", -1) + "");
+                      intent.getIntExtra("IMAGEID", -1) + "", type);
            } else {
               // Login successful
               Log.d("FTP", "Phone logged-in to server: " + ftpClient.getReplyString());
@@ -149,7 +152,7 @@ public class DownloadService extends IntentService {
         } // Done downloading file (try-catch)
 
         // Publish the results and then we are done here
-        publishResults(outputFile.getAbsolutePath(), result, intent.getIntExtra("FILENAME", 0)+"");
+        publishResults(outputFile.getAbsolutePath(), result, intent.getIntExtra("FILENAME", 0)+"", type);
 
     }
 
@@ -159,11 +162,12 @@ public class DownloadService extends IntentService {
     * @param result - The result of the download, -1 if sucessful, 0 if failure
     * @param fileName - The ID of the image that was downloaded.
     */
-    private void publishResults(String outputPath, int result, String fileName) {
+    private void publishResults(String outputPath, int result, String fileName, ImageType type) {
         Intent intent = new Intent(NOTIFICATION);
         intent.putExtra("IMAGEID", fileName);
         intent.putExtra("RESULT", result);
         intent.putExtra("FILEPATH", outputPath);
+        intent.putExtra("TYPE", type);
         sendBroadcast(intent);
         this.stopSelf();
     }

@@ -50,7 +50,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     Bundle b;
     Bundle setArgs;
 
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -197,7 +196,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param username - The username to show the profile page for.
      */
     public void showProfile(String username) {
-        // TODO Fetch profile information from backend, the specific user information
         JReqProfile profileReq = new JReqProfile(username, Session.getId());
         profileReq.setJResultListener(
                 new JRequest.JResultListener(){
