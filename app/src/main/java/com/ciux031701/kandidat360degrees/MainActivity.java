@@ -7,6 +7,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.ContactsContract;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -22,6 +23,7 @@ import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.communication.JRequester;
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.ciux031701.kandidat360degrees.representation.JSONParser;
+import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -197,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param username - The username to show the profile page for.
      */
     public void showProfile(String username) {
-        JReqProfile profileReq = new JReqProfile(username, Session.getId());
+        JReqProfile profileReq = new JReqProfile(username, Session.getId(), Session.getUser());
         profileReq.setJResultListener(
                 new JRequest.JResultListener(){
                     @Override
@@ -218,11 +220,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             error = true;
                         }
                         if(!error){
-                            int imgs[] = new int[images.length()];
+                            ArrayList<ProfilePanorama> imgs = new ArrayList<ProfilePanorama>();
                             for (int i=0; i < images.length(); i++){
                                 try {
                                     JSONArray imgArr = images.getJSONArray(i);
-                                    imgs[i] = Integer.parseInt(imgArr.get(0).toString());
+                                    ProfilePanorama pp = JSONParser.parseToProfilePanorama(imgArr);
+                                    if (pp != null)
+                                        imgs.add(pp);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
@@ -234,7 +238,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             b.putString("uploadCount",uploaded);
                             b.putString("viewsCount",views);
                             b.putString("favsCount",favs);
-                            b.putIntArray("images",imgs);
+                            b.putSerializable("images", imgs);
                             fragment.setArguments(b);
                             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
                         } else{

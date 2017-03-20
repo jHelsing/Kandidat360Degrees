@@ -5,9 +5,9 @@ package com.ciux031701.kandidat360degrees.communication;
  */
 
 public class JReqProfile extends JRequest{
-    public JReqProfile(String username, String sessionid){
+    public JReqProfile(String username, String sessionid, String visitor){
         super();
         PHP_NAME = "profile.php";
-        URL = PHP_ROOT + PHP_NAME + "?" + "user=" + username + "&" + "sessionid=" + sessionid;
+        URL = PHP_ROOT + PHP_NAME + "?" + "user=" + username + "&" + "sessionid=" + sessionid + "&" + "visitor=" + visitor;
     }
 }

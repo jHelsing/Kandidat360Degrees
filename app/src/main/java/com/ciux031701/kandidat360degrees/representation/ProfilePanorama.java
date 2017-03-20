@@ -18,19 +18,21 @@ public class ProfilePanorama {
     private boolean favorite;
     private Drawable preview;
     private int panoramaID;
+    private boolean publicImage;
 
     public ProfilePanorama(int panoramaID, boolean favorite, String date,
-                           String latitude, String longitude, int favCount) {
+                           String latitude, String longitude, int favCount, boolean publicImage) {
         this.panoramaID = panoramaID;
         this.favorite = favorite;
         this.date = date;
         this.latitude = latitude;
         this.longitude = longitude;
         this.favCount = favCount;
+        this.publicImage = publicImage;
     }
 
     public ProfilePanorama(int panoramaID, Drawable preview, boolean favorite, String date,
-                           String latitude, String longitude, int favCount) {
+                           String latitude, String longitude, int favCount, boolean publicImage) {
         this.panoramaID = panoramaID;
         this.preview = preview;
         this.favorite = favorite;
@@ -38,6 +40,7 @@ public class ProfilePanorama {
         this.latitude = latitude;
         this.longitude = longitude;
         this.favCount = favCount;
+        this.publicImage = publicImage;
     }
 
     public int getFavCount() {
@@ -66,6 +69,10 @@ public class ProfilePanorama {
 
     public int getPanoramaID() {
         return panoramaID;
+    }
+
+    public boolean isPublicImage() {
+        return publicImage;
     }
 
     public void setPreview(Drawable preview) {
