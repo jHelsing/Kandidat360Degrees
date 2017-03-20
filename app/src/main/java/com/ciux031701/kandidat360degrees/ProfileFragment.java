@@ -177,7 +177,7 @@ public class ProfileFragment extends Fragment {
         for(int i=0; i<panoramaIDs.length; i++) {
             // Fetch each image
             Intent intent =  new Intent(getActivity(), DownloadService.class);
-            intent.putExtra("IMAGETYPE", "PREVIEW");
+            intent.putExtra("IMAGETYPE", ImageType.PREVIEW);
             intent.putExtra("IMAGEID", panoramaIDs[i]);
             intent.putExtra("TYPE", "DOWNLOAD");
             getActivity().startService(intent);
@@ -320,7 +320,7 @@ public class ProfileFragment extends Fragment {
                 Menu menu = popupMenu.getMenu();
 
                 if (Session.getUser().equalsIgnoreCase(username)) {
-                    menu.add(R.string.acc_settings);
+                    menu.add(R.string.upload_profile_picture);
                 }else{
                     // TODO Add checks to see if person already is friend
                     menu.add(R.string.add_friend);
@@ -337,7 +337,8 @@ public class ProfileFragment extends Fragment {
                             case "Remove friend":
                                 // TODO send request to remove friend from session.getUser() for username
                                 break;
-                            case "Settings":
+                            case "Change profile picture":
+                                // TODO add support for uploading profile picture to server
                                 final FragmentTransaction ft = getFragmentManager().beginTransaction();
                                 ft.replace(R.id.content_frame, new SettingsFragment(), "Settings");
                                 ft.addToBackStack("Settings");

@@ -21,6 +21,7 @@ import com.ciux031701.kandidat360degrees.communication.JReqProfile;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.communication.JRequester;
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
+import com.ciux031701.kandidat360degrees.representation.JSONParser;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -219,9 +220,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         if(!error){
                             int imgs[] = new int[images.length()];
                             for (int i=0; i < images.length(); i++){
-                                try{
-                                    imgs[i] = Integer.parseInt(images.get(i).toString());
-                                } catch (JSONException e){
+                                try {
+                                    JSONArray imgArr = images.getJSONArray(i);
+                                    imgs[i] = Integer.parseInt(imgArr.get(0).toString());
+                                } catch (JSONException e) {
                                     e.printStackTrace();
                                 }
                             }
