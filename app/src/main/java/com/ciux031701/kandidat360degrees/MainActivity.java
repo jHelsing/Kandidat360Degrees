@@ -224,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             for (int i=0; i < images.length(); i++){
                                 try {
                                     JSONArray imgArr = images.getJSONArray(i);
+                                    Log.d("PROFILE", imgArr.toString());
                                     ProfilePanorama pp = JSONParser.parseToProfilePanorama(imgArr);
                                     if (pp != null)
                                         imgs.add(pp);

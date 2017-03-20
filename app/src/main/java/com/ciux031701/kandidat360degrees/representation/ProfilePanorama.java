@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
 public class ProfilePanorama {
 
     private int favCount;
+    private int viewCount;
     private String latitude;
     private String longitude;
     private String date;
@@ -19,20 +20,23 @@ public class ProfilePanorama {
     private Drawable preview;
     private int panoramaID;
     private boolean publicImage;
+    private String description;
 
     public ProfilePanorama(int panoramaID, boolean favorite, String date,
-                           String latitude, String longitude, int favCount, boolean publicImage) {
+                           String latitude, String longitude, int favCount, int viewCount, boolean publicImage, String description) {
         this.panoramaID = panoramaID;
         this.favorite = favorite;
         this.date = date;
         this.latitude = latitude;
         this.longitude = longitude;
         this.favCount = favCount;
+        this.viewCount = viewCount;
         this.publicImage = publicImage;
+        this.description = description;
     }
 
     public ProfilePanorama(int panoramaID, Drawable preview, boolean favorite, String date,
-                           String latitude, String longitude, int favCount, boolean publicImage) {
+                           String latitude, String longitude, int favCount, boolean publicImage, String description) {
         this.panoramaID = panoramaID;
         this.preview = preview;
         this.favorite = favorite;
@@ -40,7 +44,9 @@ public class ProfilePanorama {
         this.latitude = latitude;
         this.longitude = longitude;
         this.favCount = favCount;
+        this.viewCount = viewCount;
         this.publicImage = publicImage;
+        this.description = description;
     }
 
     public int getFavCount() {

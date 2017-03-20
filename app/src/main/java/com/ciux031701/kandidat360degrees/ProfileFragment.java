@@ -172,70 +172,10 @@ public class ProfileFragment extends Fragment {
 
     //Use this to fill up pictures.
     private void loadPicturesFromDB() {
-        panoramaIDs = getArguments().getIntArray("images");
+        // We have the imageids but now we need to start fetching the preview images for them
+        for(int i=0; i<pictures.size(); i++) {
 
-        for(int i=0; i<panoramaIDs.length; i++) {
-            // Fetch each image
-            Intent intent =  new Intent(getActivity(), DownloadService.class);
-            intent.putExtra("IMAGETYPE", ImageType.PREVIEW);
-            intent.putExtra("IMAGEID", panoramaIDs[i]);
-            intent.putExtra("TYPE", "DOWNLOAD");
-            getActivity().startService(intent);
-
-            JRequest getImageInfo = new JReqImageInfoProfile(Session.getId(), panoramaIDs[i], Session.getUser());
-            getImageInfo.setJResultListener(new JRequest.JResultListener() {
-                @Override
-                public void onHasResult(JSONObject result) {
-                    // TODO modify this to fit the need of profile preview information
-                    boolean error;
-                    String message = null, username = null, uploaded = null, views = null, favs = null;
-                    JSONArray images = new JSONArray();
-                    try{
-                        error = result.getBoolean("error");
-                        message = result.getString("message");
-                        username = result.getString("user");
-                        uploaded = result.getString("uploaded");
-                        views = result.getString("views");
-                        favs = result.getString("likes");
-                        images = result.getJSONArray("images");
-                    }
-                    catch(JSONException je){
-                        error = true;
-                    }
-                    if(!error){
-                        int imgs[] = new int[images.length()];
-                        for (int i=0; i < images.length(); i++){
-                            try{
-                                imgs[i] = Integer.parseInt(images.get(i).toString());
-                            } catch (JSONException e){
-                                e.printStackTrace();
-                            }
-                        }
-                        ProfileFragment fragment = new ProfileFragment();
-                        FragmentManager fragmentManager = getFragmentManager();
-                        Bundle b = new Bundle();
-                        b.putString("username",username);
-                        b.putString("uploadCount",uploaded);
-                        b.putString("viewsCount",views);
-                        b.putString("favsCount",favs);
-                        b.putIntArray("images",imgs);
-                    } else{
-                        Toast.makeText(getActivity(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });
-            JRequester.setRequest(getImageInfo);
-            JRequester.sendRequest();
         }
-
-        //Example of how to add
-        //Drawable currentPic = image from database convertet to a Drawable. Uses template picture without third argument
-        ProfilePanorama pp = new ProfilePanorama(0, false, "2017-02-08", "Gothenburg", "Gothenburg", 5);
-        pictures.add(pp);
-        pp = new ProfilePanorama(1, false, "2017-02-28", "Stockholm", "Stockholm", 0);
-        pictures.add(pp);
-        pp = new ProfilePanorama(2, false, "2017-03-03", "Malmö", "Malmö", 2);
-        pictures.add(pp);
     }
 
     private void setUpMap() {
