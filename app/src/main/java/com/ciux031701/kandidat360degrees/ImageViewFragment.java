@@ -36,38 +36,53 @@ public class ImageViewFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_imageview, container, false);
+        args = getArguments();
 
+        doneButton = (ImageButton)root.findViewById(R.id.sendToShareButton);
+
+        if(args.getString("type").equals("camera")){
+            doneButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    Bitmap tempPicture = BitmapFactory.decodeResource(getResources(), R.drawable.panorama_large2);
+                    args = new Bundle();
+                    args.putParcelable("picture", tempPicture);
+
+                    ShareFragment fragment = new ShareFragment();
+                    FragmentManager fragmentManager = getFragmentManager();
+                    fragment.setArguments(args);
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+
+                }
+            });
+        }else{//Only show the picture
+            doneButton.setVisibility(View.GONE);
+        }
         imageView1 = (ImageView)root.findViewById(R.id.imageviewfirst);
         scrollView = (HorizontalScrollView) root.findViewById(R.id.horizontalScrollView);
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
-        doneButton = (ImageButton)root.findViewById(R.id.sendToShareButton);
+
         backButton = (ImageButton)root.findViewById(R.id.viewingBackButton);
         //Scroll to middle dependent on image size
         scrollView.scrollTo(200,0);
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                Fragment fragment = new CameraFragment();
-                FragmentManager fragmentManager = getActivity().getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame,fragment).commit();
-            }
-        });
-        doneButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                Bitmap tempPicture = BitmapFactory.decodeResource(getResources(), R.drawable.panorama_large2);
-                args = new Bundle();
-                args.putParcelable("picture", tempPicture);
+                if(args.getString("type").equals("camera")){
+                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
+                    Fragment fragment = new CameraFragment();
+                    FragmentManager fragmentManager = getActivity().getFragmentManager();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame,fragment).commit();
+                }else{
+                    FragmentManager fm = getActivity().getFragmentManager();
+                    fm.popBackStack ("profile", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                }
 
-                ShareFragment fragment = new ShareFragment();
-                FragmentManager fragmentManager = getFragmentManager();
-                fragment.setArguments(args);
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
             }
         });
+
 
         return root;
     }

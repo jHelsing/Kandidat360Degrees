@@ -2,6 +2,7 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -121,9 +122,35 @@ public class ProfileFragment extends Fragment {
         pictureListView = (ListView) root.findViewById(R.id.profilePictureListView);
         profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
         pictureListView.setAdapter(profileFlowAdapter);
-
+        pictureListView.setOnItemClickListener(new FlowItemClickListener());
         return root;
     }
+
+    private class FlowItemClickListener implements android.widget.AdapterView.OnItemClickListener {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            selectItem(position);
+        }
+
+        private void selectItem(int position) {
+
+            //TODO: Get the real size image for the selected panorama id
+            //TODO: like below from the DB and add that as parameter to the imageviewfragment
+            ProfilePanorama selectedPanorama = (ProfilePanorama)pictureListView.getAdapter().getItem(position);
+            int panoramaID = selectedPanorama.getPanoramaID();
+            System.out.println("PanoramaID: " + panoramaID);
+
+            Bundle args = getArguments();
+            args.putString("type","view");
+
+            ImageViewFragment fragment = new ImageViewFragment();
+            fragment.setArguments(args);
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
+
+        }
+    }
+
 
     //Get info for specific image from DB here.
     //Use the marker as a reference when doing so.
@@ -156,9 +183,9 @@ public class ProfileFragment extends Fragment {
         //Drawable currentPic = image from database convertet to a Drawable. Uses template picture without third argument
         ProfilePanorama pp = new ProfilePanorama(0, null, false, "2017-02-08", "Gothenburg", 5);
         pictures.add(pp);
-        pp = new ProfilePanorama(0, null, false, "2017-02-28", "Stockholm", 0);
+        pp = new ProfilePanorama(1, null, false, "2017-02-28", "Stockholm", 0);
         pictures.add(pp);
-        pp = new ProfilePanorama(0, null, false, "2017-03-03", "Malmö", 2);
+        pp = new ProfilePanorama(2, null, false, "2017-03-03", "Malmö", 2);
         pictures.add(pp);
     }
 
@@ -242,11 +269,13 @@ public class ProfileFragment extends Fragment {
             public void onClick(View v) {
                 PopupMenu popupMenu = new PopupMenu(getActivity(), profileMenuButton);
                 Menu menu = popupMenu.getMenu();
-                // TODO Add checks to see if person already is friend
-                menu.add(R.string.add_friend);
-                menu.add(R.string.remove_friend);
+
                 if (Session.getUser().equalsIgnoreCase(username)) {
                     menu.add(R.string.acc_settings);
+                }else{
+                    // TODO Add checks to see if person already is friend
+                    menu.add(R.string.add_friend);
+                    menu.add(R.string.remove_friend);
                 }
                 popupMenu.show();
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {

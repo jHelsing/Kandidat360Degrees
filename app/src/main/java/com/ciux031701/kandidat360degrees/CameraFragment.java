@@ -137,7 +137,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                         mCam.takePicture(null,null,jpegCallback);
                     }
                 }else {
+                    args = new Bundle();
+                    args.putString("type","camera");
                     ImageViewFragment fragment = new ImageViewFragment();
+                    fragment.setArguments(args);
                     FragmentManager fragmentManager = getFragmentManager();
                     fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
                 }
