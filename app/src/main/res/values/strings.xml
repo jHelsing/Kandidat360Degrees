@@ -14,6 +14,14 @@
     <string name="email_username">Email/Username</string>
     <string name="password">Password</string>
     <string name="create_account">Create account</string>
+    <string name="create_account_congratulations">Congratulations!</string>
+    <string name="create_account_proceed_to_map">Proceed to map</string>
+    <string name="create_account_successfully_created">Your account has been successfully created!</string>
+    <string name="create_account_thanks_for_registering">Thanks for registering, </string>
+    <string name="create_account_info">You can now share 360-panorama pictures with your friends anywhere,
+        at anytime. You are already logged in, and to start exploring the world, just press the button below.</string>
+    <string name="create_account_wish_and_goodluck">We wish you the best and good luck!</string>
+    <string name="create_account_360WorldTeam">Yours, 360World Team.</string>
     <string name="account_details">Account details</string>
     <string name="username">Username</string>
     <string name="email">Email</string>

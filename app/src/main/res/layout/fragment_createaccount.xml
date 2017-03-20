@@ -23,14 +23,15 @@
     />
 
     <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:ems="10"
-            android:id="@+id/createAccUsernameField" android:hint="@string/username"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
+        android:id="@+id/createAccUsernameField"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/create_acc_vertical_margin"
+        android:elevation="0dp"
+        android:ems="10"
+        android:hint="@string/username" />
 
     <TextView
             android:text="@string/min_5_chars"
@@ -90,13 +91,18 @@
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
+
     <Button
-            android:text="@string/create_account"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:id="@+id/createAccCreateAccButton"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/create_acc_vertical_margin" android:background="@drawable/rounded_button"
-            android:textColor="@android:color/white" android:textAllCaps="false" android:textSize="18sp"/>
+        android:id="@+id/createAccCreateAccButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/create_acc_vertical_margin"
+        android:background="@drawable/rounded_button"
+        android:text="@string/create_account"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
 
 </LinearLayout>

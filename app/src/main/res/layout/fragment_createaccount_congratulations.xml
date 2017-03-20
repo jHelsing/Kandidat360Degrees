@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/createAccountCongratulationsTextview1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:background="@color/colorPrimary"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/title_padding_without_icon"
+        android:paddingRight="@dimen/title_padding_without_icon"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:text="@string/create_account_congratulations"
+        android:textAlignment="viewStart"
+        android:textColor="@android:color/white"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/createAccountCongratulationsTextview2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/create_acc_vertical_margin"
+        android:text="@string/create_account_successfully_created"
+        android:textSize="16sp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/create_acc_vertical_margin"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/createAccountCongratulationsTextview3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/create_account_thanks_for_registering"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/createAccountCongratulationsTextview4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:text="TextView"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/createAccountCongratulationsTextview5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:text="@string/create_account_info"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/createAccountCongratulationsTextview6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/create_acc_vertical_margin"
+        android:text="@string/create_account_wish_and_goodluck"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/createAccountCongratulationsTextview7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="@dimen/create_acc_vertical_margin"
+        android:text="@string/create_account_360WorldTeam"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/createAccountCongratulationsBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginTop="92sp"
+        android:background="@drawable/rounded_button"
+        android:text="@string/create_account_proceed_to_map"
+        android:textAllCaps="?attr/windowActionBar"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+</LinearLayout>
