@@ -438,7 +438,7 @@ public class ProfileFragment extends Fragment {
 
             File file = new File(path);
             if (file.delete()) {
-                Log.d("Profile", "Profile image has been deleted");
+                Log.d("Profile", "Preview image " + imageID + " has been deleted");
             }
 
             context.unregisterReceiver(this);
