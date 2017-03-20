@@ -187,6 +187,7 @@ public class ProfileFragment extends Fragment {
             getImageInfo.setJResultListener(new JRequest.JResultListener() {
                 @Override
                 public void onHasResult(JSONObject result) {
+                    // TODO modify this to fit the need of profile preview information
                     boolean error;
                     String message = null, username = null, uploaded = null, views = null, favs = null;
                     JSONArray images = new JSONArray();
@@ -397,6 +398,9 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    /**
+     * A class for receiving broadcasts from the download of the profile picture
+     */
     public class ProfileImageBroadcastReceiver extends BroadcastReceiver {
 
         @Override
@@ -427,9 +431,9 @@ public class ProfileFragment extends Fragment {
             if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
                 Log.d("Profile", "Preview (" + intent.getIntExtra("IMAGEID", -100) + ") found and results from download are OK.");
             }
-
+            int imageID = intent.getIntExtra("IMAGEID", -1);
             String path = context.getFilesDir() + "/preview/"
-                    + username + ".jpg";
+                    + imageID + ".jpg";
             Drawable previewDrawable = Drawable.createFromPath(path);
 
             File file = new File(path);
@@ -440,7 +444,7 @@ public class ProfileFragment extends Fragment {
             context.unregisterReceiver(this);
 
             // Add the image to the correct panorama in the arraylist
-            int imageID = intent.getIntExtra("IMAGEID", -1);
+
             int i=0;
             while (pictures.get(i).getPanoramaID() != imageID)
                 i++;
