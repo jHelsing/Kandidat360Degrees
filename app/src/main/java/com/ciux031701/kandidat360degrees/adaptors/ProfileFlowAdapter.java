@@ -34,7 +34,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
         TextView locationText = (TextView) customView.findViewById(R.id.locationText);
         TextView dateText = (TextView) customView.findViewById(R.id.dateText);
 
-        locationText.setText(singlePic.getLocation());
+        locationText.setText(singlePic.getLongitude());
         dateText.setText(singlePic.getDate());
         //Set image
         return customView;
