@@ -20,6 +20,9 @@ import android.widget.*;
 import com.ciux031701.kandidat360degrees.adaptors.ProfileFlowAdapter;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
+import com.ciux031701.kandidat360degrees.communication.JReqImageInfoProfile;
+import com.ciux031701.kandidat360degrees.communication.JRequest;
+import com.ciux031701.kandidat360degrees.communication.JRequester;
 import com.ciux031701.kandidat360degrees.communication.Session;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,6 +33,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.math.RoundingMode;
@@ -166,8 +173,6 @@ public class ProfileFragment extends Fragment {
 
     //Use this to fill up pictures.
     private void loadPicturesFromDB() {
-        // TODO load pictures from the imageid in the getArguments() into an array and start fetching all the images
-
         panoramaIDs = getArguments().getIntArray("images");
 
         for(int i=0; i<panoramaIDs.length; i++) {
@@ -177,7 +182,50 @@ public class ProfileFragment extends Fragment {
             intent.putExtra("IMAGEID", panoramaIDs[i]);
             intent.putExtra("TYPE", "DOWNLOAD");
             getActivity().startService(intent);
-            // TODO add all information from database into new ProfilePanorama.
+
+            JRequest getImageInfo = new JReqImageInfoProfile(Session.getId(), panoramaIDs[i], Session.getUser());
+            getImageInfo.setJResultListener(new JRequest.JResultListener() {
+                @Override
+                public void onHasResult(JSONObject result) {
+                    boolean error;
+                    String message = null, username = null, uploaded = null, views = null, favs = null;
+                    JSONArray images = new JSONArray();
+                    try{
+                        error = result.getBoolean("error");
+                        message = result.getString("message");
+                        username = result.getString("user");
+                        uploaded = result.getString("uploaded");
+                        views = result.getString("views");
+                        favs = result.getString("likes");
+                        images = result.getJSONArray("images");
+                    }
+                    catch(JSONException je){
+                        error = true;
+                    }
+                    if(!error){
+                        int imgs[] = new int[images.length()];
+                        for (int i=0; i < images.length(); i++){
+                            try{
+                                imgs[i] = Integer.parseInt(images.get(i).toString());
+                            } catch (JSONException e){
+                                e.printStackTrace();
+                            }
+                        }
+                        ProfileFragment fragment = new ProfileFragment();
+                        FragmentManager fragmentManager = getFragmentManager();
+                        Bundle b = new Bundle();
+                        b.putString("username",username);
+                        b.putString("uploadCount",uploaded);
+                        b.putString("viewsCount",views);
+                        b.putString("favsCount",favs);
+                        b.putIntArray("images",imgs);
+                    } else{
+                        Toast.makeText(getActivity(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+            JRequester.setRequest(getImageInfo);
+            JRequester.sendRequest();
         }
 
         //Example of how to add
