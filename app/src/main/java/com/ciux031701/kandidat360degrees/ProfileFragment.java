@@ -177,15 +177,16 @@ public class ProfileFragment extends Fragment {
             intent.putExtra("IMAGEID", panoramaIDs[i]);
             intent.putExtra("TYPE", "DOWNLOAD");
             getActivity().startService(intent);
+            // TODO add all information from database into new ProfilePanorama.
         }
 
         //Example of how to add
         //Drawable currentPic = image from database convertet to a Drawable. Uses template picture without third argument
-        ProfilePanorama pp = new ProfilePanorama(0, null, false, "2017-02-08", "Gothenburg", 5);
+        ProfilePanorama pp = new ProfilePanorama(0, false, "2017-02-08", "Gothenburg", "Gothenburg", 5);
         pictures.add(pp);
-        pp = new ProfilePanorama(1, null, false, "2017-02-28", "Stockholm", 0);
+        pp = new ProfilePanorama(1, false, "2017-02-28", "Stockholm", "Stockholm", 0);
         pictures.add(pp);
-        pp = new ProfilePanorama(2, null, false, "2017-03-03", "Malmö", 2);
+        pp = new ProfilePanorama(2, false, "2017-03-03", "Malmö", "Malmö", 2);
         pictures.add(pp);
     }
 
@@ -361,10 +362,42 @@ public class ProfileFragment extends Fragment {
             Drawable profileImage = Drawable.createFromPath(path);
             ((ImageView) root.findViewById(R.id.profileProfileImage)).setImageDrawable(profileImage);
             File file = new File(path);
-            if (!file.delete()) {
+            if (file.delete()) {
                 Log.d("Profile", "Profile image has been deleted");
             }
             context.unregisterReceiver(this);
+        }
+    }
+
+    /**
+     * A class for the receiver of download of preview images.
+     */
+    public class ProfilePreviewBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
+                Log.d("Profile", "Preview (" + intent.getIntExtra("IMAGEID", -100) + ") found and results from download are OK.");
+            }
+
+            String path = context.getFilesDir() + "/preview/"
+                    + username + ".jpg";
+            Drawable previewDrawable = Drawable.createFromPath(path);
+
+            File file = new File(path);
+            if (file.delete()) {
+                Log.d("Profile", "Profile image has been deleted");
+            }
+
+            context.unregisterReceiver(this);
+
+            // Add the image to the correct panorama in the arraylist
+            int imageID = intent.getIntExtra("IMAGEID", -1);
+            int i=0;
+            while (pictures.get(i).getPanoramaID() != imageID)
+                i++;
+            pictures.get(i).setPreview(previewDrawable);
+
         }
     }
 }
