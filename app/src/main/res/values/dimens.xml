@@ -9,4 +9,7 @@
 
     <!-- Button specific dimensions -->
     <dimen name="button_corner_radius">3dp</dimen>
+
+    <!-- Progressbar specific dimensions -->
+    <dimen name="progressbar_size">35.5dp</dimen>
 </resources>

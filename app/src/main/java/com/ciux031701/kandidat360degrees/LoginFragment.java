@@ -15,7 +15,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.communication.JReqCheckSession;
 import com.ciux031701.kandidat360degrees.communication.JReqLogin;
@@ -61,7 +60,6 @@ public class LoginFragment extends Fragment {
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loginProgressbar = (ProgressBar) getActivity().findViewById(R.id.loginProgressbar);
                 loginProgressbar.setVisibility(View.VISIBLE);
                 Session.setUser(usernameField.getText().toString());
                 String password = passwordField.getText().toString();
@@ -84,7 +82,6 @@ public class LoginFragment extends Fragment {
                                 if(!error){
                                     Session.setId(sessionId);
                                     Session.save();
-                                    Toast.makeText(getActivity(), "Logging in...",Toast.LENGTH_SHORT).show();
                                     Intent myIntent = new Intent(getActivity(), MainActivity.class);
                                     myIntent.putExtra("username", Session.getUser()); //Optional parameters
                                     startActivity(myIntent);
@@ -95,6 +92,7 @@ public class LoginFragment extends Fragment {
                                     errorView.setVisibility(View.VISIBLE);
                                     usernameField.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
                                     passwordField.getBackground().mutate().setColorFilter(getResources().getColor(android.R.color.holo_red_dark) , PorterDuff.Mode.SRC_ATOP);
+                                    loginProgressbar.setVisibility(View.INVISIBLE);
                                 }
                             }
                         }

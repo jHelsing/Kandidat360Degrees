@@ -42,7 +42,7 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/createAccountCongratulationsTextview5"
+        android:id="@+id/createAccountCongratulationsTextview4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -52,7 +52,7 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/createAccountCongratulationsTextview6"
+        android:id="@+id/createAccountCongratulationsTextview5"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -62,7 +62,7 @@
         android:textSize="16sp" />
 
     <TextView
-        android:id="@+id/createAccountCongratulationsTextview7"
+        android:id="@+id/createAccountCongratulationsTextview6"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
@@ -71,13 +71,21 @@
         android:text="@string/create_account_360WorldTeam"
         android:textSize="16sp" />
 
+    <ProgressBar
+        android:id="@+id/createAccountProgressbar"
+        style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/progressbar_size"
+        android:layout_marginTop="@dimen/create_acc_vertical_margin"
+        android:visibility="invisible" />
+
     <Button
         android:id="@+id/createAccountCongratulationsBtn"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="92sp"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:background="@drawable/rounded_button"
         android:text="@string/create_account_proceed_to_map"
         android:textAllCaps="?attr/windowActionBar"

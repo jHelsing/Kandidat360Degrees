@@ -59,19 +59,27 @@
             android:layout_marginLeft="20dp"
             android:elevation="0dp" />
 
+        <ProgressBar
+            android:id="@+id/loginProgressbar"
+            style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/progressbar_size"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:visibility="invisible" />
+
         <Button
-            android:text="@string/log_in"
+            android:id="@+id/loginButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/loginButton"
-            android:textSize="18sp"
-            android:background="@drawable/rounded_button"
-            android:textColor="@android:color/white"
-            android:textAllCaps="false"
-            android:layout_marginTop="@dimen/activity_vertical_margin"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:focusableInTouchMode="true" />
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:background="@drawable/rounded_button"
+            android:focusableInTouchMode="true"
+            android:text="@string/log_in"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:textSize="18sp" />
 
         <Button
             android:text="@string/create_account"
@@ -86,13 +94,5 @@
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
             android:focusableInTouchMode="true" />
-
-    <ProgressBar
-        android:id="@+id/loginProgressbar"
-        style="@android:style/Widget.DeviceDefault.Light.ProgressBar"
-        android:layout_width="match_parent"
-        android:layout_height="33dp"
-        android:layout_marginTop="@dimen/create_acc_vertical_margin"
-        android:visibility="invisible" />
 
 </LinearLayout>

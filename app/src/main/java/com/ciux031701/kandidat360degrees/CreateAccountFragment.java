@@ -1,6 +1,7 @@
 package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Log;
@@ -11,8 +12,8 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 import android.widget.TextView;
 import com.ciux031701.kandidat360degrees.communication.*;
 import com.ciux031701.kandidat360degrees.communication.JRequest.*;
@@ -28,6 +29,7 @@ import static android.content.Context.INPUT_METHOD_SERVICE;
 
 public class CreateAccountFragment extends Fragment {
     Button createAccountButton;
+    ImageButton returnButton;
     EditText usernameText;
     EditText passwordText;
     EditText repeatPasswordText;
@@ -49,14 +51,23 @@ public class CreateAccountFragment extends Fragment {
         passwordText = (EditText) root.findViewById(R.id.createAccPassword1Field); //first password input
         repeatPasswordText = (EditText) root.findViewById(R.id.createAccPassword2Field); //repeat password
 
-        //create account-button: should return to activity_login ( + show that the account was created?)
+        //create return-button: goes back to login screen
+        returnButton = (ImageButton)root.findViewById(R.id.returnImageButton);
+        returnButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view){
+                FragmentManager fragmentManager = getFragmentManager();
+                fragmentManager.popBackStack();
+            }});
+
+        //create account-button: should return to activity_login
         createAccountButton = (Button)root.findViewById(R.id.createAccCreateAccButton);
         createAccountButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
                 final String username = usernameText.getText().toString();
                 String email = emailText.getText().toString();
-                String password = passwordText.getText().toString();
+                final String password = passwordText.getText().toString();
                 final String repeatPassword = repeatPasswordText.getText().toString();
                 if(!password.equals(repeatPassword)){
                     passwordInformationText.setVisibility(View.VISIBLE);
@@ -79,8 +90,13 @@ public class CreateAccountFragment extends Fragment {
                                     boolean error = result.getBoolean("error");
                                     String message = result.getString("message");
                                     if(!error){
-                                        Toast.makeText(getActivity(), "Account created",Toast.LENGTH_SHORT).show();
-                                        getFragmentManager().popBackStack();
+                                        FragmentManager fragmentManager = getFragmentManager();
+                                        Fragment fragment = new CreateAccountFeedbackFragment();
+                                        Bundle b = new Bundle();
+                                        b.putString("username", username);
+                                        b.putString("password", password);
+                                        fragment.setArguments(b);
+                                        fragmentManager.beginTransaction().add(R.id.fragment_container,fragment).addToBackStack(null).commit();
                                     }
 
                                     boolean usernameError = false;
