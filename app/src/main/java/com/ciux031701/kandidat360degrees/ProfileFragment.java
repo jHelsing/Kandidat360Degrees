@@ -39,6 +39,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -94,7 +95,7 @@ public class ProfileFragment extends Fragment {
         setUpProfileMenuButton();
 
         //Get pictures, total likes nbr of friends or whatever we decide to display from db
-        pictures = new ArrayList<>();
+        pictures = (ArrayList<ProfilePanorama>) getArguments().getSerializable("images");
         loadPicturesFromDB();
 
         viewSwitchButton.setOnClickListener(new View.OnClickListener() {
@@ -153,7 +154,6 @@ public class ProfileFragment extends Fragment {
             fragment.setArguments(args);
             FragmentManager fragmentManager = getActivity().getFragmentManager();
             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
-
         }
     }
 
@@ -174,7 +174,8 @@ public class ProfileFragment extends Fragment {
     private void loadPicturesFromDB() {
         // We have the imageids but now we need to start fetching the preview images for them
         for(int i=0; i<pictures.size(); i++) {
-
+            // TODO fetch images from the FTP server and make sure that they show
+            // Similar to how fetching profile picture works.
         }
     }
 
