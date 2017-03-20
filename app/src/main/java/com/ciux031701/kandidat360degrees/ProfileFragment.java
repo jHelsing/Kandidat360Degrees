@@ -20,6 +20,9 @@ import android.widget.*;
 import com.ciux031701.kandidat360degrees.adaptors.ProfileFlowAdapter;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
+import com.ciux031701.kandidat360degrees.communication.JReqImageInfoProfile;
+import com.ciux031701.kandidat360degrees.communication.JRequest;
+import com.ciux031701.kandidat360degrees.communication.JRequester;
 import com.ciux031701.kandidat360degrees.communication.Session;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,6 +33,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.math.RoundingMode;
@@ -165,8 +172,6 @@ public class ProfileFragment extends Fragment {
 
     //Use this to fill up pictures.
     private void loadPicturesFromDB() {
-        // TODO load pictures from the imageid in the getArguments() into an array and start fetching all the images
-
         panoramaIDs = getArguments().getIntArray("images");
 
         for(int i=0; i<panoramaIDs.length; i++) {
@@ -176,15 +181,60 @@ public class ProfileFragment extends Fragment {
             intent.putExtra("IMAGEID", panoramaIDs[i]);
             intent.putExtra("TYPE", "DOWNLOAD");
             getActivity().startService(intent);
+
+            JRequest getImageInfo = new JReqImageInfoProfile(Session.getId(), panoramaIDs[i], Session.getUser());
+            getImageInfo.setJResultListener(new JRequest.JResultListener() {
+                @Override
+                public void onHasResult(JSONObject result) {
+                    // TODO modify this to fit the need of profile preview information
+                    boolean error;
+                    String message = null, username = null, uploaded = null, views = null, favs = null;
+                    JSONArray images = new JSONArray();
+                    try{
+                        error = result.getBoolean("error");
+                        message = result.getString("message");
+                        username = result.getString("user");
+                        uploaded = result.getString("uploaded");
+                        views = result.getString("views");
+                        favs = result.getString("likes");
+                        images = result.getJSONArray("images");
+                    }
+                    catch(JSONException je){
+                        error = true;
+                    }
+                    if(!error){
+                        int imgs[] = new int[images.length()];
+                        for (int i=0; i < images.length(); i++){
+                            try{
+                                imgs[i] = Integer.parseInt(images.get(i).toString());
+                            } catch (JSONException e){
+                                e.printStackTrace();
+                            }
+                        }
+                        ProfileFragment fragment = new ProfileFragment();
+                        FragmentManager fragmentManager = getFragmentManager();
+                        Bundle b = new Bundle();
+                        b.putString("username",username);
+                        b.putString("uploadCount",uploaded);
+                        b.putString("viewsCount",views);
+                        b.putString("favsCount",favs);
+                        b.putIntArray("images",imgs);
+                    } else{
+                        Toast.makeText(getActivity(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+            JRequester.setRequest(getImageInfo);
+            JRequester.sendRequest();
         }
 
         //Example of how to add
         //Drawable currentPic = image from database convertet to a Drawable. Uses template picture without third argument
-        ProfilePanorama pp = new ProfilePanorama(0, null, false, "2017-02-08", "Gothenburg", 5);
+        ProfilePanorama pp = new ProfilePanorama(0, false, "2017-02-08", "Gothenburg", "Gothenburg", 5);
         pictures.add(pp);
-        pp = new ProfilePanorama(1, null, false, "2017-02-28", "Stockholm", 0);
+        pp = new ProfilePanorama(1, false, "2017-02-28", "Stockholm", "Stockholm", 0);
         pictures.add(pp);
-        pp = new ProfilePanorama(2, null, false, "2017-03-03", "Malmö", 2);
+        pp = new ProfilePanorama(2, false, "2017-03-03", "Malmö", "Malmö", 2);
         pictures.add(pp);
     }
 
@@ -354,6 +404,9 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    /**
+     * A class for receiving broadcasts from the download of the profile picture
+     */
     public class ProfileImageBroadcastReceiver extends BroadcastReceiver {
 
         @Override
@@ -367,10 +420,42 @@ public class ProfileFragment extends Fragment {
             Drawable profileImage = Drawable.createFromPath(path);
             ((ImageView) root.findViewById(R.id.profileProfileImage)).setImageDrawable(profileImage);
             File file = new File(path);
-            if (!file.delete()) {
+            if (file.delete()) {
                 Log.d("Profile", "Profile image has been deleted");
             }
             context.unregisterReceiver(this);
+        }
+    }
+
+    /**
+     * A class for the receiver of download of preview images.
+     */
+    public class ProfilePreviewBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
+                Log.d("Profile", "Preview (" + intent.getIntExtra("IMAGEID", -100) + ") found and results from download are OK.");
+            }
+            int imageID = intent.getIntExtra("IMAGEID", -1);
+            String path = context.getFilesDir() + "/preview/"
+                    + imageID + ".jpg";
+            Drawable previewDrawable = Drawable.createFromPath(path);
+
+            File file = new File(path);
+            if (file.delete()) {
+                Log.d("Profile", "Preview image " + imageID + " has been deleted");
+            }
+
+            context.unregisterReceiver(this);
+
+            // Add the image to the correct panorama in the arraylist
+
+            int i=0;
+            while (pictures.get(i).getPanoramaID() != imageID)
+                i++;
+            pictures.get(i).setPreview(previewDrawable);
+
         }
     }
 }
