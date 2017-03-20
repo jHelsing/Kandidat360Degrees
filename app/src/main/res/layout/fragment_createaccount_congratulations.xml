@@ -31,29 +31,15 @@
         android:text="@string/create_account_successfully_created"
         android:textSize="16sp" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/createAccountCongratulationsTextview3"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
         android:layout_marginTop="@dimen/create_acc_vertical_margin"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/createAccountCongratulationsTextview3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/create_account_thanks_for_registering"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/createAccountCongratulationsTextview4"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/activity_horizontal_margin"
-            android:text="TextView"
-            android:textSize="16sp" />
-    </LinearLayout>
+        android:text="@string/create_account_thanks_for_registering"
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/createAccountCongratulationsTextview5"
