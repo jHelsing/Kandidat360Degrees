@@ -138,11 +138,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     }
                 }else {
                     args = new Bundle();
-                    args.putString("type","camera");
+                    args.putString("origin","camera");
                     ImageViewFragment fragment = new ImageViewFragment();
                     fragment.setArguments(args);
                     FragmentManager fragmentManager = getFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("camera").commit();
                 }
 
             }

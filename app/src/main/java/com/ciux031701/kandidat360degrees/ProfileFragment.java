@@ -55,15 +55,16 @@ public class ProfileFragment extends Fragment {
     private ArrayList<ProfilePanorama> pictures;
     private int[] panoramaIDs;
 
-    private boolean listMode = true;
-    private boolean first = true;
+    private boolean listMode;
+    private boolean first;
     private Bundle instanceState;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         root = inflater.inflate(R.layout.fragment_profile, container, false);
         instanceState = savedInstanceState;
-
+        listMode=true;
+        first= true;
         viewSwitchButton = (ImageButton) root.findViewById(R.id.profileSwitchModeButton);
         Toolbar toolbar = (Toolbar) root.findViewById(R.id.tool_bar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
@@ -104,8 +105,7 @@ public class ProfileFragment extends Fragment {
                     pictureListView.setVisibility(View.GONE);
                     listMode = false;
                     //noinspection deprecation
-                    viewSwitchButton.setImageDrawable(getResources()
-                            .getDrawable(R.drawable.enabled_map_view_profile_icon));
+                    viewSwitchButton.setImageDrawable(getResources().getDrawable(R.drawable.enabled_map_view_profile_icon));
                     setUpMap();
                     mapView.setVisibility(View.VISIBLE);
                 } else {
@@ -133,7 +133,7 @@ public class ProfileFragment extends Fragment {
         }
 
         private void selectItem(int position) {
-
+            listMode=false;
             //TODO: Get the real size image for the selected panorama id
             //TODO: like below from the DB and add that as parameter to the imageviewfragment
             ProfilePanorama selectedPanorama = (ProfilePanorama)pictureListView.getAdapter().getItem(position);
@@ -141,11 +141,10 @@ public class ProfileFragment extends Fragment {
             System.out.println("PanoramaID: " + panoramaID);
 
             Bundle args = getArguments();
-            args.putString("type","view");
-
+            args.putString("origin","profile");
             ImageViewFragment fragment = new ImageViewFragment();
             fragment.setArguments(args);
-            FragmentManager fragmentManager = getFragmentManager();
+            FragmentManager fragmentManager = getActivity().getFragmentManager();
             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
 
         }
@@ -328,8 +327,15 @@ public class ProfileFragment extends Fragment {
                 googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                     @Override
                     public void onInfoWindowClick(Marker marker) {
-                        //get to full screen view?
-                        marker.setRotation(marker.getRotation() + 20);
+                        //Go to full screen view
+                        //TODO: get fullscreen image from DB and send as argument
+                        Bundle args =  new Bundle();
+                        args.putString("origin","profile");
+                        listMode=false;
+                        ImageViewFragment fragment = new ImageViewFragment();
+                        fragment.setArguments(args);
+                        FragmentManager fragmentManager = getActivity().getFragmentManager();
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("view").commit();
                     }
                 });
 

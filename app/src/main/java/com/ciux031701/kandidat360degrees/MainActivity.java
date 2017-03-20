@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ExploreFragment fragment = new ExploreFragment();
         FragmentManager fragmentManager = getFragmentManager();
         fragment.setArguments(setArgs);
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
         setTitle("Explore");
     }
 
@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             b.putString("favsCount",favs);
                             b.putIntArray("images",imgs);
                             fragment.setArguments(b);
-                            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
                         } else{
                             Toast.makeText(getApplicationContext(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
                         }

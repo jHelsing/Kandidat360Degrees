@@ -127,8 +127,15 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                     @Override
                     public void onInfoWindowClick(Marker marker) {
-                        //get to full screen view?
-                        marker.setRotation(marker.getRotation() + 20);
+                        //Go to full screen view
+                        //TODO: get fullscreen image from DB and send as argument
+                        Bundle args =  new Bundle();
+                        args.putString("origin","explore");
+
+                        ImageViewFragment fragment = new ImageViewFragment();
+                        fragment.setArguments(args);
+                        FragmentManager fragmentManager = getFragmentManager();
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
                     }
                 });
 
@@ -150,8 +157,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         return root;
     }
 
-    //Get info for specific image from DB here.
-    //Use the marker as a reference when doing so.
     public View onMarkerClicked(Marker marker) {
         View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_window, null);
 

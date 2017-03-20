@@ -31,16 +31,18 @@ public class ImageViewFragment extends Fragment{
     private DrawerLayout mDrawerLayout;
 
     private Bundle args;
+    private String origin;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_imageview, container, false);
         args = getArguments();
+        origin = args.getString("origin");
 
         doneButton = (ImageButton)root.findViewById(R.id.sendToShareButton);
 
-        if(args.getString("type").equals("camera")){
+        if(origin.equals("camera")){
             doneButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -49,7 +51,7 @@ public class ImageViewFragment extends Fragment{
                     args = new Bundle();
                     args.putParcelable("picture", tempPicture);
 
-                    ShareFragment fragment = new ShareFragment();
+                    Fragment fragment = new ShareFragment();
                     FragmentManager fragmentManager = getFragmentManager();
                     fragment.setArguments(args);
                     fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
@@ -69,14 +71,9 @@ public class ImageViewFragment extends Fragment{
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(args.getString("type").equals("camera")){
-                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                    Fragment fragment = new CameraFragment();
-                    FragmentManager fragmentManager = getActivity().getFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.content_frame,fragment).commit();
-                }else{
+                {
                     FragmentManager fm = getActivity().getFragmentManager();
-                    fm.popBackStack ("profile", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    fm.popBackStackImmediate("view", FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 }
 
 
