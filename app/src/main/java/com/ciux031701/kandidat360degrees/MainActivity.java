@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         boolean error;
                         String message = null, username = null, uploaded = null, views = null, favs = null;
                         JSONArray images = new JSONArray();
-                        try{
+                        try {
                             error = result.getBoolean("error");
                             message = result.getString("message");
                             username = result.getString("user");
@@ -215,11 +215,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             views = result.getString("views");
                             favs = result.getString("likes");
                             images = result.getJSONArray("images");
-                        }
-                        catch(JSONException je){
+                        } catch(JSONException je){
                             error = true;
                         }
-                        if(!error){
+
+                        if(!error) {
                             ArrayList<ProfilePanorama> imgs = new ArrayList<ProfilePanorama>();
                             for (int i=0; i < images.length(); i++){
                                 try {
@@ -242,7 +242,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             b.putSerializable("images", imgs);
                             fragment.setArguments(b);
                             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
-                        } else{
+                        } else {
                             Toast.makeText(getApplicationContext(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
                         }
                     }

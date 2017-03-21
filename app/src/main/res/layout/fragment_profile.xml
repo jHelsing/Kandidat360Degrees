@@ -10,107 +10,111 @@
         layout="@layout/tool_bar" />
 
     <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
         <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="@dimen/activity_horizontal_margin">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="@dimen/activity_horizontal_margin">
+
             <ImageView
-                    android:id="@+id/profileProfileImage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/anonymous_profile"
-                    android:contentDescription="@string/profile_image"/>
+                android:id="@+id/profileProfileImage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/profile_image"
+                app:srcCompat="@drawable/anonymous_profile" />
 
             <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_gravity="center_vertical" android:layout_weight="1">
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
                 <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
                     <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/profileUserNameTextView"
-                            android:text="@string/username"
-                            android:textSize="24sp"
-                            android:drawableLeft="@drawable/username_profile_icon"
-                            android:drawableStart="@drawable/username_profile_icon"
-                            android:drawablePadding="8dp"/>
+                        android:id="@+id/profileUserNameTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawableLeft="@drawable/username_profile_icon"
+                        android:drawablePadding="8dp"
+                        android:drawableStart="@drawable/username_profile_icon"
+                        android:text="@string/username"
+                        android:textSize="24sp" />
 
                 </LinearLayout>
 
 
-
                 <LinearLayout
-                        android:layout_width="match_parent"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/activity_vertical_margin">
+
+                    <TextView
+                        android:id="@+id/profilePanoramaCountTextView"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/activity_vertical_margin">
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginEnd="@dimen/activity_horizontal_margin"
+                        android:layout_marginRight="@dimen/activity_horizontal_margin"
+                        android:drawableLeft="@drawable/upload_icon"
+                        android:drawablePadding="8dp"
+                        android:drawableStart="@drawable/upload_icon"
+                        android:text="@string/count" />
 
                     <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/profilePanoramaCountTextView"
-                            android:text="@string/count"
-                            android:layout_gravity="center_vertical"
-                            android:drawableLeft="@drawable/upload_icon"
-                            android:drawableStart="@drawable/upload_icon"
-                            android:drawablePadding="8dp"
-                            android:layout_marginEnd="@dimen/activity_horizontal_margin"
-                            android:layout_marginRight="@dimen/activity_horizontal_margin"/>
-
-                    <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:id="@+id/profileFavCountTextView"
-                            android:text="@string/count"
-                            android:drawableLeft="@drawable/ic_favorite"
-                            android:drawableStart="@drawable/ic_favorite"
-                            android:drawablePadding="8dp"
-                            android:layout_gravity="center_vertical"/>
+                        android:id="@+id/profileFavCountTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:drawableLeft="@drawable/ic_favorite"
+                        android:drawablePadding="8dp"
+                        android:drawableStart="@drawable/ic_favorite"
+                        android:text="@string/count" />
 
                 </LinearLayout>
 
             </LinearLayout>
+
             <ImageButton
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    app:srcCompat="@drawable/disable_map_view_icon_profile"
-                    android:background="@color/colorBackground"
-                    android:layout_weight="0"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
-                    android:layout_gravity="bottom"
-                    android:contentDescription="@string/change_map_view_on_profile_from_list"
-                    android:id="@+id/profileSwitchModeButton"/>
+                android:id="@+id/profileSwitchModeButton"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_weight="0"
+                android:background="@color/colorBackground"
+                android:contentDescription="@string/change_map_view_on_profile_from_list"
+                app:srcCompat="@drawable/disable_map_view_icon_profile" />
+
             <ImageButton
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    app:srcCompat="@drawable/more_settings_icon"
-                    android:layout_weight="0"
-                    android:background="@color/colorBackground"
-                    android:layout_gravity="bottom"
-                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
-                    android:layout_marginStart="@dimen/activity_horizontal_margin"
-                    android:contentDescription="@string/profile_options_three_dot_button_text"
-                    android:id="@+id/profileSettingsButton"/>
+                android:id="@+id/profileSettingsButton"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                android:layout_marginStart="@dimen/activity_horizontal_margin"
+                android:layout_weight="0"
+                android:background="@color/colorBackground"
+                android:contentDescription="@string/profile_options_three_dot_button_text"
+                app:srcCompat="@drawable/more_settings_icon" />
 
         </LinearLayout>
+
         <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@android:color/darker_gray"
-        />
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray" />
     </LinearLayout>
 
     <ListView

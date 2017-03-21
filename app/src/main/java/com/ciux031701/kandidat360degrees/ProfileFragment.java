@@ -93,39 +93,13 @@ public class ProfileFragment extends Fragment {
         setUpProfileInformation();
         loadProfilePicture();
         setUpProfileMenuButton();
+        setUpViewSwitchButton();
 
         //Get pictures, total likes nbr of friends or whatever we decide to display from db
+        // We do not need to check this error since we are the ones who send the bundle and are
+        // 100% sure of what it contains.
         pictures = (ArrayList<ProfilePanorama>) getArguments().getSerializable("images");
         loadPicturesFromDB();
-
-        viewSwitchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (first) {
-                    mapView = (MapView) root.findViewById(R.id.profileMapView);
-                    mapView.onCreate(instanceState);
-                    mapView.onResume(); // needed to get the map to display immediately
-                    mapView.setVisibility(View.GONE);
-                    first = false;
-                    instanceState = null;
-                }
-                if (listMode) {
-                    pictureListView.setVisibility(View.GONE);
-                    listMode = false;
-                    //noinspection deprecation
-                    viewSwitchButton.setImageDrawable(getResources().getDrawable(R.drawable.enabled_map_view_profile_icon));
-                    setUpMap();
-                    mapView.setVisibility(View.VISIBLE);
-                } else {
-                    pictureListView.setVisibility(View.VISIBLE);
-                    listMode = true;
-                    //noinspection deprecation
-                    viewSwitchButton.setImageDrawable(getResources()
-                            .getDrawable(R.drawable.disable_map_view_icon_profile));
-                    mapView.setVisibility(View.GONE);
-                }
-            }
-        });
 
         pictureListView = (ListView) root.findViewById(R.id.profilePictureListView);
         profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
@@ -210,29 +184,26 @@ public class ProfileFragment extends Fragment {
         TextView favCountView = (TextView) root.findViewById(R.id.profileFavCountTextView);
 
         // Process information from arguments
-        Bundle args = getArguments();
-        username = args.getString("username");
+        username = getArguments().getString("username");
         userNameView.setText(username);
 
         int panoramaCount = 0;
-        try{
-            if(!((args.getString("uploadCount")).equals(null))){
-                panoramaCount = Integer.parseInt(args.getString("uploadCount"));
-            }
-        } catch (NumberFormatException e){
+        try {
+            if (!getArguments().getString("uploadCount").equals(null))
+                panoramaCount = Integer.parseInt(getArguments().getString("uploadCount"));
+        } catch (NumberFormatException e) {
             e.printStackTrace();
         }
 
         int favCount = 0;
-        try{
-            if(!((args.getString("favsCount")).equals(null))){
-                favCount = Integer.parseInt(args.getString("favsCount"));
-            }
+        try {
+            if(!getArguments().getString("favsCount").equals(null))
+                favCount = Integer.parseInt(getArguments().getString("favsCount"));
         } catch (NumberFormatException e){
             e.printStackTrace();
         }
 
-        DecimalFormat df = new DecimalFormat("#.##");
+        DecimalFormat df = new DecimalFormat("#.#");
         df.setRoundingMode(RoundingMode.CEILING);
 
         String panoramaString = null;
@@ -262,7 +233,7 @@ public class ProfileFragment extends Fragment {
 
                 if (Session.getUser().equalsIgnoreCase(username)) {
                     menu.add(R.string.upload_profile_picture);
-                }else{
+                } else {
                     // TODO Add checks to see if person already is friend
                     menu.add(R.string.add_friend);
                     menu.add(R.string.remove_friend);
@@ -399,5 +370,36 @@ public class ProfileFragment extends Fragment {
             pictures.get(i).setPreview(previewDrawable);
 
         }
+    }
+
+    private void setUpViewSwitchButton() {
+        viewSwitchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (first) {
+                    mapView = (MapView) root.findViewById(R.id.profileMapView);
+                    mapView.onCreate(instanceState);
+                    mapView.onResume(); // needed to get the map to display immediately
+                    mapView.setVisibility(View.GONE);
+                    first = false;
+                    instanceState = null;
+                }
+                if (listMode) {
+                    pictureListView.setVisibility(View.GONE);
+                    listMode = false;
+                    //noinspection deprecation
+                    viewSwitchButton.setImageDrawable(getResources().getDrawable(R.drawable.enabled_map_view_profile_icon));
+                    setUpMap();
+                    mapView.setVisibility(View.VISIBLE);
+                } else {
+                    pictureListView.setVisibility(View.VISIBLE);
+                    listMode = true;
+                    //noinspection deprecation
+                    viewSwitchButton.setImageDrawable(getResources()
+                            .getDrawable(R.drawable.disable_map_view_icon_profile));
+                    mapView.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 }
