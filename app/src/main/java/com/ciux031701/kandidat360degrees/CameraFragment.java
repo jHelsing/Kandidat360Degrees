@@ -2,8 +2,8 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -11,7 +11,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.hardware.Camera;
 import android.hardware.Sensor;
@@ -20,9 +19,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -48,7 +45,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private ImageButton captureButton;
     private ImageView previewImage;
 
-    private SurfaceView mSurfaceView, mSurfaceViewOnTop;
+    private SurfaceView mSurfaceViewBelow, mSurfaceViewTop;
     private Camera mCam;
 
     //Sensor stuff
@@ -62,8 +59,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     private boolean isVertical;
     private boolean captureInProgress;
+    private boolean isSafeToTakePicture = true; //is it safe to capture a picture?
+    private int nbrOfPicturesTaken = 0; //number of pictures taken in the panorama
 
-    private boolean safeToTakePicture = true; //is it safe to capture a picture?
+    ProgressDialog progressDialog;
 
     private DrawerLayout mDrawerLayout;
 
@@ -131,10 +130,15 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     //angleProgressBar.setVisibility(View.VISIBLE);
                     startGyroDegree=lastDegree;
                     backButton.setVisibility(View.GONE);
-                    if(mCam != null && safeToTakePicture){
+                    if(mCam != null && isSafeToTakePicture){
                         //set the flag to false so we don't take two pictures at the same time
-                        safeToTakePicture = false;
+                        isSafeToTakePicture = false;
                         mCam.takePicture(null,null,jpegCallback);
+                        nbrOfPicturesTaken++;
+                    }
+                    if(nbrOfPicturesTaken == 3){
+                        //Save the image
+                        saveAndMakePanorama();
                     }
                 }else {
                     args = new Bundle();
@@ -148,15 +152,15 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             }
         });
 
-        //Views to show the camera and the most recently taken picture in:
-        mSurfaceView = (SurfaceView)root.findViewById(R.id.surfaceView);
-        mSurfaceView.getHolder().addCallback(mSurfaceCallback);
+        //Views to show the camera (below) and the most recently taken picture (top) in:
+        mSurfaceViewBelow = (SurfaceView)root.findViewById(R.id.surfaceViewBelow);
+        mSurfaceViewBelow.getHolder().addCallback(mSurfaceCallback);
+        mSurfaceViewBelow.setVisibility(View.GONE);
 
-        mSurfaceViewOnTop = (SurfaceView)root.findViewById(R.id.surfaceViewOnTop);
-        mSurfaceViewOnTop.setZOrderOnTop(true);
-        mSurfaceViewOnTop.getHolder().setFormat(PixelFormat.TRANSPARENT);
-        mSurfaceView.setVisibility(View.GONE);
-        mSurfaceViewOnTop.setVisibility(View.GONE);
+        mSurfaceViewTop = (SurfaceView)root.findViewById(R.id.surfaceViewTop);
+        mSurfaceViewTop.setZOrderOnTop(true);
+        mSurfaceViewTop.getHolder().setFormat(PixelFormat.TRANSPARENT);
+        mSurfaceViewTop.setVisibility(View.GONE);
 
         return root;
     }
@@ -177,24 +181,25 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         public void onPictureTaken(byte[] data, Camera camera) {
             //byte[] --> bitmap
             Bitmap bitmap = BitmapFactory.decodeByteArray(data,0,data.length);
-            //Rotate the picture to fit portrait mode
-            Matrix matrix = new Matrix();
-            matrix.postRotate(90);
-            bitmap = Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,false);
+            //Rotate to portrait mode
+            Matrix rotationMatrix = new Matrix();
+            rotationMatrix.postRotate(90);
+            bitmap = Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),rotationMatrix,false);
 
             //TODO: save the image to a List (to openCV)
 
+            //To draw 1/3 of the most recently taken picture:
             Canvas canvas = null;
             try {
-                canvas = mSurfaceViewOnTop.getHolder().lockCanvas(null);
-                synchronized (mSurfaceViewOnTop.getHolder()){
-                    //Clear canvas
+                canvas = mSurfaceViewTop.getHolder().lockCanvas(null);
+                synchronized (mSurfaceViewTop.getHolder()){
+                    //Clear canvas from other pictures
                     canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-                    //Scale the image to fit the surfaceview
-                    float scale = 1.0f * mSurfaceView.getHeight()/bitmap.getHeight();
-                    Bitmap scaleImage = Bitmap.createScaledBitmap(bitmap,(int)(scale*bitmap.getWidth()),mSurfaceView.getHeight(),false);
+                    //To fit the view -- scale the image:
+                    float scale = 1.0f * mSurfaceViewBelow.getHeight()/bitmap.getHeight();
+                    Bitmap scaleImage = Bitmap.createScaledBitmap(bitmap,(int)(scale*bitmap.getWidth()),mSurfaceViewBelow.getHeight(),false);
                     Paint paint = new Paint();
-                    //Set the opacity of the image
+
                     paint.setAlpha(200);
                     //Draw 1/3 of the image:
                     canvas.drawBitmap(scaleImage,-scaleImage.getWidth()*2/3,0,paint);
@@ -203,12 +208,12 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 e.printStackTrace();
             } finally {
                 if (canvas != null){
-                    mSurfaceViewOnTop.getHolder().unlockCanvasAndPost(canvas);
+                    mSurfaceViewTop.getHolder().unlockCanvasAndPost(canvas);
                 }
             }
             //Start preview of the camera & set safe to take pictures to true
             mCam.startPreview();
-            safeToTakePicture = true;
+            isSafeToTakePicture = true;
         }
 
     };
@@ -216,28 +221,27 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     //For the surfaceviews:
     private SurfaceHolder.Callback mSurfaceCallback = new SurfaceHolder.Callback(){
         @Override
-        public void surfaceCreated(SurfaceHolder holder){
+        public void surfaceCreated(SurfaceHolder surfaceHolder){
             try{
-                //Tell the camera to display the frame on this surfaceview:
-                mCam.setPreviewDisplay(holder);
+                //To display the camera on this surfaceview:
+                mCam.setPreviewDisplay(surfaceHolder);
             } catch (IOException e){
                 e.printStackTrace();
             }
         }
         @Override
-        public void surfaceChanged(SurfaceHolder holder,int format, int width, int height){
-            //Get the default parameters for camera
+        public void surfaceChanged(SurfaceHolder surfaceHolder, int format, int width, int height){
+            //Obtain current parameters of the camera
             Camera.Parameters myParameters = mCam.getParameters();
-            //Select the best preview size
-            Camera.Size myBestSize = getBestPreviewSize(myParameters);
-            if(myBestSize != null){
-                //Set the preview size
-                myParameters.setPreviewSize(myBestSize.width,myBestSize.height);
-                //Set the parameters to the camera
+            //Get the best preview size
+            Camera.Size bestSize = getBestPreviewSize(myParameters);
+            if(bestSize != null){
+                //Set preview size to best size
+                myParameters.setPreviewSize(bestSize.width,bestSize.height);
                 mCam.setParameters(myParameters);
-                //Rotate the display frame 90 degree to view in portrait mode
+                //Rotate to portrait mode (90 degrees)
                 mCam.setDisplayOrientation(90);
-                //Start the preview
+
                 mCam.startPreview();
             }
         }
@@ -245,6 +249,45 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         public void surfaceDestroyed(SurfaceHolder holder){
         }
     };
+
+    private void saveAndMakePanorama(){
+        Thread worker = new Thread(processImageRunnable);
+        worker.start();
+    }
+
+    private Runnable processImageRunnable = new Runnable() {
+        @Override
+        public void run(){
+            showProgressDialog();
+            //TODO: openCV parts
+            closeProgressDialog();
+        }
+    };
+
+    //To stop the camera preview during computations
+    private void showProgressDialog(){
+        getActivity().runOnUiThread(new Runnable(){
+            @Override
+            public void run() {
+                mCam.stopPreview();
+                progressDialog = ProgressDialog.show(getActivity(),"","Panorama",true);
+                progressDialog.setCancelable(false);
+            }
+        });
+    }
+
+    //To start camera preview when computations are done
+    private void closeProgressDialog(){
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mCam.startPreview();
+                progressDialog.dismiss();
+            }
+        });
+    }
+
+
 
     @Override
     public void onPause() {
@@ -318,8 +361,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                             holdVerticallyImage.setVisibility(View.GONE);
                             holdVerticallyText.setVisibility(View.GONE);
                             captureButton.setVisibility(View.VISIBLE);
-                            mSurfaceView.setVisibility(View.VISIBLE);
-                            mSurfaceViewOnTop.setVisibility(View.VISIBLE);
+                            mSurfaceViewBelow.setVisibility(View.VISIBLE);
+                            mSurfaceViewTop.setVisibility(View.VISIBLE);
                         }
                     }
 
@@ -330,8 +373,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                             holdVerticallyImage.setVisibility(View.VISIBLE);
                             holdVerticallyText.setVisibility(View.VISIBLE);
                             captureButton.setVisibility(View.GONE);
-                            mSurfaceView.setVisibility(View.GONE);
-                            mSurfaceViewOnTop.setVisibility(View.GONE);
+                            mSurfaceViewBelow.setVisibility(View.GONE);
+                            mSurfaceViewTop.setVisibility(View.GONE);
                         }
                     }
                 }
@@ -362,11 +405,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     private Camera.Size getBestPreviewSize(Camera.Parameters parameters){
         Camera.Size bestSize = null;
-        List<Camera.Size> sizeList = parameters.getSupportedPreviewSizes();
-        bestSize = sizeList.get(0);
-        for(int j=1; j < sizeList.size(); j++){
-            if((sizeList.get(j).width * sizeList.get(j).height) > (bestSize.width * bestSize.height)){
-                bestSize = sizeList.get(j);
+        List<Camera.Size> listOfSizes = parameters.getSupportedPreviewSizes();
+        bestSize = listOfSizes.get(0);
+        for(int i=1; i < listOfSizes.size(); i++){
+            if((listOfSizes.get(i).width * listOfSizes.get(i).height) > (bestSize.width * bestSize.height)){
+                bestSize = listOfSizes.get(i);
             }
         }
         return bestSize;
