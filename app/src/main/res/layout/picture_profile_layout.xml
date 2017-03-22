@@ -51,16 +51,17 @@
                     android:drawableLeft="@drawable/profile_time_icon"
                     android:drawableStart="@drawable/profile_time_icon"
                     android:drawablePadding="@dimen/activity_horizontal_margin" android:layout_weight="1"/>
+
             <TextView
-                    android:text="@string/count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@android:color/white"
-                    android:id="@+id/favCounter"
-                    android:drawableRight="@drawable/ic_favorite_no_click"
-                    android:drawableEnd="@drawable/ic_favorite_no_click"
-                    android:drawablePadding="8dp"
-                    android:layout_weight="0"/>
+                android:id="@+id/favCounter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:drawableEnd="@drawable/ic_favorite_no_click"
+                android:drawablePadding="8dp"
+                android:drawableRight="@drawable/ic_favorite_no_click"
+                android:text="@string/count"
+                android:textColor="@android:color/white" />
 
         </LinearLayout>
 

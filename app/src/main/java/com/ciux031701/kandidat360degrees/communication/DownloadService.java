@@ -152,7 +152,7 @@ public class DownloadService extends IntentService {
         } // Done downloading file (try-catch)
 
         // Publish the results and then we are done here
-        publishResults(outputFile.getAbsolutePath(), result, intent.getIntExtra("FILENAME", 0)+"", type);
+        publishResults(outputFile.getAbsolutePath(), result, filename, type);
 
     }
 
@@ -163,8 +163,9 @@ public class DownloadService extends IntentService {
     * @param fileName - The ID of the image that was downloaded.
     */
     private void publishResults(String outputPath, int result, String fileName, ImageType type) {
-        Intent intent = new Intent(NOTIFICATION);
+        Intent intent = new Intent(NOTIFICATION + fileName);
         intent.putExtra("IMAGEID", fileName);
+        Log.d("Bilder", fileName + " : In Download service");
         intent.putExtra("RESULT", result);
         intent.putExtra("FILEPATH", outputPath);
         sendBroadcast(intent);

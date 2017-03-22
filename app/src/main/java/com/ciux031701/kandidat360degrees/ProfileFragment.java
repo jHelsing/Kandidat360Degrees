@@ -150,6 +150,15 @@ public class ProfileFragment extends Fragment {
         for(int i=0; i<pictures.size(); i++) {
             // TODO fetch images from the FTP server and make sure that they show
             // Similar to how fetching profile picture works.
+            Intent intent =  new Intent(getActivity(), DownloadService.class);
+            intent.putExtra("IMAGETYPE", ImageType.PREVIEW);
+            intent.putExtra("IMAGEID", pictures.get(i).getPanoramaID());
+            intent.putExtra("TYPE", "DOWNLOAD");
+            intent.setAction(DownloadService.NOTIFICATION + pictures.get(i).getPanoramaID() + ".jpg");
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(DownloadService.NOTIFICATION + pictures.get(i).getPanoramaID() + ".jpg");
+            getActivity().registerReceiver(new ProfilePreviewBroadcastReceiver(), filter);
+            getActivity().startService(intent);
         }
     }
 
@@ -171,9 +180,9 @@ public class ProfileFragment extends Fragment {
         intent.putExtra("IMAGETYPE", ImageType.PROFILE);
         intent.putExtra("USERNAME", username);
         intent.putExtra("TYPE", "DOWNLOAD");
-        intent.setAction(DownloadService.NOTIFICATION);
+        intent.setAction(DownloadService.NOTIFICATION + username + ".jpg");
         IntentFilter filter = new IntentFilter();
-        filter.addAction(DownloadService.NOTIFICATION);
+        filter.addAction(DownloadService.NOTIFICATION + username + ".jpg");
         getActivity().registerReceiver(new ProfileImageBroadcastReceiver(), filter);
         getActivity().startService(intent);
     }
@@ -211,6 +220,8 @@ public class ProfileFragment extends Fragment {
             panoramaString = df.format(panoramaCount / 1000.0) + "k";
         } else if (panoramaCount >= 1000000) {
             panoramaString = df.format(panoramaCount / 1000000) + "M";
+        } else {
+            panoramaString = panoramaCount + "";
         }
         panoramaCountView.setText(panoramaString);
 
@@ -219,6 +230,8 @@ public class ProfileFragment extends Fragment {
             favString = df.format(favCount / 1000.0) + "k";
         } else if (favCount >= 1000000) {
             favString = df.format(favCount / 1000000) + "M";
+        } else {
+            favString = favCount + "";
         }
         favCountView.setText(favString);
     }
@@ -348,11 +361,11 @@ public class ProfileFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
-                Log.d("Profile", "Preview (" + intent.getIntExtra("IMAGEID", -100) + ") found and results from download are OK.");
+                Log.d("Profile", "Preview (" + intent.getStringExtra("IMAGEID") + ") found and results from download are OK.");
             }
-            int imageID = intent.getIntExtra("IMAGEID", -1);
-            String path = context.getFilesDir() + "/preview/"
-                    + imageID + ".jpg";
+            String imageID = intent.getStringExtra("IMAGEID");
+            String path = context.getFilesDir() + "/previews/"
+                    + imageID;
             Drawable previewDrawable = Drawable.createFromPath(path);
 
             File file = new File(path);
@@ -365,9 +378,12 @@ public class ProfileFragment extends Fragment {
             // Add the image to the correct panorama in the arraylist
 
             int i=0;
-            while (pictures.get(i).getPanoramaID() != imageID)
+            Log.d("Bilder", pictures.get(i).getPanoramaID() + "");
+            Log.d("Bilder", imageID + "");
+            while (i < pictures.size() && pictures.get(i).getPanoramaID() + ".jpg" != imageID)
                 i++;
-            pictures.get(i).setPreview(previewDrawable);
+            if(i < pictures.size())
+                pictures.get(i).setPreview(previewDrawable);
 
         }
     }
