@@ -112,43 +112,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             switch(position) {
                 case 0:
-                    fragmentClass = ExploreFragment.class;
                     showExploreView();
                     break;
                 case 1:
-                    fragmentClass = NotificationFragment.class;
                     showNotificationView();
                     break;
                 case 2:
-                    fragmentClass = CameraFragment.class;
-                    mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                    showCamera();
                     break;
                 case 3:
-                    fragmentClass = FriendsFragment.class;
+                    showFriendsView();
                     break;
                 case 4:
-                    fragmentClass = UploadFragment.class;
+                    showUploadView();
                     break;
                 case 5:
-                    fragmentClass = SettingsFragment.class;
+                    showSettingsView();
                     break;
                 case 6:
                     destroySession();
                     fragmentClass = LoginFragment.class;
+                    try {
+                        fragment = (Fragment) fragmentClass.newInstance();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    // Insert the fragment by replacing any existing fragment
+                    FragmentManager fragmentManager = getFragmentManager();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
                     break;
                 default:
-                    fragmentClass = ExploreFragment.class;
+                    showExploreView();
             }
-
-            try {
-                fragment = (Fragment) fragmentClass.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            // Insert the fragment by replacing any existing fragment
-            FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
 
             mDrawerList.setItemChecked(position, true);
             mDrawerLayout.closeDrawer(mDrawerList);
@@ -260,5 +256,49 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("notifications").commit();
         setTitle("Notifications");
     }
+
+    public void showFriendsView() {
+        FriendsFragment fragment = new FriendsFragment();
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("friends").commit();
+        setTitle("Friends");
+    }
+
+    public void showCamera() {
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+        Class fragmentClass = CameraFragment.class;
+        try {
+            Fragment fragment = (Fragment) fragmentClass.newInstance();
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void showUploadView() {
+        Class fragmentClass = UploadFragment.class;
+        try {
+            Fragment fragment = (Fragment) fragmentClass.newInstance();
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void showSettingsView() {
+        Class fragmentClass = SettingsFragment.class;
+        try {
+            Fragment fragment = (Fragment) fragmentClass.newInstance();
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
 }
