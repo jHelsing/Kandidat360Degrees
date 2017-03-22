@@ -38,7 +38,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
- * Created by boking on 2017-02-14.
+ * Created by boking on 2017-02-14. Revised by Jonathan 2017-03-22
  */
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    private void showExploreView(){
+    public void showExploreView(){
         ExploreFragment fragment = new ExploreFragment();
         FragmentManager fragmentManager = getFragmentManager();
         fragment.setArguments(setArgs);
