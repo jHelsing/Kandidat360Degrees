@@ -7,10 +7,12 @@ import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,12 +20,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ciux031701.kandidat360degrees.adaptors.ExploreSearchAdapter;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,6 +44,7 @@ import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,6 +62,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     private DrawerLayout mDrawerLayout;
     private ImageButton cameraButton;
     private SearchView searchView;
+    private ListView searchListView;
 
     private TextView infoWindowText;
     private ImageView infoWindowImage;
@@ -66,16 +74,40 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
     private ClusterManager<MyItem>  mClusterManager;
 
+    private ExploreSearchAdapter exploreSearchAdapter;
+    private ArrayList<String> resultArrayList;
+    private List<Address> globalList;
+    private int lastSearchStringLength;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_explore, container, false);
         setHasOptionsMenu(true);
-
+        lastSearchStringLength=0;
         toolbar = (Toolbar) root.findViewById(R.id.tool_bar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         isShowingPublic = true;
+        resultArrayList = new ArrayList<>();
+        searchListView = (ListView) root.findViewById(R.id.searchListView);
+        exploreSearchAdapter = new ExploreSearchAdapter(resultArrayList, getActivity().getApplicationContext());
+        searchListView.setAdapter(exploreSearchAdapter);
+        searchListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                try {
+                    searchListView.setVisibility(View.GONE);
+                    performSearch((String)exploreSearchAdapter.getItemWithoutCountry(i));
+                    //closes virtual keyboard
+                    View currentFocus = getActivity().getCurrentFocus();
+                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         cameraButton = (ImageButton) root.findViewById(R.id.cameraButton);
         mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
         toolbarMenuButton = (ImageButton) root.findViewById(R.id.toolbarMenuButton);
@@ -173,8 +205,23 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.toolmenu_search, menu);
         this.toolbarMenu = menu;
-        earthButton = menu.findItem(R.id.togglePermission);
+        MenuItem searchMenuItem = menu.findItem(R.id.action_search);
         searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+
+        MenuItemCompat.setOnActionExpandListener(searchMenuItem, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                exploreSearchAdapter.clear();
+                searchListView.setVisibility(View.GONE);
+                return true;
+            }
+        });
+        earthButton = menu.findItem(R.id.togglePermission);
         searchView.setQueryHint("Search!");
         int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
         View searchPlate = searchView.findViewById(searchPlateId);
@@ -191,6 +238,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(Color.LTGRAY);
         searchView.setBackgroundColor(Color.WHITE);
         searchView.setOnQueryTextListener(this);
+
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -210,7 +258,13 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                     isShowingPublic = true;
                 }
                 return true;
-
+            case R.id.action_search:
+                if(searchListView.getVisibility()==View.GONE) {
+                    searchListView.setVisibility(View.VISIBLE);
+                }else{
+                    searchListView.setVisibility(View.GONE);
+                }
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -235,6 +289,10 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     public boolean onQueryTextSubmit(String query) {
         searchView.clearFocus();
         try {
+            searchListView.setVisibility(View.GONE);
+            View currentFocus = getActivity().getCurrentFocus();
+            InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             performSearch(query);
         } catch (IOException e) {
             e.printStackTrace();
@@ -244,6 +302,49 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
     @Override
     public boolean onQueryTextChange(String newText) {
+
+        if(searchListView.getVisibility()==View.GONE){
+            searchListView.setVisibility(View.VISIBLE);
+        }
+        //Only search for new results if we add characters
+        //Should probably be done in another thread.
+        if(newText.length()>lastSearchStringLength) {
+            lastSearchStringLength=newText.length();
+            //searchListView.invalidate();
+            geocoder = new Geocoder(getActivity());
+            try {
+                globalList = geocoder.getFromLocationName(newText, 5);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            exploreSearchAdapter.clear();
+            for (Address address : globalList) {
+
+                System.out.println("Adding result: " + address.getLocality() + address.getFeatureName() + address.getAdminArea());
+                if(address.getLocality()!=null){
+                    resultArrayList.add(address.getLocality() + ", " +address.getCountryName());
+                }
+                if(address.getAdminArea() != null){
+                    resultArrayList.add(address.getAdminArea() + ", "+ address.getCountryName());
+                }
+                if(address.getFeatureName() != null){
+                    resultArrayList.add(address.getFeatureName()+ ", " + address.getCountryName());
+                }
+            }
+
+            exploreSearchAdapter.notifyDataSetChanged();
+
+
+            /*if (TextUtils.isEmpty(newText)) {
+                exploreSearchAdapter.filter("");
+                searchListView.clearTextFilter();
+            } else {
+                exploreSearchAdapter.filter(newText.toString());
+            }*/
+            return true;
+        }else{
+            lastSearchStringLength=newText.length();
+        }
         return false;
     }
 
