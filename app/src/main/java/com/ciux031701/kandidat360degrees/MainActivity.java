@@ -113,9 +113,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             switch(position) {
                 case 0:
                     fragmentClass = ExploreFragment.class;
+                    showExploreView();
                     break;
                 case 1:
                     fragmentClass = NotificationFragment.class;
+                    showNotificationView();
                     break;
                 case 2:
                     fragmentClass = CameraFragment.class;
@@ -250,4 +252,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         JRequester.setRequest(profileReq);
         JRequester.sendRequest();
     }
+
+
+    public void showNotificationView() {
+        NotificationFragment fragment = new NotificationFragment();
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("notifications").commit();
+        setTitle("Notifications");
+    }
+
 }

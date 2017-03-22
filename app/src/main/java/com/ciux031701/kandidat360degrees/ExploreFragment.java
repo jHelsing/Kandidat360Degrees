@@ -12,7 +12,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,7 +27,6 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.ciux031701.kandidat360degrees.adaptors.ExploreSearchAdapter;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -42,13 +40,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by boking on 2017-02-14.
+ * Created by boking on 2017-02-14. Revisited by Jonathan on 2017-03-22
  */
 
 public class ExploreFragment extends Fragment implements SearchView.OnQueryTextListener {
@@ -57,10 +54,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     MapView mMapView;
     private GoogleMap googleMap;
 
-    private Toolbar toolbar;
-    private ImageButton toolbarMenuButton;
     private DrawerLayout mDrawerLayout;
-    private ImageButton cameraButton;
     private SearchView searchView;
     private ListView searchListView;
 
@@ -84,39 +78,28 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         View root = inflater.inflate(R.layout.fragment_explore, container, false);
         setHasOptionsMenu(true);
         lastSearchStringLength=0;
-        toolbar = (Toolbar) root.findViewById(R.id.tool_bar);
+
+        // Set up toolbar and navigation drawer.
+        Toolbar toolbar = (Toolbar) root.findViewById(R.id.tool_bar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        isShowingPublic = true;
-        resultArrayList = new ArrayList<>();
-        searchListView = (ListView) root.findViewById(R.id.searchListView);
-        exploreSearchAdapter = new ExploreSearchAdapter(resultArrayList, getActivity().getApplicationContext());
-        searchListView.setAdapter(exploreSearchAdapter);
-        searchListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                try {
-                    searchListView.setVisibility(View.GONE);
-                    performSearch((String)exploreSearchAdapter.getItemWithoutCountry(i));
-                    //closes virtual keyboard
-                    View currentFocus = getActivity().getCurrentFocus();
-                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        cameraButton = (ImageButton) root.findViewById(R.id.cameraButton);
-        mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
-        toolbarMenuButton = (ImageButton) root.findViewById(R.id.toolbarMenuButton);
+        ImageButton toolbarMenuButton = (ImageButton) root.findViewById(R.id.toolbarMenuButton);
         toolbarMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mDrawerLayout.openDrawer(Gravity.LEFT);
             }
         });
+
+        // Set up
+        isShowingPublic = true;
+        setUpSearchFunctionality(root);
+
+        mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
+
+
+        // Set up camera button
+        ImageButton cameraButton = (ImageButton) root.findViewById(R.id.cameraButton);
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -127,64 +110,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             }
         });
 
-
-        mMapView = (MapView) root.findViewById(R.id.mapView);
-        mMapView.onCreate(savedInstanceState);
-
-        mMapView.onResume(); // needed to get the map to display immediately
-
-        try {
-            MapsInitializer.initialize(getActivity().getApplicationContext());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        mMapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap mMap) {
-
-                googleMap = mMap;
-                setUpClusterer();
-                googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-                    @Override
-                    public View getInfoWindow(Marker marker) {
-                        return onMarkerClicked(marker);
-                    }
-
-                    @Override
-                    public View getInfoContents(Marker marker) {
-                        return null;
-                    }
-                });
-                googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        //Go to full screen view
-                        //TODO: get fullscreen image from DB and send as argument
-                        Bundle args =  new Bundle();
-                        args.putString("origin","explore");
-
-                        ImageViewFragment fragment = new ImageViewFragment();
-                        fragment.setArguments(args);
-                        FragmentManager fragmentManager = getFragmentManager();
-                        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
-                    }
-                });
-
-                ((MainActivity) getActivity()).loadMapStyling(googleMap);
-
-                googleMap.getUiSettings().setMapToolbarEnabled(false);
-                // For dropping a marker at a point on the Map
-                LatLng gothenburg = new LatLng(57.4, 12);
-                googleMap.addMarker(new MarkerOptions().position(gothenburg).title("Here we go bois")
-                        .snippet("its happening!").icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-                // For zooming automatically to the location of the marker
-                //CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(12).build();
-                //googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-            }
-        });
-
+        setUpMap(root, savedInstanceState);
 
         return root;
     }
@@ -287,7 +213,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
     @Override
     public boolean onQueryTextSubmit(String query) {
-        searchView.clearFocus();
         try {
             searchListView.setVisibility(View.GONE);
             View currentFocus = getActivity().getCurrentFocus();
@@ -377,6 +302,87 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             MyItem offsetItem = new MyItem(lat, lng);
             mClusterManager.addItem(offsetItem);
         }
+    }
+
+    private void setUpMap(View root, Bundle bundle) {
+        mMapView = (MapView) root.findViewById(R.id.mapView);
+        mMapView.onCreate(bundle);
+
+        mMapView.onResume(); // needed to get the map to display immediately
+
+        try {
+            MapsInitializer.initialize(getActivity().getApplicationContext());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        mMapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap mMap) {
+
+                googleMap = mMap;
+                setUpClusterer();
+                googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+                    @Override
+                    public View getInfoWindow(Marker marker) {
+                        return onMarkerClicked(marker);
+                    }
+
+                    @Override
+                    public View getInfoContents(Marker marker) {
+                        return null;
+                    }
+                });
+                googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                    @Override
+                    public void onInfoWindowClick(Marker marker) {
+                        //Go to full screen view
+                        //TODO: get fullscreen image from DB and send as argument
+                        Bundle args =  new Bundle();
+                        args.putString("origin","explore");
+
+                        ImageViewFragment fragment = new ImageViewFragment();
+                        fragment.setArguments(args);
+                        FragmentManager fragmentManager = getFragmentManager();
+                        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
+                    }
+                });
+
+                ((MainActivity) getActivity()).loadMapStyling(googleMap);
+
+                googleMap.getUiSettings().setMapToolbarEnabled(false);
+                // For dropping a marker at a point on the Map
+                LatLng gothenburg = new LatLng(57.4, 12);
+                googleMap.addMarker(new MarkerOptions().position(gothenburg).title("Here we go bois")
+                        .snippet("its happening!").icon(BitmapDescriptorFactory
+                                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                // For zooming automatically to the location of the marker
+                //CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(12).build();
+                //googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+            }
+        });
+    }
+
+    private void setUpSearchFunctionality(View root) {
+        resultArrayList = new ArrayList<>();
+        searchListView = (ListView) root.findViewById(R.id.searchListView);
+        exploreSearchAdapter = new ExploreSearchAdapter(resultArrayList, getActivity().getApplicationContext());
+        searchListView.setAdapter(exploreSearchAdapter);
+        searchListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                try {
+                    searchListView.setVisibility(View.GONE);
+                    performSearch((String)exploreSearchAdapter.getItemWithoutCountry(i));
+                    //closes virtual keyboard
+                    View currentFocus = getActivity().getCurrentFocus();
+                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public class CustomMarkerRenderer extends DefaultClusterRenderer<MyItem>{
