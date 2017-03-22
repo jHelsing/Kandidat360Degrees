@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable;
  * Represents a panorama image in the profile
  *
  * @author Jonathan
- * @version 0.1
+ * @version 1.0
  */
 public class ProfilePanorama {
 
