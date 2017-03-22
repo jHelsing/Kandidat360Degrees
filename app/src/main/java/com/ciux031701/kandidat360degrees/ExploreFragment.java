@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -132,6 +133,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         inflater.inflate(R.menu.toolmenu_search, menu);
         this.toolbarMenu = menu;
         MenuItem searchMenuItem = menu.findItem(R.id.action_search);
+        Drawable searchIcon = getResources().getDrawable(R.drawable.search_icon);
+        searchMenuItem.setIcon(searchIcon);
         searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 
         MenuItemCompat.setOnActionExpandListener(searchMenuItem, new MenuItemCompat.OnActionExpandListener() {

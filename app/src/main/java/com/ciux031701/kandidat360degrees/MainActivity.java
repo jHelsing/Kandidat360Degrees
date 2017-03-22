@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,6 +25,7 @@ import com.ciux031701.kandidat360degrees.communication.JRequester;
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.ciux031701.kandidat360degrees.representation.JSONParser;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
+import com.ciux031701.kandidat360degrees.representation.RoundImageView;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -72,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         drawerFooter = getLayoutInflater().inflate(R.layout.drawer_footer, mDrawerList, false);
         usernameText = (TextView) drawerHeader.findViewById(R.id.userNameText);
         usernameText.setText(userName);
+
+        RoundImageView profileImageView = (RoundImageView) drawerHeader.findViewById(R.id.imageView);
+        profileImageView.setImageDrawable(getResources().getDrawable(R.drawable.anonymous_profile));
 
         drawerHeader.setOnClickListener(new View.OnClickListener() {
             @Override
