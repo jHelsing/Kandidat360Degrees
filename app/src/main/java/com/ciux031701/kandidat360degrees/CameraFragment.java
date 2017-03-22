@@ -18,6 +18,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.widget.DrawerLayout;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
@@ -28,8 +29,17 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.ciux031701.kandidat360degrees.representation.NativePanorama;
+
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.imgcodecs.Imgcodecs;
+
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -62,7 +72,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private boolean isSafeToTakePicture = true; //is it safe to capture a picture?
     private int nbrOfPicturesTaken = 0; //number of pictures taken in the panorama
 
-    ProgressDialog progressDialog;
+    private ProgressDialog progressDialog;
+    private List<Mat> listOfTakenImages = new ArrayList<>();
 
     private DrawerLayout mDrawerLayout;
 
@@ -124,7 +135,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!captureInProgress) {
+                //if(!captureInProgress) {
                     //Take a picture
                     captureInProgress = true;
                     //angleProgressBar.setVisibility(View.VISIBLE);
@@ -136,11 +147,13 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                         mCam.takePicture(null,null,jpegCallback);
                         nbrOfPicturesTaken++;
                     }
-                    if(nbrOfPicturesTaken == 3){
-                        //Save the image
-                        saveAndMakePanorama();
-                    }
-                }else {
+//                    if(nbrOfPicturesTaken == 3){
+//                            //Save the image
+//                            saveAndMakePanorama();
+//                    }
+                if (nbrOfPicturesTaken == 3) {
+                    saveAndMakePanorama();
+
                     args = new Bundle();
                     args.putString("origin","camera");
                     ImageViewFragment fragment = new ImageViewFragment();
@@ -186,7 +199,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             rotationMatrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),rotationMatrix,false);
 
-            //TODO: save the image to a List (to openCV)
+            //Convert the image to Mat, to be able to use openCV
+            Mat mat = new Mat();
+            Utils.bitmapToMat(bitmap,mat);
+            listOfTakenImages.add(mat);
 
             //To draw 1/3 of the most recently taken picture:
             Canvas canvas = null;
@@ -259,7 +275,30 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         @Override
         public void run(){
             showProgressDialog();
-            //TODO: openCV parts
+            //openCV-parts:
+            try {
+                int nbrOfImages = listOfTakenImages.size();
+                long[] imageAddresses = new long[nbrOfImages];
+                for (int i=0; i < nbrOfImages; i++){
+                    imageAddresses[i] = listOfTakenImages.get(i).getNativeObjAddr();
+                }
+                Mat result = new Mat(); //a mat to store the final panorama in
+                NativePanorama.processPanorama(imageAddresses,result.getNativeObjAddr());
+                //Save the image to phone:
+                File sdcard = Environment.getExternalStorageDirectory();
+                final String fileName = sdcard.getAbsolutePath() + "/opencv_" + System.currentTimeMillis() + ".png";
+                Imgcodecs.imwrite(fileName,result);
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getActivity(),"File saved at: " + fileName,Toast.LENGTH_LONG).show();
+                    }
+                });
+                listOfTakenImages.clear();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            //end of openCV-parts
             closeProgressDialog();
         }
     };
@@ -269,7 +308,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         getActivity().runOnUiThread(new Runnable(){
             @Override
             public void run() {
-                mCam.stopPreview();
+                if (mCam != null){
+                    mCam.stopPreview();
+                }
                 progressDialog = ProgressDialog.show(getActivity(),"","Panorama",true);
                 progressDialog.setCancelable(false);
             }
@@ -281,7 +322,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mCam.startPreview();
+                if (mCam != null){
+                    mCam.startPreview();
+                }
                 progressDialog.dismiss();
             }
         });
