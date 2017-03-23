@@ -18,6 +18,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 
+import static android.content.ContentValues.TAG;
+
 /**
  * Created by boking on 2017-03-14.
  */
@@ -32,6 +34,7 @@ public class ImageViewFragment extends Fragment{
 
     private Bundle args;
     private String origin;
+    private Bitmap panoramaImage;
 
 
     @Override
@@ -41,8 +44,14 @@ public class ImageViewFragment extends Fragment{
         origin = args.getString("origin");
 
         doneButton = (ImageButton)root.findViewById(R.id.sendToShareButton);
+        imageView1 = (ImageView)root.findViewById(R.id.imageviewfirst);
 
         if(origin.equals("camera")){
+            panoramaImage = args.getParcelable("image");
+            imageView1.setImageBitmap(panoramaImage);
+            if (panoramaImage == null){
+                Log.i(TAG,"Panorama image is null");
+            }
             doneButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -61,7 +70,6 @@ public class ImageViewFragment extends Fragment{
         }else{//Only show the picture
             doneButton.setVisibility(View.GONE);
         }
-        imageView1 = (ImageView)root.findViewById(R.id.imageviewfirst);
         scrollView = (HorizontalScrollView) root.findViewById(R.id.horizontalScrollView);
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
 
