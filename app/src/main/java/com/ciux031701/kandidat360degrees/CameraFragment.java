@@ -287,10 +287,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             resultPanorama = new Mat(); //a mat to store the final panorama in
             NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
             //Save the image to internal memory ------------------ not working :(
-            File path = new File(Environment.getDataDirectory() + "/360World/");
+            File path = new File(getActivity().getFilesDir() + "/panoramas/");
             path.mkdirs();
             File file = new File(path, "image.png");
-            final String fileName = file.toString();
+            final String fileName = file.getPath();
             boolean success = Imgcodecs.imwrite(fileName, resultPanorama);
             getActivity().runOnUiThread(new Runnable() {
                 @Override
