@@ -1,6 +1,11 @@
 package com.ciux031701.kandidat360degrees.adaptors;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -13,10 +18,14 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.ciux031701.kandidat360degrees.ProfileFragment;
 import com.ciux031701.kandidat360degrees.R;
+import com.ciux031701.kandidat360degrees.communication.DownloadService;
+import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 
 import java.io.EOFException;
+import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -34,19 +43,39 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent){
+    public View getView(final int position, View convertView, ViewGroup parent){
 
         ProfilePanorama singlePic = getItem(position);
         LayoutInflater inflater = LayoutInflater.from(getContext());
-        View customView = inflater.inflate(R.layout.picture_profile_layout,parent,false);
+        final View customView = inflater.inflate(R.layout.picture_profile_layout,parent,false);
+
+        registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
+                imageView.setImageDrawable(getItem(position).getPreview());
+            }
+        });
 
         ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
         TextView locationText = (TextView) customView.findViewById(R.id.locationText);
         TextView favCountText = (TextView) customView.findViewById(R.id.favCounter);
         TextView dateText = (TextView) customView.findViewById(R.id.dateText);
 
+        //Start fetching a preview for the item
+        Intent intent =  new Intent(getContext(), DownloadService.class);
+        intent.putExtra("IMAGETYPE", ImageType.PREVIEW);
+        intent.putExtra("IMAGEID", singlePic.getPanoramaID());
+        intent.putExtra("TYPE", "DOWNLOAD");
+        intent.setAction(DownloadService.NOTIFICATION + singlePic.getPanoramaID() + ".jpg");
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DownloadService.NOTIFICATION + singlePic.getPanoramaID() + ".jpg");
+        getContext().registerReceiver(new ProfilePreviewBroadcastReceiver(), filter);
+        getContext().startService(intent);
 
-        //Show adress per item
+
+        //Show adress for the item
         Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
         double latitude = Double.parseDouble(singlePic.getLatitude());
         double longitude = Double.parseDouble(singlePic.getLongitude());
@@ -65,10 +94,10 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements
             e.printStackTrace();
         }
 
-        //Show date per item
+        //Show date for the item
         dateText.setText(singlePic.getDate().substring(0,10));
 
-        //Show favstext per item
+        //Show favstext for the item
         DecimalFormat df = new DecimalFormat("#.#");
         df.setRoundingMode(RoundingMode.CEILING);
 
@@ -83,7 +112,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements
         }
         favCountText.setText(favString);
 
-        //show if liked per item
+        //show if liked for the item
         if(singlePic.isFavorite()){
             Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_clicked);
             favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
@@ -98,5 +127,42 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Log.d("Clicked", id + "");
+    }
+
+    /**
+     * A class for the receiver of download of preview images.
+     */
+    public class ProfilePreviewBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
+                Log.d("Profile", "Preview (" + intent.getStringExtra("IMAGEID") + ") found and results from download are OK.");
+                String imageID = intent.getStringExtra("IMAGEID");
+                String path = context.getFilesDir() + "/previews/"
+                        + imageID;
+                Drawable previewDrawable = Drawable.createFromPath(path);
+
+                File file = new File(path);
+                if (file.delete()) {
+                    Log.d("Profile", "Preview image " + imageID + " has been deleted");
+                }
+
+                context.unregisterReceiver(this);
+
+                // Add the image to the correct panorama in the arraylist
+
+                int i=0;
+                Log.d("Bilder", getItem(i).getPanoramaID() + "");
+                Log.d("Bilder", imageID + "");
+                while (i < getCount() && getItem(i).getPanoramaID() + ".jpg" != imageID)
+                    i++;
+                if(i < getCount()) {
+                    getItem(i).setPreview(previewDrawable);
+                    notifyDataSetChanged();
+                }
+            }
+
+        }
     }
 }
