@@ -43,20 +43,11 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements
     }
 
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent){
+    public View getView(final int position, View convertView, final ViewGroup parent){
 
         ProfilePanorama singlePic = getItem(position);
         LayoutInflater inflater = LayoutInflater.from(getContext());
         final View customView = inflater.inflate(R.layout.picture_profile_layout,parent,false);
-
-        registerDataSetObserver(new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                super.onChanged();
-                ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
-                imageView.setImageDrawable(getItem(position).getPreview());
-            }
-        });
 
         ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
         TextView locationText = (TextView) customView.findViewById(R.id.locationText);
@@ -71,8 +62,35 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements
         intent.setAction(DownloadService.NOTIFICATION + singlePic.getPanoramaID() + ".jpg");
         IntentFilter filter = new IntentFilter();
         filter.addAction(DownloadService.NOTIFICATION + singlePic.getPanoramaID() + ".jpg");
-        getContext().registerReceiver(new ProfilePreviewBroadcastReceiver(), filter);
+        getContext().registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
+                    Log.d("Profile", "Preview (" + intent.getStringExtra("IMAGEID") + ") found and results from download are OK.");
+                    String imageID = intent.getStringExtra("IMAGEID");
+                    String path = context.getFilesDir() + "/previews/"
+                            + imageID;
+                    Drawable previewDrawable = Drawable.createFromPath(path);
+
+                    context.unregisterReceiver(this);
+
+                    // Add the image to the correct panorama in the arraylist
+
+                    int i=0;
+                    Log.d("Bilder", getItem(i).getPanoramaID() + "");
+                    Log.d("Bilder", imageID + "");
+                    while (i < getCount() && !(getItem(i).getPanoramaID() + ".jpg").equals(imageID))
+                        i++;
+                    if(i < getCount()) {
+                        getItem(i).setPreview(previewDrawable);
+                        ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
+                        imageView.setImageDrawable(getItem(position).getPreview());
+                    }
+                }
+            }
+        }, filter);
         getContext().startService(intent);
+
 
 
         //Show adress for the item
@@ -118,8 +136,6 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements
             favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
         }
 
-
-
         //Set image
         return customView;
     }
@@ -129,40 +145,4 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements
         Log.d("Clicked", id + "");
     }
 
-    /**
-     * A class for the receiver of download of preview images.
-     */
-    public class ProfilePreviewBroadcastReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
-                Log.d("Profile", "Preview (" + intent.getStringExtra("IMAGEID") + ") found and results from download are OK.");
-                String imageID = intent.getStringExtra("IMAGEID");
-                String path = context.getFilesDir() + "/previews/"
-                        + imageID;
-                Drawable previewDrawable = Drawable.createFromPath(path);
-
-                File file = new File(path);
-                if (file.delete()) {
-                    Log.d("Profile", "Preview image " + imageID + " has been deleted");
-                }
-
-                context.unregisterReceiver(this);
-
-                // Add the image to the correct panorama in the arraylist
-
-                int i=0;
-                Log.d("Bilder", getItem(i).getPanoramaID() + "");
-                Log.d("Bilder", imageID + "");
-                while (i < getCount() && getItem(i).getPanoramaID() + ".jpg" != imageID)
-                    i++;
-                if(i < getCount()) {
-                    getItem(i).setPreview(previewDrawable);
-                    notifyDataSetChanged();
-                }
-            }
-
-        }
-    }
 }

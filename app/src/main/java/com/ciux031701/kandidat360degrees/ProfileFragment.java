@@ -99,12 +99,11 @@ public class ProfileFragment extends Fragment {
         // We do not need to check this error since we are the ones who send the bundle and are
         // 100% sure of what it contains.
         pictures = (ArrayList<ProfilePanorama>) getArguments().getSerializable("images");
-        loadPicturesFromDB();
-
         pictureListView = (ListView) root.findViewById(R.id.profilePictureListView);
         profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
         pictureListView.setAdapter(profileFlowAdapter);
         pictureListView.setOnItemClickListener(new FlowItemClickListener());
+
         return root;
     }
 
@@ -142,24 +141,6 @@ public class ProfileFragment extends Fragment {
 
         infoWindowText.setText(marker.getPosition().toString());
         return v;
-    }
-
-    //Use this to fill up pictures.
-    private void loadPicturesFromDB() {
-        // We have the imageids but now we need to start fetching the preview images for them
-        for(int i=0; i<pictures.size(); i++) {
-            // TODO fetch images from the FTP server and make sure that they show
-            // Similar to how fetching profile picture works.
-            Intent intent =  new Intent(getActivity(), DownloadService.class);
-            intent.putExtra("IMAGETYPE", ImageType.PREVIEW);
-            intent.putExtra("IMAGEID", pictures.get(i).getPanoramaID());
-            intent.putExtra("TYPE", "DOWNLOAD");
-            intent.setAction(DownloadService.NOTIFICATION + pictures.get(i).getPanoramaID() + ".jpg");
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(DownloadService.NOTIFICATION + pictures.get(i).getPanoramaID() + ".jpg");
-            getActivity().registerReceiver(new ProfilePreviewBroadcastReceiver(), filter);
-            getActivity().startService(intent);
-        }
     }
 
     private void setUpMap() {
@@ -350,41 +331,6 @@ public class ProfileFragment extends Fragment {
                 Log.d("Profile", "Profile image has been deleted");
             }
             context.unregisterReceiver(this);
-        }
-    }
-
-    /**
-     * A class for the receiver of download of preview images.
-     */
-    public class ProfilePreviewBroadcastReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
-                Log.d("Profile", "Preview (" + intent.getStringExtra("IMAGEID") + ") found and results from download are OK.");
-            }
-            String imageID = intent.getStringExtra("IMAGEID");
-            String path = context.getFilesDir() + "/previews/"
-                    + imageID;
-            Drawable previewDrawable = Drawable.createFromPath(path);
-
-            File file = new File(path);
-            if (file.delete()) {
-                Log.d("Profile", "Preview image " + imageID + " has been deleted");
-            }
-
-            context.unregisterReceiver(this);
-
-            // Add the image to the correct panorama in the arraylist
-
-            int i=0;
-            Log.d("Bilder", pictures.get(i).getPanoramaID() + "");
-            Log.d("Bilder", imageID + "");
-            while (i < pictures.size() && pictures.get(i).getPanoramaID() + ".jpg" != imageID)
-                i++;
-            if(i < pictures.size())
-                pictures.get(i).setPreview(previewDrawable);
-
         }
     }
 
