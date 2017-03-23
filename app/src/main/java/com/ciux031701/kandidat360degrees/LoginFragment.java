@@ -133,6 +133,7 @@ public class LoginFragment extends Fragment {
     private void inSession(){
         //Check if a session is saved locally.
         if (Session.load()) {
+            // TODO Should show a loading screen first instead of showing the login screen.
             //Send a request to see if it matches a remote session.
             //If it does, skip login.
             JReqCheckSession checkSessionReq = new JReqCheckSession();

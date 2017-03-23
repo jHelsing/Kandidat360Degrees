@@ -91,8 +91,6 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements
         }, filter);
         getContext().startService(intent);
 
-
-
         //Show adress for the item
         Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
         double latitude = Double.parseDouble(singlePic.getLatitude());
