@@ -20,7 +20,7 @@
     <SurfaceView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/surfaceViewOnTop"/>
+        android:id="@+id/surfaceViewDraw"/>
 
     <ImageButton
         android:id="@+id/backButton"
@@ -62,15 +62,6 @@
         android:layout_marginRight="27dp"
         android:layout_marginEnd="27dp"
         android:visibility="gone" />
-
-    <ImageView
-        android:layout_width="match_parent"
-        opencv:srcCompat="@drawable/example_panorama"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/previewImage"
-        android:layout_height="match_parent"
-        android:adjustViewBounds="false" />
 
     <TextView
         android:text="@string/hold_phone_vertical"
