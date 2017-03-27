@@ -20,7 +20,7 @@
     <SurfaceView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/surfaceViewOnTop"/>
+        android:id="@+id/surfaceViewDraw"/>
 
     <ImageButton
         android:id="@+id/backButton"
