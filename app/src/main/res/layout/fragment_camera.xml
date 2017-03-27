@@ -63,15 +63,6 @@
         android:layout_marginEnd="27dp"
         android:visibility="gone" />
 
-    <ImageView
-        android:layout_width="match_parent"
-        opencv:srcCompat="@drawable/example_panorama"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/previewImage"
-        android:layout_height="match_parent"
-        android:adjustViewBounds="false" />
-
     <TextView
         android:text="@string/hold_phone_vertical"
         android:layout_width="wrap_content"
@@ -92,7 +83,17 @@
         android:progressDrawable="@drawable/progressbar_capture"
         android:layout_width="250dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="10dp"
+        android:visibility="gone" />
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        opencv:srcCompat="@android:drawable/ic_menu_upload"
+        android:id="@+id/angleImage"
+        android:layout_alignTop="@+id/backButton"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 
 </RelativeLayout>
