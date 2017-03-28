@@ -193,34 +193,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             matrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
 
-            //Convert the image to Mat, to be able to use openCV
-            Mat mat = new Mat(bitmap.getWidth(), bitmap.getHeight(), 16); //type of Mat needs to 16, CV_8UC3, to be able to use matToBitmap(..) later
-            Utils.bitmapToMat(bitmap, mat);
-            listOfTakenImages.add(mat);
+            //TODO: convert to Mat for opencv
 
-//            Canvas canvas = null;
-//            try {
-//                canvas = mSurfaceViewOnTop.getHolder().lockCanvas(null);
-//                synchronized (mSurfaceViewOnTop.getHolder()){
-//                    //Clear canvas
-//                    canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-//                    //Scale the image to fit the surfaceview
-//                    float scale = 1.0f * mSurfaceView.getHeight()/bitmap.getHeight();
-//                    Bitmap scaleImage = Bitmap.createScaledBitmap(bitmap,(int)(scale*bitmap.getWidth()),mSurfaceView.getHeight(),false);
-//                    Paint paint = new Paint();
-//                    //Set the opacity of the image
-//                    paint.setAlpha(200);
-//                    //Draw 1/3 of the image:
-//                    canvas.drawBitmap(scaleImage,-scaleImage.getWidth()*2/3,0,paint);
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            } finally {
-//                if (canvas != null){
-//                    mSurfaceViewOnTop.getHolder().unlockCanvasAndPost(canvas);
-//                }
-//            }
-            //Start preview of the camera & set safe to take pictures to true
             mCam.startPreview();
             safeToTakePicture = true;
         }
