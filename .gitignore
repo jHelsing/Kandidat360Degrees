@@ -42,4 +42,4 @@ captures/
 .idea
 
 # OpenCV
-/Android.mk
+Android.mk
