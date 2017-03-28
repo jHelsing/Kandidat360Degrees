@@ -9,8 +9,8 @@ import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.ArcShape;
 import android.graphics.drawable.shapes.OvalShape;
 import android.hardware.Camera;
 import android.hardware.Sensor;
@@ -20,7 +20,6 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
@@ -32,15 +31,12 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 
 /**
@@ -56,7 +52,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private ImageView previewImage;
     private ImageView angleImage;
 
-    private SurfaceView mSurfaceView, mSurfaceViewDraw;
+    private SurfaceView mSurfaceView;
+    private DrawDotSurfaceView mSurfaceViewDraw;
     private Camera mCam;
 
     //Sensor stuff
@@ -75,6 +72,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     private DrawerLayout mDrawerLayout;
     private ArrayList<Mat> listOfTakenImages;
+    private int nbrOfImages = 20;
+    private int targetDegree;
+    private ShapeDrawable filledCircle;
+    private Canvas canvas;
 
     private Bundle args;
     private ProgressBar angleProgressBar;
@@ -164,11 +165,20 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         mSurfaceView.getHolder().addCallback(mSurfaceCallback);
         mSurfaceView.setVisibility(View.GONE);
 
-        mSurfaceViewDraw = (SurfaceView) root.findViewById(R.id.surfaceViewDraw);
+        mSurfaceViewDraw = (DrawDotSurfaceView) root.findViewById(R.id.surfaceViewDraw);
         mSurfaceViewDraw.setZOrderOnTop(true);
-        mSurfaceViewDraw.getHolder().addCallback(mSurfaceCallbackDraw);
+        //mSurfaceViewDraw.getHolder().addCallback(mSurfaceCallbackDraw);
         mSurfaceViewDraw.getHolder().setFormat(PixelFormat.TRANSPARENT);
         mSurfaceViewDraw.setVisibility(View.GONE);
+
+        Display mDisp = getActivity().getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        mDisp.getSize(size);
+        int centerX = size.x/2;
+        int centerY = size.y/2;
+        Point center = new Point(centerX,centerY);
+        mSurfaceViewDraw.setCenter(center);
+
 
         return root;
     }
@@ -194,6 +204,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
 
             //TODO: convert to Mat for opencv
+            listOfTakenImages.add(new Mat()); //should be removed
+
+            targetDegree = listOfTakenImages.size()*(360/nbrOfImages);
+            mSurfaceViewDraw.setTargetDegree(targetDegree);
 
             mCam.startPreview();
             safeToTakePicture = true;
@@ -206,29 +220,31 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private SurfaceHolder.Callback mSurfaceCallbackDraw = new SurfaceHolder.Callback() {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            Canvas canvas = null;
             try {
                 canvas = mSurfaceViewDraw.getHolder().lockCanvas(null);
                 synchronized (mSurfaceViewDraw.getHolder()) {
                     //Find center of screen to put the circle there:
                     Display mDisp = getActivity().getWindowManager().getDefaultDisplay();
-                    int centerX = mDisp.getWidth()/2;
-                    int centerY = mDisp.getHeight()/2;
+                    Point size = new Point();
+                    mDisp.getSize(size);
+                    int centerX = size.x/2;
+                    int centerY = size.y/2;
 
-                    //Draw a filled circle in the center of the display:
-                    ShapeDrawable filledCircle = new ShapeDrawable(new OvalShape());
-                    filledCircle.getPaint().setColor(0xff74AC23); //default is black
-                    int filledRadius = 40;
-                    filledCircle.setBounds(centerX-filledRadius,centerY-filledRadius,centerX+filledRadius,centerY+filledRadius); //needed, the shape is not drawn otherwise
-                    filledCircle.draw(canvas);
+//                    //Draw a filled circle in the center of the display:
+//                    filledCircle = new ShapeDrawable(new OvalShape());
+//                    filledCircle.getPaint().setColor(0xff74AC23); //default is black
+//                    int filledRadius = 40;
+//                    filledCircle.setBounds(centerX-filledRadius,centerY-filledRadius,centerX+filledRadius,centerY+filledRadius); //needed, the shape is not drawn otherwise
+//                    filledCircle.draw(canvas);
 
                     //Draw an unfilled circle in the center of the display:
                     ShapeDrawable unfilledCircle = new ShapeDrawable(new OvalShape());
                     unfilledCircle.getPaint().setStyle(Paint.Style.STROKE);
                     unfilledCircle.getPaint().setStrokeWidth(5);
-                    int unfilledRadius = filledRadius + 15;
+                    int unfilledRadius = 40 + 15;
                     unfilledCircle.setBounds(centerX-unfilledRadius,centerY-unfilledRadius,centerX+unfilledRadius,centerY+unfilledRadius);
                     unfilledCircle.draw(canvas);
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -352,6 +368,28 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     lastDegree = average;
                     int newProgressAngle = (int)fromDegreeToProgress(lastDegree);
                     System.out.println("angle: " + lastDegree + ". Progress: " + newProgressAngle);
+
+                    mSurfaceViewDraw.setCurrentDegree(newProgressAngle);
+
+                    //Re-draw the dot:
+//                    int deltaDegree = newProgressAngle-targetDegree; //positive value - right of targetDegree
+//                    Rect rectangle = new Rect();
+//                    Display display = getActivity().getWindowManager().getDefaultDisplay();
+//                    display.getRectSize(rectangle);
+//                    int width = rectangle.width(); //pixlar tror vi
+//                    //int height = rectangle.height();
+//                    Rect bounds = filledCircle.getBounds();
+//
+//                    Display mDisp = getActivity().getWindowManager().getDefaultDisplay();
+//                    Point size = new Point();
+//                    mDisp.getSize(size);
+//                    int centerX = size.x/2;
+//                    int centerY = size.y/2;
+//
+//                    int degreeToPixels = width * 2/3 * 20 / 360;
+//
+//                    filledCircle.setBounds(centerX-width-degreeToPixels*deltaDegree,centerY-width,centerX+width-degreeToPixels*deltaDegree,centerY+width);
+//                    filledCircle.draw(canvas);
 
                     //To prevent weird jumps
                     if(Math.abs(lastProgressAngle-newProgressAngle)<15 && Math.abs(newProgressAngle-lastProgressAngle)<15) {

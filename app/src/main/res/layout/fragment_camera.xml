@@ -17,10 +17,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/surfaceView"/>
-    <SurfaceView
+    <com.ciux031701.kandidat360degrees.DrawDotSurfaceView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/surfaceViewDraw"/>
+        android:id="@+id/surfaceViewDraw">
+    </com.ciux031701.kandidat360degrees.DrawDotSurfaceView>
 
     <ImageButton
         android:id="@+id/backButton"
