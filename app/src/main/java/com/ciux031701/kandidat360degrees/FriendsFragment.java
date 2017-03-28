@@ -18,6 +18,13 @@ import android.widget.TextView;
 
 import com.ciux031701.kandidat360degrees.adaptors.FriendsAdapter;
 import com.ciux031701.kandidat360degrees.representation.FriendTuple;
+import com.ciux031701.kandidat360degrees.communication.JRequest.JResultListener;
+import com.ciux031701.kandidat360degrees.communication.*;
+
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,37 +69,38 @@ public class FriendsFragment extends Fragment {
         mRecyclerView = (RecyclerView) root.findViewById(R.id.friends_recycle_view);
 
         if (!firstView) {
+            JReqFriends jReqFriends = new JReqFriends();
+            jReqFriends.setJResultListener(
+                    new JResultListener() {
+
+                        @Override
+                        public void onHasResult(JSONObject result) {
+                            boolean error = false;
+                            JSONArray friends;
+                            try {
+                                error = result.getBoolean("error");
+
+                                if (!error) {
+                                    friends = result.getJSONArray("friends");
+                                    for (int i = 0; i < friends.length(); i++)
+                                        friendList.add(new FriendTuple(friends.getJSONObject(i).getString("name"), getActivity()));
+                                    sortFriendlistByName(friendList);
+                                    addSectionHeadersToFriendlist();
+                                    mRecyclerView.getAdapter().notifyDataSetChanged();
+                                }
+                            } catch (JSONException je) {
+
+                            }
+
+                        }
+                    }
+            );
+            JRequester.setRequest(jReqFriends);
+            JRequester.sendRequest();
             //TODO: Retrieve data from database to friendList instead!
             //Test for implementing a sorted arraylist that is sorted by names
-            friendList.add(new FriendTuple("Jonathan", getActivity()));
-            friendList.add(new FriendTuple("John", getActivity()));
-            friendList.add(new FriendTuple("Amar", getActivity()));
-            friendList.add(new FriendTuple("Bertil", getActivity()));
-            friendList.add(new FriendTuple("Åsa", getActivity()));
-            friendList.add(new FriendTuple("Bengt", getActivity()));
-            friendList.add(new FriendTuple("Peter", getActivity()));
-            friendList.add(new FriendTuple("Sigrid", getActivity()));
-            friendList.add(new FriendTuple("Marcus", getActivity()));
-            friendList.add(new FriendTuple("Daniel", getActivity()));
-            friendList.add(new FriendTuple("Astrid", getActivity()));
-            friendList.add(new FriendTuple("Linea", getActivity()));
-            friendList.add(new FriendTuple("Olof", getActivity()));
-            friendList.add(new FriendTuple("Fredrik", getActivity()));
-            friendList.add(new FriendTuple("Isabell", getActivity()));
-            friendList.add(new FriendTuple("Greta", getActivity()));
-            friendList.add(new FriendTuple("Alexander", getActivity()));
-            friendList.add(new FriendTuple("Linda", getActivity()));
-            friendList.add(new FriendTuple("Sebastian", getActivity()));
-            friendList.add(new FriendTuple("Axel", getActivity()));
-            friendList.add(new FriendTuple("Steve", getActivity()));
 
-            friendRequestList.add(new FriendTuple("Maja",getActivity()));
-            friendRequestList.add(new FriendTuple("Sofia",getActivity()));
-
-            sortFriendlistByName(friendList);
-            sortFriendlistByName(friendRequestList);
             friendRequestList.add(0,new FriendTuple(getResources().getString(R.string.friend_requests), getActivity()));
-            addSectionHeadersToFriendlist();
             firstView = true;
         }
 
