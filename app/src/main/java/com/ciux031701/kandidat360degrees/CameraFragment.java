@@ -137,7 +137,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!captureInProgress) {
+
+                mSurfaceViewDraw.acquireTarget();
+             //   if (!captureInProgress)
+                if (false) { ///  <-- satte till false för att disabla fototagningen medans jag testa pricken
                     //Take a picture
                     captureInProgress = true;
                     angleProgressBar.setVisibility(View.VISIBLE);
@@ -148,7 +151,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                         safeToTakePicture = false;
                         mCam.takePicture(null, null, jpegCallback);
                     }
-                } else {
+                } else if(false){ // <- här med
                     args = new Bundle();
                     args.putString("origin", "camera");
                     ImageViewFragment fragment = new ImageViewFragment();
@@ -179,7 +182,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         Point center = new Point(centerX,centerY);
         mSurfaceViewDraw.setCenter(center);
 
-
         return root;
     }
 
@@ -204,10 +206,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
 
             //TODO: convert to Mat for opencv
-            listOfTakenImages.add(new Mat()); //should be removed
+        //    listOfTakenImages.add(new Mat()); //should be removed
 
-            targetDegree = listOfTakenImages.size()*(360/nbrOfImages);
-            mSurfaceViewDraw.setTargetDegree(targetDegree);
+            //targetDegree = listOfTakenImages.size()*(360/nbrOfImages);
+            mSurfaceViewDraw.setTargetDegree(0);
 
             mCam.startPreview();
             safeToTakePicture = true;
@@ -341,7 +343,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 orientation = new float[3];
                 SensorManager.getOrientation(rField, orientation);
                 currentDegrees = fromSensorToDegrees(orientation[0]);
-
+                mSurfaceViewDraw.setCurrentDegree((int)currentDegrees);
                 //angleProgressBar.setProgress((int)currentDegrees);
                 //this is used to get DPI for the specific device
                 DisplayMetrics metrics = getResources().getDisplayMetrics();
@@ -369,7 +371,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     int newProgressAngle = (int)fromDegreeToProgress(lastDegree);
                     System.out.println("angle: " + lastDegree + ". Progress: " + newProgressAngle);
 
-                    mSurfaceViewDraw.setCurrentDegree(newProgressAngle);
+                 //   mSurfaceViewDraw.setCurrentDegree(newProgressAngle);
 
                     //Re-draw the dot:
 //                    int deltaDegree = newProgressAngle-targetDegree; //positive value - right of targetDegree
@@ -411,6 +413,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     }
                 }
 
+
                 if (orientation[1] < 1.75 && orientation[1] > 1.25 || orientation[1] < -1.25 && orientation[1] > -1.75) {
                     if (!isVertical) {
                         isVertical = true;
@@ -431,7 +434,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                             holdVerticallyText.setVisibility(View.VISIBLE);
                             captureButton.setVisibility(View.GONE);
                             mSurfaceView.setVisibility(View.GONE);
-                            mSurfaceViewDraw.setVisibility(View.GONE);
+                            mSurfaceViewDraw.setVisibility(View.INVISIBLE);
                         }
                     }
                 }

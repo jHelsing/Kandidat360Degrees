@@ -14,6 +14,7 @@ import android.util.AttributeSet;
 import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import org.w3c.dom.Attr;
 
@@ -25,10 +26,15 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     private Paint paint = new Paint();
     private Point center;
     private ShapeDrawable filledCircle;
+    private ShapeDrawable aimCircle;
     private int targetDegree;
-    private int currentDegree;
+    private Integer currentDegree;
     private int radius = 40;
+    private int unfilledRadius =0;
     private Canvas canvas;
+    private int width;
+    private float degToPixFactor;
+    private boolean targetAcquired = false;
 
     public DrawDotSurfaceView(Context context) {
         super(context);
@@ -51,38 +57,56 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     private void initialize() {
         getHolder().addCallback(this);
         paint.setColor(Color.GREEN);
-        setFocusable(true);
+        setFocusable(false);
         filledCircle = new ShapeDrawable(new OvalShape());
         filledCircle.getPaint().setColor(0xff74AC23); //default is black
         filledCircle.setBounds(center.x - radius, center.y - radius, center.x + radius, center.y + radius); //needed, the shape is not drawn
+
+        aimCircle = new ShapeDrawable(new OvalShape());
+        aimCircle.getPaint().setStyle(Paint.Style.STROKE);
+        aimCircle.getPaint().setStrokeWidth(5);
+        unfilledRadius = radius + 15;
+        aimCircle.setBounds(center.x-unfilledRadius,center.y-unfilledRadius,center.x+unfilledRadius,center.y+unfilledRadius);
     }
 
+
     public void startThread() {
-        drawThread = new DrawThread(getHolder(),this);
         drawThread.setRunning(true);
         drawThread.start();
     }
 
     public void stopThread() {
         drawThread.setRunning(false);
-        drawThread.stop();
     }
 
+    public boolean acquireTarget(){
+        if (currentDegree != null && !targetAcquired){
+            targetDegree = currentDegree;
+            targetAcquired = true;
+            return true;
+        }else{
+            targetAcquired = false;
+            return false;
+        }
+    }
     @Override
     public void onDraw(Canvas canvas) {
         //Clear the canvas:
+        if(canvas == null) return;
         canvas.drawColor(0, PorterDuff.Mode.CLEAR);
         //Draw a filled circle in the center of the display:
-        int deltaDegree = currentDegree-targetDegree; //positive value - right of targetDegree
-        Rect rectangle = new Rect();
-        Display display = ((Activity)getContext()).getWindowManager().getDefaultDisplay();
-        display.getRectSize(rectangle);
-        int width = rectangle.width(); //pixlar tror vi
+        //currentDegree += 1;
 
-        int degreeToPixels = width * 2/3 * 20 / 360;
-
-        filledCircle.setBounds(center.x-width-degreeToPixels*deltaDegree,center.y-width,center.x+width-degreeToPixels*deltaDegree,center.y+width);
-        filledCircle.draw(canvas);
+        aimCircle.draw(canvas);
+        if(targetAcquired) {
+            int deltaDegree = currentDegree - targetDegree; //positive value - right of targetDegree
+            filledCircle.setBounds(getNewBounds(deltaDegree));
+            filledCircle.draw(canvas);
+        }
+    }
+    private Rect getNewBounds(int dDeg){
+        int dPixel = Math.round(dDeg*degToPixFactor);
+        return new Rect(center.x-dPixel-radius,center.y-radius,center.x+radius-dPixel,center.y+radius);
     }
 
     public void setTargetDegree(int targetDegree) {
@@ -95,47 +119,22 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
 
     public void setCenter(Point center) {
         this.center = center;
+        aimCircle.setBounds(center.x-unfilledRadius,center.y-unfilledRadius,center.x+unfilledRadius,center.y+unfilledRadius);
+
     }
 
-    class DrawThread extends Thread {
-        private SurfaceHolder holder;
-        DrawDotSurfaceView surfaceView;
-        private boolean run = false;
 
-        public DrawThread(SurfaceHolder holder, DrawDotSurfaceView surfaceView) {
-            this.holder = holder;
-            this.surfaceView = surfaceView;
-            run = false;
-        }
-
-        public void setRunning(boolean run) {
-            this.run = run;
-        }
-
-        @Override
-        public void run() {
-            //Canvas canvas = null;
-            while (run) {
-                try {
-                    //canvas = holder.lockCanvas(null);
-                    synchronized (holder) {
-                        surfaceView.onDraw(canvas);
-                        //surfaceView.update();
-                    }
-                } finally {
-                    if (canvas != null) {
-                        //holder.unlockCanvasAndPost(canvas);
-                    }
-                }
-            }
-        }
-    }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        drawThread = new DrawThread(getHolder(), this);
-        drawThread.setRunning(true);
-        drawThread.start();
+        Rect rectangle = new Rect();
+        Display display = ((Activity)getContext()).getWindowManager().getDefaultDisplay();
+        display.getRectSize(rectangle);
+        width = rectangle.width(); //pixlar tror vi
+        degToPixFactor = (width*40)/(360*3);
+
+        drawThread = new DrawThread(getHolder(),this);
+        startThread();
     }
 
     @Override
@@ -145,6 +144,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-
+        stopThread();
+        drawThread = null;
     }
 }
