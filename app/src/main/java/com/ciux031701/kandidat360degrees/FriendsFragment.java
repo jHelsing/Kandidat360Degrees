@@ -97,7 +97,6 @@ public class FriendsFragment extends Fragment {
             );
             JRequester.setRequest(jReqFriends);
             JRequester.sendRequest();
-            //TODO: Retrieve data from database to friendList instead!
             //Test for implementing a sorted arraylist that is sorted by names
 
             friendRequestList.add(0,new FriendTuple(getResources().getString(R.string.friend_requests), getActivity()));
@@ -124,11 +123,11 @@ public class FriendsFragment extends Fragment {
     }
 
     public void addSectionHeadersToFriendlist() {
-        char currentLetter = friendList.get(0).getUserName().charAt(0);
+        char currentLetter = Character.toUpperCase(friendList.get(0).getUserName().charAt(0));
         friendList.add(0, new FriendTuple(currentLetter + "", getActivity()));
         for (int i = 1; i < friendList.size() - 1; i++) {
             currentLetter = friendList.get(i).getUserName().charAt(0);
-            char nextLetter = friendList.get(i + 1).getUserName().charAt(0);
+            char nextLetter = Character.toUpperCase(friendList.get(i + 1).getUserName().charAt(0));
             if (currentLetter != nextLetter) {
                 friendList.add(i + 1, new FriendTuple(nextLetter + "", getActivity()));
             }
