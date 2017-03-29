@@ -5,29 +5,35 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <include
+        android:id="@+id/tool_bar"
+        layout="@layout/tool_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/colorBackground"
+        android:orientation="horizontal">
+
+        <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
+            android:id="@+id/friends_recycle_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/colorBackground"
+            app:fastScrollAutoHide="false"
+            app:fastScrollPopupBgColor="@color/colorPrimaryDarker"
+            app:fastScrollPopupTextColor="@android:color/white"
+            app:fastScrollThumbColor="@color/colorPrimaryDarker"
+            tools:listitem="@layout/friends_list_item"></com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView>
+
+    </LinearLayout>
+
     <include
         android:id="@+id/tool_bar"
         layout="@layout/tool_bar"
         ></include>
-
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/colorBackground">
-
-        <com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView
-            android:id="@+id/friends_recycle_view"
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            tools:listitem="@layout/friends_list_item"
-            app:fastScrollPopupBgColor="@color/colorPrimaryDarker"
-            app:fastScrollPopupTextColor="@android:color/white"
-            app:fastScrollThumbColor="@color/colorPrimaryDarker"
-            app:fastScrollAutoHide="false"
-            android:background="@color/colorBackground">
-        </com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView>
-
-    </LinearLayout>
 
 </LinearLayout>

@@ -97,8 +97,7 @@ public class LoginFragment extends Fragment {
                             }
                         }
                 );
-                JRequester.setRequest(loginReq);
-                JRequester.sendRequest();
+                loginReq.sendRequest();
             }
         });
 
@@ -156,8 +155,7 @@ public class LoginFragment extends Fragment {
                         }
                     }
             );
-            JRequester.setRequest(checkSessionReq);
-            JRequester.sendRequest();
+            checkSessionReq.sendRequest();
 
         }
     }

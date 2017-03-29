@@ -17,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.ciux031701.kandidat360degrees.MainActivity;
+import com.ciux031701.kandidat360degrees.representation.FriendRequestList;
 import com.ciux031701.kandidat360degrees.representation.FriendTuple;
 import com.ciux031701.kandidat360degrees.ProfileFragment;
 import com.ciux031701.kandidat360degrees.R;
@@ -29,9 +30,9 @@ import java.util.ArrayList;
  */
 
 public class FriendsAdapter extends FriendsListAdapter {
-    private ArrayList<FriendTuple> friendRequests;
+    private FriendRequestList friendRequests;
 
-    public FriendsAdapter(Context context, ArrayList<FriendTuple> friends, ArrayList<FriendTuple> friendRequests) {
+    public FriendsAdapter(Context context, ArrayList<FriendTuple> friends, FriendRequestList friendRequests) {
         super(context, friends);
         this.friendRequests = friendRequests;
     }
@@ -60,7 +61,7 @@ public class FriendsAdapter extends FriendsListAdapter {
         Button acceptButton = (Button) holder.itemView.findViewById(R.id.buttonAcceptFriendRequest);
         Button cancelButton = (Button) holder.itemView.findViewById(R.id.buttonCancelFriendRequest);
 
-        if (isFirstPosition(position)) { //show "friend requests"-header
+        if (isFirstPosition(position) && friendRequests.size() > 1) { //show "friend requests"-header
             showFriendRequestHeader(position, friendlistDetails, friendlistSectionHeader, holder);
         } else if (isFriendRequest(position)) { //show friend request
             showFriendRequestItem(position, friendlistDetails, friendlistSectionHeader, titleTextView, thumbnailImageView, acceptButton, cancelButton);

@@ -171,8 +171,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void destroySession(){
         Session.delete();
         JReqDestroySession destroySession = new JReqDestroySession();
-        JRequester.setRequest(destroySession);
-        JRequester.sendRequest();
+        destroySession.sendRequest();
     }
 
     public void loadMapStyling(GoogleMap map) {
@@ -250,8 +249,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     }
                 });
-        JRequester.setRequest(profileReq);
-        JRequester.sendRequest();
+        profileReq.sendRequest();
     }
 
 

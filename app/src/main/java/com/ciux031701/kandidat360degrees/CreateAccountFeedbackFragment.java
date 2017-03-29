@@ -72,8 +72,7 @@ public class CreateAccountFeedbackFragment extends Fragment {
                             }
                         }
                 );
-                JRequester.setRequest(loginReq);
-                JRequester.sendRequest();
+                loginReq.sendRequest();
             }
         });
         return root;

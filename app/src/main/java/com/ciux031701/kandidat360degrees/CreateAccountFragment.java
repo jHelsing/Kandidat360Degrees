@@ -174,8 +174,7 @@ public class CreateAccountFragment extends Fragment {
                             }
                         }
                 );
-                JRequester.setRequest(registerReq);
-                JRequester.sendRequest();
+                registerReq.sendRequest();
 
 
             }

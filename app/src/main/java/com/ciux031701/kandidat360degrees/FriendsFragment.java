@@ -17,6 +17,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.ciux031701.kandidat360degrees.adaptors.FriendsAdapter;
+import com.ciux031701.kandidat360degrees.representation.FriendRequestList;
 import com.ciux031701.kandidat360degrees.representation.FriendTuple;
 import com.ciux031701.kandidat360degrees.communication.JRequest.JResultListener;
 import com.ciux031701.kandidat360degrees.communication.*;
@@ -40,7 +41,7 @@ public class FriendsFragment extends Fragment {
     private DrawerLayout mDrawerLayout;
     private TextView toolbarTitle;
     private final ArrayList<FriendTuple> friendList = new ArrayList<>();
-    private final ArrayList<FriendTuple> friendRequestList = new ArrayList<>();
+    private final FriendRequestList friendRequestList = new FriendRequestList();
     private RecyclerView mRecyclerView;
     private boolean firstView = false;
 
@@ -69,6 +70,31 @@ public class FriendsFragment extends Fragment {
         mRecyclerView = (RecyclerView) root.findViewById(R.id.friends_recycle_view);
 
         if (!firstView) {
+            JReqFriendRequests jReqFriendRequests = new JReqFriendRequests();
+            jReqFriendRequests.setJResultListener(
+                    new JResultListener() {
+
+                        @Override
+                        public void onHasResult(JSONObject result) {
+                            boolean error = false;
+                            JSONArray friendrequests;
+                            try {
+                                error = result.getBoolean("error");
+
+                                if (!error) {
+                                    friendrequests = result.getJSONArray("friendrequests");
+                                    for (int i = 0; i < friendrequests.length(); i++)
+                                        friendRequestList.add(new FriendTuple(friendrequests.getJSONObject(i).getString("name"), getActivity()));
+                                    mRecyclerView.getAdapter().notifyDataSetChanged();
+                                }
+                            } catch (JSONException je) {
+
+                            }
+
+                        }
+                    }
+            );
+            jReqFriendRequests.sendRequest();
             JReqFriends jReqFriends = new JReqFriends();
             jReqFriends.setJResultListener(
                     new JResultListener() {
@@ -95,11 +121,8 @@ public class FriendsFragment extends Fragment {
                         }
                     }
             );
-            JRequester.setRequest(jReqFriends);
-            JRequester.sendRequest();
+            jReqFriends.sendRequest();
             //Test for implementing a sorted arraylist that is sorted by names
-
-            friendRequestList.add(0,new FriendTuple(getResources().getString(R.string.friend_requests), getActivity()));
             firstView = true;
         }
 

@@ -17,17 +17,17 @@ import org.json.JSONObject;
 
 public class JRequester {
     public static String PHP_ROOT = "http://saga.olf.sgsnet.se/android_connection/";
-    private static JSONObject JSONResult = null;
-    private static JRequest jRequest = null;
-    public static void setRequest(JRequest jReq){
-        jRequest = jReq;
+    private JSONObject JSONResult = null;
+    private JRequest jRequest = null;
+    public void setRequest(JRequest jReq){
+        this.jRequest = jReq;
     }
 
-    public static JSONObject getResult(){
+    public JSONObject getResult(){
         return JSONResult;
     }
 
-    public static void sendRequest(){
+    public void sendRequest(){
         StringRequest stringRequest = new StringRequest(Request.Method.GET, jRequest.getUrl(),
                 new Response.Listener<String>() {
                     @Override

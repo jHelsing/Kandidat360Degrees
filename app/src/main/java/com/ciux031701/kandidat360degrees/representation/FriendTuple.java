@@ -14,6 +14,7 @@ import com.ciux031701.kandidat360degrees.R;
 public class FriendTuple {
     private String userName;
     private Drawable profilePicture;
+    private Context context;
 
     public FriendTuple(String userName, Drawable profilePicture){
         this.userName = userName;
@@ -22,13 +23,14 @@ public class FriendTuple {
 
     public FriendTuple(String userName, Context context){
         this.userName = userName;
+        this.context = context;
         this.profilePicture = context.getResources().getDrawable(R.drawable.anonymous_profile_image_circle_small);
     }
 
     public String getUserName(){
         return userName;
     }
-
+    public Context getContext(){return context;}
     public Drawable getProfilePicture(){
         return profilePicture;
     }
