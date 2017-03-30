@@ -20,9 +20,10 @@ import android.widget.*;
 import com.ciux031701.kandidat360degrees.adaptors.ProfileFlowAdapter;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
-import com.ciux031701.kandidat360degrees.communication.JReqImageInfoProfile;
+import com.ciux031701.kandidat360degrees.communication.JReqIsFriend;
+import com.ciux031701.kandidat360degrees.communication.JReqRemoveFriend;
+import com.ciux031701.kandidat360degrees.communication.JReqSendFriendrequest;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
-import com.ciux031701.kandidat360degrees.communication.JRequester;
 import com.ciux031701.kandidat360degrees.communication.Session;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,12 +35,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -222,26 +221,48 @@ public class ProfileFragment extends Fragment {
         profileMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PopupMenu popupMenu = new PopupMenu(getActivity(), profileMenuButton);
-                Menu menu = popupMenu.getMenu();
+                final PopupMenu popupMenu = new PopupMenu(getActivity(), profileMenuButton);
+                final Menu menu = popupMenu.getMenu();
 
                 if (Session.getUser().equalsIgnoreCase(username)) {
                     menu.add(R.string.upload_profile_picture);
                 } else {
-                    // TODO Add checks to see if person already is friend
-                    menu.add(R.string.add_friend);
-                    menu.add(R.string.remove_friend);
+                    JReqIsFriend jReqIsFriend = new JReqIsFriend(username);
+                    jReqIsFriend.setJResultListener(
+                            new JRequest.JResultListener() {
+                                @Override
+                                public void onHasResult(JSONObject result) {
+                                    try{
+                                        boolean error = result.getBoolean("error");
+                                        if(!error){
+                                            boolean isFriend = result.getBoolean("isfriend");
+                                            if(isFriend)
+                                                menu.add("Remove Friend");
+                                            else
+                                                menu.add("Add Friend");
+                                            popupMenu.show();
+                                        }
+                                    }catch(JSONException je){
+
+                                    }
+                                }
+                            }
+                    );
+                    jReqIsFriend.sendRequest();
                 }
-                popupMenu.show();
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getTitle().toString()) {
-                            case "Add friend":
-                                // TODO send add friend request to username from session.getUser()
+                            case "Add Friend":
+                                JReqSendFriendrequest jReqSendFriendRequest = new JReqSendFriendrequest(username);
+                                jReqSendFriendRequest.sendRequest();
+                                // TODO Error handling with JResultListener?
                                 break;
-                            case "Remove friend":
-                                // TODO send request to remove friend from session.getUser() for username
+                            case "Remove Friend":
+                                JReqRemoveFriend jReqRemoveFriend = new JReqRemoveFriend(username);
+                                jReqRemoveFriend.sendRequest();
+                                // TODO Error handling with JResultListener?
                                 break;
                             case "Change profile picture":
                                 // TODO add support for uploading profile picture to server
