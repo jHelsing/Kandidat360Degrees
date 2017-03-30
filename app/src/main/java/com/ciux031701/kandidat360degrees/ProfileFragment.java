@@ -109,7 +109,8 @@ public class ProfileFragment extends Fragment {
     private class FlowItemClickListener implements android.widget.AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            selectItem(position);
+            //TODO: Put this event inside Adapter because we will go to imageViewFragment only when we press on the picture (Not the whole item)
+            //selectItem(position);
         }
 
         private void selectItem(int position) {

@@ -1,6 +1,7 @@
 package com.ciux031701.kandidat360degrees.adaptors;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.ciux031701.kandidat360degrees.ImageViewFragment;
 import com.ciux031701.kandidat360degrees.ProfileFragment;
 import com.ciux031701.kandidat360degrees.R;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
@@ -37,7 +40,7 @@ import java.util.Locale;
  * Created by boking on 2017-02-21.
  */
 
-public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements AdapterView.OnItemClickListener {
+public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
     public ProfileFlowAdapter(Context context, ArrayList<ProfilePanorama> pictures) {
         super(context, R.layout.picture_profile_layout,pictures);
     }
@@ -136,11 +139,6 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements
 
         //Set image
         return customView;
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Log.d("Clicked", id + "");
     }
 
 }
