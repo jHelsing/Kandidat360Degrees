@@ -11,8 +11,10 @@ import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -48,13 +50,13 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent){
 
-        ProfilePanorama singlePic = getItem(position);
+        final ProfilePanorama singlePic = getItem(position);
         LayoutInflater inflater = LayoutInflater.from(getContext());
         final View customView = inflater.inflate(R.layout.picture_profile_layout,parent,false);
 
         ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
         TextView locationText = (TextView) customView.findViewById(R.id.locationText);
-        TextView favCountText = (TextView) customView.findViewById(R.id.favCounter);
+        final TextView favCountText = (TextView) customView.findViewById(R.id.favCounter);
         TextView dateText = (TextView) customView.findViewById(R.id.dateText);
 
         //Start fetching a preview for the item
@@ -136,6 +138,25 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
             Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_clicked);
             favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
         }
+
+        favCountText.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_RIGHT = 2;
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() > (favCountText.getRight()
+                            - (favCountText.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width()
+                                - Math.round(16 * (getContext().getResources().getDisplayMetrics()
+                                    .xdpi / DisplayMetrics.DENSITY_DEFAULT))))) {
+                        if(!singlePic.isFavorite()){
+                            //Request to database that it is liked
+                        }
+                        return true;
+                    }
+                }
+                return true;
+            }
+        });
 
         //Set image
         return customView;

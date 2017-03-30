@@ -7,50 +7,52 @@
         android:background="@color/colorBackground">
 
     <LinearLayout
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:background="@color/colorPrimary"
+        android:layout_height="match_parent"
         android:layout_marginLeft="@dimen/activity_horizontal_margin"
         android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin">
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:background="@color/colorPrimary"
+        android:orientation="vertical">
 
         <ImageView
-                android:layout_width="wrap_content"
-                app:srcCompat="@drawable/example_panorama_small"
-                android:id="@+id/panoramaPreview"
-                android:scaleType="fitXY"
-                android:layout_height="80dp" />
+            android:id="@+id/panoramaPreview"
+            android:layout_width="wrap_content"
+            android:layout_height="80dp"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/example_panorama_small" />
 
         <TextView
-                android:text="@string/temp_location"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@android:color/white"
-                android:padding="10dp"
-                android:textSize="15sp"
-                android:id="@+id/locationText"
-                android:drawableLeft="@drawable/profile_location_icon"
-                android:drawableStart="@drawable/profile_location_icon"
-                android:drawablePadding="@dimen/activity_horizontal_margin"/>
+            android:id="@+id/locationText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/profile_location_icon"
+            android:drawablePadding="@dimen/activity_horizontal_margin"
+            android:drawableStart="@drawable/profile_location_icon"
+            android:padding="10dp"
+            android:text="@string/temp_location"
+            android:textColor="@android:color/white"
+            android:textSize="15sp" />
+
         <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingRight="10dp"
-                android:paddingEnd="10dp">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingEnd="10dp"
+            android:paddingRight="10dp">
 
             <TextView
-                    android:text="@string/temp_date"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="@android:color/white"
-                    android:padding="10dp"
-                    android:textSize="15sp"
-                    android:id="@+id/dateText"
-                    android:drawableLeft="@drawable/profile_time_icon"
-                    android:drawableStart="@drawable/profile_time_icon"
-                    android:drawablePadding="@dimen/activity_horizontal_margin" android:layout_weight="1"/>
+                android:id="@+id/dateText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/profile_time_icon"
+                android:drawablePadding="@dimen/activity_horizontal_margin"
+                android:drawableStart="@drawable/profile_time_icon"
+                android:padding="10dp"
+                android:text="@string/temp_date"
+                android:textColor="@android:color/white"
+                android:textSize="15sp" />
 
             <TextView
                 android:id="@+id/favCounter"
