@@ -83,20 +83,20 @@
         </RelativeLayout>
 
         <Button
-            android:text="@string/cancel"
+            android:id="@+id/buttonCancelFriendRequest"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/friends_list_thumbnail"
+            android:layout_marginEnd="24dp"
+            android:layout_marginRight="24dp"
+            android:layout_toLeftOf="@+id/buttonAcceptFriendRequest"
+            android:layout_toRightOf="@+id/layout_friends_list_title"
+            android:layout_toStartOf="@+id/buttonAcceptFriendRequest"
             android:background="@android:color/transparent"
+            android:text="@string/cancel"
             android:textAppearance="@style/TextAppearance.AppCompat"
             android:textColor="@color/colorPrimary"
-            android:textSize="15sp"
-            android:id="@+id/buttonCancelFriendRequest"
-            android:layout_alignBottom="@+id/friends_list_thumbnail"
-            android:layout_toRightOf="@+id/layout_friends_list_title"
-            android:layout_toLeftOf="@+id/buttonAcceptFriendRequest"
-            android:layout_toStartOf="@+id/buttonAcceptFriendRequest"
-            android:layout_marginRight="24dp"
-            android:layout_marginEnd="24dp" />
+            android:textSize="15sp" />
 
         <Button
             android:text="@string/accept"

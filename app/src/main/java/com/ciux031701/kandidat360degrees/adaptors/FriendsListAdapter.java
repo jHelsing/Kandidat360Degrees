@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.ciux031701.kandidat360degrees.representation.FriendList;
 import com.ciux031701.kandidat360degrees.representation.FriendTuple;
 import com.ciux031701.kandidat360degrees.R;
 import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
@@ -21,14 +22,16 @@ import java.util.ArrayList;
 
 public abstract class FriendsListAdapter extends RecyclerView.Adapter implements FastScrollRecyclerView.SectionedAdapter {
     private LayoutInflater mInflater;
-    private ArrayList<FriendTuple> mDataSource;
+    protected ArrayList<FriendTuple> mDataSource;
     private ViewHolder holder;
     private Context context;
+    protected FriendList friends;
 
-    public FriendsListAdapter(Context context, ArrayList<FriendTuple> data) {
+    public FriendsListAdapter(Context context, FriendList friends) {
         this.context = context;
+        this.friends = friends;
         mInflater = LayoutInflater.from(context);
-        mDataSource = data;
+        mDataSource = friends.getList();
     }
 
     @Override
