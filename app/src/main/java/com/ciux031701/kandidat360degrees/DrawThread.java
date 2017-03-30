@@ -34,7 +34,7 @@ public class DrawThread extends Thread {
                 try {
                     canvas = holder.lockCanvas(null);
                     synchronized (holder) {
-                        surfaceView.onDraw(canvas);
+                        surfaceView.draw(canvas);
                         //surfaceView.update();
                     }
                 } finally {

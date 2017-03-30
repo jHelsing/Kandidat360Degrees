@@ -71,11 +71,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private boolean safeToTakePicture = true; //is it safe to capture a picture?
 
     private DrawerLayout mDrawerLayout;
-    private ArrayList<Mat> listOfTakenImages;
+    private ArrayList<Mat> listOfTakenImages = new ArrayList<>();
     private int nbrOfImages = 20;
-    private int targetDegree;
-    private ShapeDrawable filledCircle;
-    private Canvas canvas;
+    private double targetDegree;
 
     private Bundle args;
     private ProgressBar angleProgressBar;
@@ -137,21 +135,19 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                mSurfaceViewDraw.acquireTarget();
-             //   if (!captureInProgress)
-                if (false) { ///  <-- satte till false för att disabla fototagningen medans jag testa pricken
+                if (!captureInProgress) {
+                //if(false) { ///
                     //Take a picture
                     captureInProgress = true;
                     angleProgressBar.setVisibility(View.VISIBLE);
                     System.out.println("Startgyrodegree: " + startGyroDegree);
-                    backButton.setVisibility(View.GONE);
-                    if(mCam != null && safeToTakePicture){
-                       //set the flag to false so we don't take two pictures at the same time
-                        safeToTakePicture = false;
-                        mCam.takePicture(null, null, jpegCallback);
-                    }
-                } else if(false){ // <- här med
+                    backButton.setVisibility(View.GONE); // <-- kommenterat resten för att disabla fototagningen under testning av  pricken
+//                    if(mCam != null && safeToTakePicture){
+//                       //set the flag to false so we don't take two pictures at the same time
+//                        safeToTakePicture = false;
+//                        mCam.takePicture(null, null, jpegCallback);
+//                    }
+                } else if(false){ // <-- satte till false för att disabla bytet av fragments medans jag testa pricken
                     args = new Bundle();
                     args.putString("origin", "camera");
                     ImageViewFragment fragment = new ImageViewFragment();
@@ -206,10 +202,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
 
             //TODO: convert to Mat for opencv
-        //    listOfTakenImages.add(new Mat()); //should be removed
+            //listOfTakenImages.add(new Mat()); //should be removed
 
-            //targetDegree = listOfTakenImages.size()*(360/nbrOfImages);
-            mSurfaceViewDraw.setTargetDegree(0);
+            targetDegree = startGyroDegree + listOfTakenImages.size()*(360/nbrOfImages);
+            mSurfaceViewDraw.setTargetDegree((int)targetDegree);
 
             mCam.startPreview();
             safeToTakePicture = true;
@@ -217,54 +213,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     };
 
-    //For the surfaceview to draw on:
-    //How to do this: https://developer.android.com/guide/topics/graphics/2d-graphics.html
-    private SurfaceHolder.Callback mSurfaceCallbackDraw = new SurfaceHolder.Callback() {
-        @Override
-        public void surfaceCreated(SurfaceHolder holder) {
-            try {
-                canvas = mSurfaceViewDraw.getHolder().lockCanvas(null);
-                synchronized (mSurfaceViewDraw.getHolder()) {
-                    //Find center of screen to put the circle there:
-                    Display mDisp = getActivity().getWindowManager().getDefaultDisplay();
-                    Point size = new Point();
-                    mDisp.getSize(size);
-                    int centerX = size.x/2;
-                    int centerY = size.y/2;
 
-//                    //Draw a filled circle in the center of the display:
-//                    filledCircle = new ShapeDrawable(new OvalShape());
-//                    filledCircle.getPaint().setColor(0xff74AC23); //default is black
-//                    int filledRadius = 40;
-//                    filledCircle.setBounds(centerX-filledRadius,centerY-filledRadius,centerX+filledRadius,centerY+filledRadius); //needed, the shape is not drawn otherwise
-//                    filledCircle.draw(canvas);
-
-                    //Draw an unfilled circle in the center of the display:
-                    ShapeDrawable unfilledCircle = new ShapeDrawable(new OvalShape());
-                    unfilledCircle.getPaint().setStyle(Paint.Style.STROKE);
-                    unfilledCircle.getPaint().setStrokeWidth(5);
-                    int unfilledRadius = 40 + 15;
-                    unfilledCircle.setBounds(centerX-unfilledRadius,centerY-unfilledRadius,centerX+unfilledRadius,centerY+unfilledRadius);
-                    unfilledCircle.draw(canvas);
-
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (canvas != null) {
-                    mSurfaceViewDraw.getHolder().unlockCanvasAndPost(canvas);
-                }
-            }
-        }
-
-        @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        }
-
-        @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
-        }
-    };
 
     //For the surfaceview showing the camera:
     private SurfaceHolder.Callback mSurfaceCallback = new SurfaceHolder.Callback() {
@@ -356,6 +305,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                         if(isFirstSensorChanged){
                             startGyroDegree = currentDegrees;
                             isFirstSensorChanged=false;
+                            mSurfaceViewDraw.setTargetDegree((int)startGyroDegree);
+                            mSurfaceViewDraw.setTargetAcquired(true);
                         }
                         previousAngles.poll();
 
@@ -371,27 +322,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     int newProgressAngle = (int)fromDegreeToProgress(lastDegree);
                     System.out.println("angle: " + lastDegree + ". Progress: " + newProgressAngle);
 
-                 //   mSurfaceViewDraw.setCurrentDegree(newProgressAngle);
-
-                    //Re-draw the dot:
-//                    int deltaDegree = newProgressAngle-targetDegree; //positive value - right of targetDegree
-//                    Rect rectangle = new Rect();
-//                    Display display = getActivity().getWindowManager().getDefaultDisplay();
-//                    display.getRectSize(rectangle);
-//                    int width = rectangle.width(); //pixlar tror vi
-//                    //int height = rectangle.height();
-//                    Rect bounds = filledCircle.getBounds();
-//
-//                    Display mDisp = getActivity().getWindowManager().getDefaultDisplay();
-//                    Point size = new Point();
-//                    mDisp.getSize(size);
-//                    int centerX = size.x/2;
-//                    int centerY = size.y/2;
-//
-//                    int degreeToPixels = width * 2/3 * 20 / 360;
-//
-//                    filledCircle.setBounds(centerX-width-degreeToPixels*deltaDegree,centerY-width,centerX+width-degreeToPixels*deltaDegree,centerY+width);
-//                    filledCircle.draw(canvas);
+                    mSurfaceViewDraw.setCurrentDegree((int)lastDegree);
 
                     //To prevent weird jumps
                     if(Math.abs(lastProgressAngle-newProgressAngle)<15 && Math.abs(newProgressAngle-lastProgressAngle)<15) {

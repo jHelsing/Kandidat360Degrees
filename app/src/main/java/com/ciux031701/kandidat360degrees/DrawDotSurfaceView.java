@@ -31,7 +31,6 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     private Integer currentDegree;
     private int radius = 40;
     private int unfilledRadius =0;
-    private Canvas canvas;
     private int width;
     private float degToPixFactor;
     private boolean targetAcquired = false;
@@ -79,18 +78,19 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         drawThread.setRunning(false);
     }
 
-    public boolean acquireTarget(){
-        if (currentDegree != null && !targetAcquired){
-            targetDegree = currentDegree;
-            targetAcquired = true;
-            return true;
-        }else{
-            targetAcquired = false;
-            return false;
-        }
-    }
+//    public boolean acquireTarget(){
+//        if (currentDegree != null && !targetAcquired){
+//            targetDegree = currentDegree;
+//            targetAcquired = true;
+//            return true;
+//        }else{
+//            targetAcquired = false;
+//            return false;
+//        }
+//    }
+
     @Override
-    public void onDraw(Canvas canvas) {
+    public void draw(Canvas canvas) {
         //Clear the canvas:
         if(canvas == null) return;
         canvas.drawColor(0, PorterDuff.Mode.CLEAR);
@@ -117,13 +117,15 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         this.currentDegree = currentDegree;
     }
 
+    public void setTargetAcquired(boolean targetAcquired) {
+        this.targetAcquired = targetAcquired;
+    }
+
     public void setCenter(Point center) {
         this.center = center;
         aimCircle.setBounds(center.x-unfilledRadius,center.y-unfilledRadius,center.x+unfilledRadius,center.y+unfilledRadius);
 
     }
-
-
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
