@@ -69,34 +69,34 @@ public class FriendsFragment extends Fragment {
         mRecyclerView = (RecyclerView) root.findViewById(R.id.friends_recycle_view);
 
         if (!firstView) {
-            JReqFriends jReqFriends = new JReqFriends();
-            jReqFriends.setJResultListener(
-                    new JResultListener() {
-
-                        @Override
-                        public void onHasResult(JSONObject result) {
-                            boolean error = false;
-                            JSONArray friends;
-                            try {
-                                error = result.getBoolean("error");
-
-                                if (!error) {
-                                    friends = result.getJSONArray("friends");
-                                    for (int i = 0; i < friends.length(); i++)
-                                        friendList.add(new FriendTuple(friends.getJSONObject(i).getString("name"), getActivity()));
-                                    sortFriendlistByName(friendList);
-                                    addSectionHeadersToFriendlist();
-                                    mRecyclerView.getAdapter().notifyDataSetChanged();
-                                }
-                            } catch (JSONException je) {
-
-                            }
-
-                        }
-                    }
-            );
-            JRequester.setRequest(jReqFriends);
-            JRequester.sendRequest();
+//            JReqFriends jReqFriends = new JReqFriends();
+//            jReqFriends.setJResultListener(
+//                    new JResultListener() {
+//
+//                        @Override
+//                        public void onHasResult(JSONObject result) {
+//                            boolean error = false;
+//                            JSONArray friends;
+//                            try {
+//                                error = result.getBoolean("error");
+//
+//                                if (!error) {
+//                                    friends = result.getJSONArray("friends");
+//                                    for (int i = 0; i < friends.length(); i++)
+//                                        friendList.add(new FriendTuple(friends.getJSONObject(i).getString("name"), getActivity()));
+//                                    sortFriendlistByName(friendList);
+//                                    addSectionHeadersToFriendlist();
+//                                    mRecyclerView.getAdapter().notifyDataSetChanged();
+//                                }
+//                            } catch (JSONException je) {
+//
+//                            }
+//
+//                        }
+//                    }
+//            );
+//            JRequester.setRequest(jReqFriends);
+//            JRequester.sendRequest();
             //TODO: Retrieve data from database to friendList instead!
             //Test for implementing a sorted arraylist that is sorted by names
 
