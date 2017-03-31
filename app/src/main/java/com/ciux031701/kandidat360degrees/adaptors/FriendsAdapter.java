@@ -187,7 +187,7 @@ public class FriendsAdapter extends FriendsListAdapter {
         addListenerToView(holder, getContext());
     }
 
-    private void addListenerToView(final RecyclerView.ViewHolder holder, final Context context){
+    public static void addListenerToView(final RecyclerView.ViewHolder holder, final Context context){
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
