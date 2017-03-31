@@ -62,6 +62,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     //Sensor stuff
     private Sensor accelerometer;
     private Sensor magnetometer;
+    private Sensor rotationVector;
+    private Sensor gyroscope;
     private SensorManager sensorManager;
     float[] mGravity;
     float[] mGeomagnetic;
@@ -85,6 +87,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     float rField[], iField[];
     private LinkedList<Double> previousAngles;
     private boolean isFirstSensorChanged;
+    private float[] mRotationMatrix;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -103,6 +106,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        rotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_UI);
+        sensorManager.registerListener(this, rotationVector, SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
 
@@ -116,6 +123,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         backButton = (ImageButton)root.findViewById(R.id.backButton);
         backButton.setBackgroundResource(R.drawable.temp_return);
         captureButton.setVisibility(View.GONE);
+
+        orientation = new float[3];
+        mRotationMatrix = new float[9];
 
 
         backButton.setOnClickListener(new View.OnClickListener() {
@@ -169,6 +179,14 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         mSurfaceViewDraw.getHolder().addCallback(mSurfaceCallbackDraw);
         mSurfaceViewDraw.getHolder().setFormat(PixelFormat.TRANSPARENT);
         mSurfaceViewDraw.setVisibility(View.GONE);
+
+        //TEMPORARY
+        holdVerticallyImage.setVisibility(View.GONE);
+        holdVerticallyText.setVisibility(View.GONE);
+        captureButton.setVisibility(View.VISIBLE);
+        mSurfaceView.setVisibility(View.VISIBLE);
+        mSurfaceViewDraw.setVisibility(View.VISIBLE);
+
 
         return root;
     }
@@ -311,94 +329,64 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
 
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
+        {
+            if(captureInProgress){
 
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-            mGravity = lowPass(sensorEvent.values.clone(), mGravity);
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-            mGeomagnetic = lowPass(sensorEvent.values.clone(), mGeomagnetic);
-        if (mGravity != null && mGeomagnetic != null) {
-            rField = new float[9];
-            iField = new float[9];
-            boolean success = SensorManager.getRotationMatrix(rField, iField, mGravity, mGeomagnetic);
-            if (success) {
+                // Convert the rotation-vector to a 4x4 matrix.
+                SensorManager.getRotationMatrixFromVector(mRotationMatrix,
+                        sensorEvent.values);
+                SensorManager
+                        .remapCoordinateSystem(mRotationMatrix,
+                                SensorManager.AXIS_X, SensorManager.AXIS_Z,
+                                mRotationMatrix);
+                SensorManager.getOrientation(mRotationMatrix, orientation);
 
-                orientation = new float[3];
-                SensorManager.getOrientation(rField, orientation);
+                // Optionally convert the result from radians to degrees
+                orientation[0] = (float) Math.toDegrees(orientation[0]);
+                orientation[1] = (float) Math.toDegrees(orientation[1]);
+                orientation[2] = (float) Math.toDegrees(orientation[2]);
+
+
                 currentDegrees = fromSensorToDegrees(orientation[0]);
+                System.out.println("orintation[1]: " + orientation[1]);
+                lastDegree = currentDegrees;
+                int newProgressAngle = (int)fromDegreeToProgress(lastDegree);
 
-                //angleProgressBar.setProgress((int)currentDegrees);
-                //this is used to get DPI for the specific device
-                DisplayMetrics metrics = getResources().getDisplayMetrics();
 
-                if(captureInProgress){
-
-                    float sum = 0;
-                    if(previousAngles.size()==3){
-                        //Uses the third retrieved degree as start since first have a higher risk of being off
-                        if(isFirstSensorChanged){
-                            startGyroDegree = currentDegrees;
-                            isFirstSensorChanged=false;
-                        }
-                        previousAngles.poll();
-
-                    }
-                    previousAngles.offer(currentDegrees);
-                    for(double angle : previousAngles) {
-                        sum += angle;
-                    }
-
-                    float average = sum/previousAngles.size();
-
-                    lastDegree = average;
-                    int newProgressAngle = (int)fromDegreeToProgress(lastDegree);
-                    System.out.println("angle: " + lastDegree + ". Progress: " + newProgressAngle);
-
-                    //To prevent weird jumps
-                    if(Math.abs(lastProgressAngle-newProgressAngle)<15 && Math.abs(newProgressAngle-lastProgressAngle)<15) {
-                        if(newProgressAngle < 185 && newProgressAngle > 175 && isHalfWay!=true){
-                            System.out.println("halfway=true");
-                            isHalfWay=true;
-                        }
-
-                        lastProgressAngle=newProgressAngle;
-
-                        //Compare with 180 abd ifHalfWay so it doesn't register when we go from 1,0,360,359,...
-                        if (newProgressAngle < 180 && isHalfWay == false) {
-                            angleImage.setRotation(newProgressAngle);
-                            angleProgressBar.setProgress(newProgressAngle);
-                        } else if (newProgressAngle >= 180 && isHalfWay == true) {
-                            angleImage.setRotation(newProgressAngle);
-                            angleProgressBar.setProgress(newProgressAngle);
-                        }
-                    }
-                }
-
-                if (orientation[1] < 1.75 && orientation[1] > 1.25 || orientation[1] < -1.25 && orientation[1] > -1.75) {
-                    if (!isVertical) {
-                        isVertical = true;
-                        if (!captureInProgress) {
-                            holdVerticallyImage.setVisibility(View.GONE);
-                            holdVerticallyText.setVisibility(View.GONE);
-                            captureButton.setVisibility(View.VISIBLE);
-                            mSurfaceView.setVisibility(View.VISIBLE);
-                            mSurfaceViewDraw.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                } else {
-                    if (isVertical) {
-                        isVertical = false;
-                        if (!captureInProgress) {
-                            holdVerticallyImage.setVisibility(View.VISIBLE);
-                            holdVerticallyText.setVisibility(View.VISIBLE);
-                            captureButton.setVisibility(View.GONE);
-                            mSurfaceView.setVisibility(View.GONE);
-                            mSurfaceViewDraw.setVisibility(View.GONE);
-                        }
-                    }
-                }
+                lastDegree = orientation[0];
+                //int newProgressAngle = (int)fromDegreeToProgress(lastDegree);
+                angleImage.setRotation(orientation[0]);
+                angleProgressBar.setProgress((int)orientation[0]);
             }
         }
+
+
+
+        /*if (orientation[1] < 1.75 && orientation[1] > 1.25 || orientation[1] < -1.25 && orientation[1] > -1.75) {
+            if (!isVertical) {
+                isVertical = true;
+                if (!captureInProgress) {
+                    holdVerticallyImage.setVisibility(View.GONE);
+                    holdVerticallyText.setVisibility(View.GONE);
+                    captureButton.setVisibility(View.VISIBLE);
+                    mSurfaceView.setVisibility(View.VISIBLE);
+                    mSurfaceViewDraw.setVisibility(View.VISIBLE);
+                }
+            }
+
+        } else {
+            if (isVertical) {
+                isVertical = false;
+                if (!captureInProgress) {
+                    holdVerticallyImage.setVisibility(View.VISIBLE);
+                    holdVerticallyText.setVisibility(View.VISIBLE);
+                    captureButton.setVisibility(View.GONE);
+                    mSurfaceView.setVisibility(View.GONE);
+                    mSurfaceViewDraw.setVisibility(View.GONE);
+                }
+            }
+        }*/
     }
 
     public double fromDegreeToProgress(double degree) {
