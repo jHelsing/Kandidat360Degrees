@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.adaptors.ShareAdapter;
+import com.ciux031701.kandidat360degrees.representation.FriendList;
 import com.ciux031701.kandidat360degrees.representation.FriendTuple;
 
 import java.util.ArrayList;
@@ -41,7 +42,7 @@ public class ShareFragment extends Fragment {
     private ImageView previewPic;
     private Button shareButton;
     private Switch publicSwitch;
-    private final ArrayList<FriendTuple> friendList = new ArrayList<>();
+    private final FriendList friendList = new FriendList();
     private RecyclerView mRecyclerView;
     private boolean firstView = false;
 
@@ -105,8 +106,6 @@ public class ShareFragment extends Fragment {
             friendList.add(new FriendTuple( "Axel", getActivity()));
             friendList.add(new FriendTuple( "Steve", getActivity()));
 
-            sortFriendlistByName();
-            addSectionHeadersToFriendlist();
             firstView = true;
         }
 
@@ -115,29 +114,6 @@ public class ShareFragment extends Fragment {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         return root;
-    }
-
-    public void sortFriendlistByName() {
-        Collections.sort(friendList, new Comparator<FriendTuple>() {
-            @Override
-            public int compare(FriendTuple o1, FriendTuple o2) {
-                String s1 = o1.getUserName();
-                String s2 = o2.getUserName();
-                return s1.compareToIgnoreCase(s2);
-            }
-        });
-    }
-
-    public void addSectionHeadersToFriendlist() {
-        char currentLetter = friendList.get(0).getUserName().charAt(0);
-        friendList.add(0,new FriendTuple(currentLetter + "", getActivity()));
-        for(int i = 1; i < friendList.size()-1; i++){
-            currentLetter = friendList.get(i).getUserName().charAt(0);
-            char nextLetter = friendList.get(i+1).getUserName().charAt(0);
-            if(currentLetter != nextLetter){
-                friendList.add(i+1,new FriendTuple(nextLetter + "", getActivity()));
-            }
-        }
     }
 
     private void addListenerToShareButton(Button shareButton) {

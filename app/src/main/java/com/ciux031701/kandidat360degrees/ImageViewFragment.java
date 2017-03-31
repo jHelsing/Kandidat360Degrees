@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -17,6 +18,8 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
+
+import java.util.ArrayList;
 
 /**
  * Created by boking on 2017-03-14.
@@ -30,15 +33,18 @@ public class ImageViewFragment extends Fragment{
     private ImageView doneButton;
     private DrawerLayout mDrawerLayout;
 
-    private Bundle args;
     private String origin;
+    private String imageid;
+    private Drawable image;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_imageview, container, false);
-        args = getArguments();
-        origin = args.getString("origin");
+        origin = getArguments().getString("origin");
+        imageid = getArguments().getString("imageid");
+        image = ((ArrayList<Drawable>) getArguments().getSerializable("panorama")).get(0);
+
 
         doneButton = (ImageButton)root.findViewById(R.id.sendToShareButton);
 
@@ -48,7 +54,7 @@ public class ImageViewFragment extends Fragment{
                 public void onClick(View view) {
                     mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                     Bitmap tempPicture = BitmapFactory.decodeResource(getResources(), R.drawable.panorama_large2);
-                    args = new Bundle();
+                    Bundle args = new Bundle();
                     args.putParcelable("picture", tempPicture);
 
                     Fragment fragment = new ShareFragment();
@@ -64,6 +70,8 @@ public class ImageViewFragment extends Fragment{
         imageView1 = (ImageView)root.findViewById(R.id.imageviewfirst);
         scrollView = (HorizontalScrollView) root.findViewById(R.id.horizontalScrollView);
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
+
+        imageView1.setImageDrawable(image);
 
         backButton = (ImageButton)root.findViewById(R.id.viewingBackButton);
         //Scroll to middle dependent on image size

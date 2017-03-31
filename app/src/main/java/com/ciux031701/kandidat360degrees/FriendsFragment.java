@@ -1,6 +1,7 @@
 package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.ciux031701.kandidat360degrees.adaptors.FriendsAdapter;
+import com.ciux031701.kandidat360degrees.representation.FriendList;
 import com.ciux031701.kandidat360degrees.representation.FriendRequestList;
 import com.ciux031701.kandidat360degrees.representation.FriendTuple;
 import com.ciux031701.kandidat360degrees.communication.JRequest.JResultListener;
@@ -40,7 +42,7 @@ public class FriendsFragment extends Fragment {
     private ImageButton toolbarMenuButton;
     private DrawerLayout mDrawerLayout;
     private TextView toolbarTitle;
-    private final ArrayList<FriendTuple> friendList = new ArrayList<>();
+    private final FriendList friendList = new FriendList();
     private final FriendRequestList friendRequestList = new FriendRequestList();
     private RecyclerView mRecyclerView;
     private boolean firstView = false;
@@ -85,7 +87,7 @@ public class FriendsFragment extends Fragment {
                                     friendrequests = result.getJSONArray("friendrequests");
                                     for (int i = 0; i < friendrequests.length(); i++)
                                         friendRequestList.add(new FriendTuple(friendrequests.getJSONObject(i).getString("name"), getActivity()));
-                                    mRecyclerView.getAdapter().notifyDataSetChanged();
+                                    mRecyclerView.setAdapter(new FriendsAdapter(getActivity(), friendList, friendRequestList));
                                 }
                             } catch (JSONException je) {
 
@@ -110,9 +112,7 @@ public class FriendsFragment extends Fragment {
                                     friends = result.getJSONArray("friends");
                                     for (int i = 0; i < friends.length(); i++)
                                         friendList.add(new FriendTuple(friends.getJSONObject(i).getString("name"), getActivity()));
-                                    sortFriendlistByName(friendList);
-                                    addSectionHeadersToFriendlist();
-                                    mRecyclerView.getAdapter().notifyDataSetChanged();
+                                    mRecyclerView.setAdapter(new FriendsAdapter(getActivity(), friendList, friendRequestList));
                                 }
                             } catch (JSONException je) {
 
@@ -126,35 +126,10 @@ public class FriendsFragment extends Fragment {
             firstView = true;
         }
 
-        FriendsAdapter adapter = new FriendsAdapter(getActivity(), friendList, friendRequestList);
-        mRecyclerView.setAdapter(adapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         //TODO: Add separators to the RecyclerView
 
         return root;
-    }
-
-    public void sortFriendlistByName(ArrayList<FriendTuple> friendList) {
-        Collections.sort(friendList, new Comparator<FriendTuple>() {
-            @Override
-            public int compare(FriendTuple o1, FriendTuple o2) {
-                String s1 = o1.getUserName();
-                String s2 = o2.getUserName();
-                return s1.compareToIgnoreCase(s2);
-            }
-        });
-    }
-
-    public void addSectionHeadersToFriendlist() {
-        char currentLetter = Character.toUpperCase(friendList.get(0).getUserName().charAt(0));
-        friendList.add(0, new FriendTuple(currentLetter + "", getActivity()));
-        for (int i = 1; i < friendList.size() - 1; i++) {
-            currentLetter = friendList.get(i).getUserName().charAt(0);
-            char nextLetter = Character.toUpperCase(friendList.get(i + 1).getUserName().charAt(0));
-            if (currentLetter != nextLetter) {
-                friendList.add(i + 1, new FriendTuple(nextLetter + "", getActivity()));
-            }
-        }
     }
 
     @Override

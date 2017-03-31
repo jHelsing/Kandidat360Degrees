@@ -1,6 +1,7 @@
 package com.ciux031701.kandidat360degrees.adaptors;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -9,8 +10,11 @@ import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -18,6 +22,8 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.ciux031701.kandidat360degrees.ImageViewFragment;
+import com.ciux031701.kandidat360degrees.MainActivity;
 import com.ciux031701.kandidat360degrees.ProfileFragment;
 import com.ciux031701.kandidat360degrees.R;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
@@ -37,7 +43,7 @@ import java.util.Locale;
  * Created by boking on 2017-02-21.
  */
 
-public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements AdapterView.OnItemClickListener {
+public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
     public ProfileFlowAdapter(Context context, ArrayList<ProfilePanorama> pictures) {
         super(context, R.layout.picture_profile_layout,pictures);
     }
@@ -45,13 +51,13 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent){
 
-        ProfilePanorama singlePic = getItem(position);
+        final ProfilePanorama singlePic = getItem(position);
         LayoutInflater inflater = LayoutInflater.from(getContext());
         final View customView = inflater.inflate(R.layout.picture_profile_layout,parent,false);
 
         ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
         TextView locationText = (TextView) customView.findViewById(R.id.locationText);
-        TextView favCountText = (TextView) customView.findViewById(R.id.favCounter);
+        final TextView favCountText = (TextView) customView.findViewById(R.id.favCounter);
         TextView dateText = (TextView) customView.findViewById(R.id.dateText);
 
         //Start fetching a preview for the item
@@ -134,13 +140,41 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> implements
             favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
         }
 
+        favCountText.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_RIGHT = 2;
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() > (favCountText.getRight()
+                            - (favCountText.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width()
+                                - Math.round(16 * (getContext().getResources().getDisplayMetrics()
+                                    .xdpi / DisplayMetrics.DENSITY_DEFAULT))))) {
+                        if(!singlePic.isFavorite()){
+                            //Request to database that it is liked
+                        }
+                        return true;
+                    }
+                }
+                return true;
+            }
+        });
+
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //TODO: Get the real size image for the selected panorama id
+                //TODO: like below from the DB and add that as parameter to the imageviewfragment
+                ProfilePanorama selectedPanorama = getItem(position);
+                String panoramaID = selectedPanorama.getPanoramaID();
+                System.out.println("PanoramaID: " + panoramaID);
+
+                MainActivity mainActivity = (MainActivity) v.getContext();
+                mainActivity.showPanorama("profile", panoramaID);
+            }
+        });
+
         //Set image
         return customView;
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Log.d("Clicked", id + "");
     }
 
 }

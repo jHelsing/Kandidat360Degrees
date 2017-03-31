@@ -47,7 +47,7 @@
     <string name="share_panorama">Share panorama</string>
     <!-- Notifications -->
     <string name="accept">Accept</string>
-    <string name="cancel">Cancel</string>
+    <string name="cancel">Decline</string>
     <!-- Profile -->
     <string name="profile">Profile</string>
     <string name="count">Count</string>

@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.ciux031701.kandidat360degrees.representation.FriendList;
 import com.ciux031701.kandidat360degrees.representation.FriendTuple;
 import com.ciux031701.kandidat360degrees.R;
 
@@ -21,7 +22,7 @@ import java.util.ArrayList;
 
 public class ShareAdapter extends FriendsListAdapter {
 
-    public ShareAdapter(Context context, ArrayList<FriendTuple> data) {
+    public ShareAdapter(Context context, FriendList data) {
         super(context,data);
     }
 

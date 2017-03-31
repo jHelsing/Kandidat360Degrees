@@ -16,12 +16,20 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.ciux031701.kandidat360degrees.FriendsFragment;
 import com.ciux031701.kandidat360degrees.MainActivity;
+import com.ciux031701.kandidat360degrees.communication.JReqAcceptFriend;
+import com.ciux031701.kandidat360degrees.communication.JReqDeclineFriend;
+import com.ciux031701.kandidat360degrees.communication.JRequest;
+import com.ciux031701.kandidat360degrees.representation.FriendList;
 import com.ciux031701.kandidat360degrees.representation.FriendRequestList;
 import com.ciux031701.kandidat360degrees.representation.FriendTuple;
 import com.ciux031701.kandidat360degrees.ProfileFragment;
 import com.ciux031701.kandidat360degrees.R;
 
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -32,7 +40,7 @@ import java.util.ArrayList;
 public class FriendsAdapter extends FriendsListAdapter {
     private FriendRequestList friendRequests;
 
-    public FriendsAdapter(Context context, ArrayList<FriendTuple> friends, FriendRequestList friendRequests) {
+    public FriendsAdapter(Context context, FriendList friends, FriendRequestList friendRequests) {
         super(context, friends);
         this.friendRequests = friendRequests;
     }
@@ -102,24 +110,63 @@ public class FriendsAdapter extends FriendsListAdapter {
         acceptButton.setVisibility(View.VISIBLE);
         cancelButton.setVisibility(View.VISIBLE);
 
-        addListenerToAcceptButton(acceptButton);
-        addListenerToCancelButton(cancelButton);
+        addListenerToAcceptButton(acceptButton, data);
+        addListenerToCancelButton(cancelButton, data);
     }
 
-    private void addListenerToAcceptButton(Button acceptButton){
+    private void addListenerToAcceptButton(Button acceptButton, final FriendTuple user){
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: add the friend to the database, remove from friend request list. Then reload the fragment?
+                JReqAcceptFriend jReqAcceptFriend = new JReqAcceptFriend(user.getUserName());
+                jReqAcceptFriend.setJResultListener(
+                        new JRequest.JResultListener() {
+                            @Override
+                            public void onHasResult(JSONObject result) {
+                                try {
+                                    boolean error = result.getBoolean("error");
+                                    if(!error){
+                                        friendRequests.remove(user);
+                                        friends.add(user);
+                                        mDataSource = friends.getList();
+                                        notifyDataSetChanged();
+                                    }
+                                }
+                                catch(JSONException je){
+
+                                }
+                            }
+                        }
+                );
+                jReqAcceptFriend.sendRequest();
+
             }
         });
     }
 
-    private void addListenerToCancelButton(Button cancelButton){
+    private void addListenerToCancelButton(Button cancelButton, final FriendTuple user){
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //TODO: remove from friend request list. Then reload the fragment?
+                JReqDeclineFriend jReqDeclineFriend = new JReqDeclineFriend(user.getUserName());
+                jReqDeclineFriend.setJResultListener(
+                        new JRequest.JResultListener() {
+                            @Override
+                            public void onHasResult(JSONObject result) {
+                                try {
+                                    boolean error = result.getBoolean("error");
+                                    if(!error){
+                                        friendRequests.remove(user);
+                                        notifyDataSetChanged();
+                                    }
+                                }
+                                catch(JSONException je){
+
+                                }
+                            }
+                        }
+                );
+                jReqDeclineFriend.sendRequest();
             }
         });
     }

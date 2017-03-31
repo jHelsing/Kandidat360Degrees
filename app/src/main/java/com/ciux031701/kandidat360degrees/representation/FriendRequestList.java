@@ -21,7 +21,14 @@ public class FriendRequestList extends ArrayList<FriendTuple> {
             super.add(0, new FriendTuple("Friend Requests", item.getContext()));
         super.add(i, item);
     }
-    public void remove(FriendTuple item){
-
+    @Override
+    public boolean remove(Object item){
+        //Remove header also if last friend request to be removed.
+        if(size()==2) {
+            clear();
+            return true;
+        }
+        else
+            return super.remove(item);
     }
 }
