@@ -35,12 +35,12 @@ public class DownloadService extends IntentService {
             case PREVIEW:
                 localFilePath = FTPInfo.PREVIEW_LOCAL_LOCATION;
                 serverFilePath = FTPInfo.PREVIEW_SERVER_LOCATION;
-                filename = intent.getIntExtra("IMAGEID", -1) + FTPInfo.FILETYPE;
+                filename = intent.getStringExtra("IMAGEID") + FTPInfo.FILETYPE;
                 break;
             case PANORAMA:
                 localFilePath = FTPInfo.PANORAMA_LOCAL_LOCATION;
                 serverFilePath = FTPInfo.PANORAMA_SERVER_LOCATION;
-                filename = intent.getIntExtra("IMAGEID", -1) + FTPInfo.FILETYPE;
+                filename = intent.getStringExtra("IMAGEID") + FTPInfo.FILETYPE;
                 break;
             case PROFILE:
                 localFilePath = FTPInfo.PROFILE_LOCAL_LOCATION;
@@ -69,11 +69,11 @@ public class DownloadService extends IntentService {
            } catch (java.io.IOException e) {
               Log.d("FTP", "File could not be created at location " + outputFile.getPath());
               publishResults(outputFile.getPath(), Activity.RESULT_CANCELED,
-                      intent.getIntExtra("IMAGEID", -1) + "", type);
+                      intent.getStringExtra("IMAGEID") + "", type);
            }
         } else {
            publishResults(outputFile.getPath(), Activity.RESULT_OK,
-                   intent.getIntExtra("IMAGEID", -1) + "", type);
+                   intent.getStringExtra("IMAGEID") + "", type);
         }
 
         // Start FTP communication
@@ -95,7 +95,7 @@ public class DownloadService extends IntentService {
               ftpClient.disconnect();
 
               publishResults(outputFile.getPath(), Activity.RESULT_CANCELED,
-                      intent.getIntExtra("IMAGEID", -1) + "", type);
+                      intent.getStringExtra("IMAGEID") + "", type);
            } else {
               // Login successful
               Log.d("FTP", "Phone logged-in to server: " + ftpClient.getReplyString());

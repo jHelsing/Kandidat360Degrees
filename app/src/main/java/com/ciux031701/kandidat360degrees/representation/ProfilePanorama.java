@@ -18,11 +18,11 @@ public class ProfilePanorama {
     private String date;
     private boolean favorite;
     private Drawable preview;
-    private int panoramaID;
+    private String panoramaID;
     private boolean publicImage;
     private String description;
 
-    public ProfilePanorama(int panoramaID, boolean favorite, String date,
+    public ProfilePanorama(String panoramaID, boolean favorite, String date,
                            String latitude, String longitude, int favCount, int viewCount, boolean publicImage, String description) {
         this.panoramaID = panoramaID;
         this.favorite = favorite;
@@ -35,7 +35,7 @@ public class ProfilePanorama {
         this.description = description;
     }
 
-    public ProfilePanorama(int panoramaID, Drawable preview, boolean favorite, String date,
+    public ProfilePanorama(String panoramaID, Drawable preview, boolean favorite, String date,
                            String latitude, String longitude, int favCount, boolean publicImage, String description) {
         this.panoramaID = panoramaID;
         this.preview = preview;
@@ -73,7 +73,7 @@ public class ProfilePanorama {
         return preview;
     }
 
-    public int getPanoramaID() {
+    public String getPanoramaID() {
         return panoramaID;
     }
 
