@@ -5,7 +5,7 @@ package com.ciux031701.kandidat360degrees.communication;
  */
 
 public class JReqLikeImage extends JRequest {
-    public JReqLikeImage(int imageid) {
+    public JReqLikeImage(String imageid) {
         super();
         PHP_NAME = "like.php";
         URL = PHP_ROOT + PHP_NAME + "?" + "sessionid=" + Session.getId() + "&" + "imageid=" + imageid;

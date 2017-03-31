@@ -1,8 +1,12 @@
 package com.ciux031701.kandidat360degrees;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -18,6 +22,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.ciux031701.kandidat360degrees.communication.DownloadService;
+import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.communication.JReqDestroySession;
 import com.ciux031701.kandidat360degrees.communication.JReqProfile;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
@@ -36,6 +42,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
@@ -300,6 +307,46 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void showPanorama (final String origin, final String imageID) {
+        Intent intent =  new Intent(this, DownloadService.class);
+        intent.putExtra("IMAGETYPE", ImageType.PANORAMA);
+        intent.putExtra("IMAGEID", imageID);
+        intent.putExtra("TYPE", "DOWNLOAD");
+        intent.setAction(DownloadService.NOTIFICATION + imageID + ".jpg");
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DownloadService.NOTIFICATION + imageID + ".jpg");
+        registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
+                    Log.d("MainActivity", "Panorama image found and results from download are OK.");
+
+                    String path = context.getFilesDir() + "/panoramas/"
+                            + imageID + ".jpg";
+                    Drawable panoramaImage = Drawable.createFromPath(path);
+
+                    File file = new File(path);
+                    if (file.delete()) {
+                        Log.d("MainActivity", "Panorama image has been deleted");
+                    }
+                    context.unregisterReceiver(this);
+
+                    Bundle args = new Bundle();
+                    args.putString("origin", origin);
+                    args.putString("imageid", imageID);
+                    ArrayList<Drawable> arrayList = new ArrayList<Drawable>();
+                    arrayList.add(panoramaImage);
+                    args.putSerializable("panorama", arrayList);
+                    ImageViewFragment fragment = new ImageViewFragment();
+                    fragment.setArguments(args);
+                    FragmentManager fragmentManager = getFragmentManager();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
+                }
+            }
+        }, filter);
+        startService(intent);
     }
 
 

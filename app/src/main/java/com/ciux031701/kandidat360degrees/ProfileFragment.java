@@ -114,19 +114,6 @@ public class ProfileFragment extends Fragment {
         }
 
         private void selectItem(int position) {
-            listMode=false;
-            //TODO: Get the real size image for the selected panorama id
-            //TODO: like below from the DB and add that as parameter to the imageviewfragment
-            ProfilePanorama selectedPanorama = (ProfilePanorama)pictureListView.getAdapter().getItem(position);
-            int panoramaID = selectedPanorama.getPanoramaID();
-            System.out.println("PanoramaID: " + panoramaID);
-
-            Bundle args = getArguments();
-            args.putString("origin","profile");
-            ImageViewFragment fragment = new ImageViewFragment();
-            fragment.setArguments(args);
-            FragmentManager fragmentManager = getActivity().getFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
         }
     }
 

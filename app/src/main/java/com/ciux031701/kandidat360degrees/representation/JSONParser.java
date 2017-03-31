@@ -15,7 +15,7 @@ public class JSONParser {
         if (imageArray.length() == 0) {
             return null;
         }
-        int imageID = -1;
+        String imageID = "";
         boolean publicImage = false;
         String uploadDate = "";
         String longitude = "";
@@ -25,7 +25,7 @@ public class JSONParser {
         int favCount = -1;
         boolean favorite = false;
         try {
-            imageID = Integer.parseInt(imageArray.get(0).toString());
+            imageID = imageArray.get(0).toString();
             int publicInt = Integer.parseInt(imageArray.get(2).toString());
             if (publicInt == 1)
                 publicImage = true;
