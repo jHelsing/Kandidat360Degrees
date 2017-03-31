@@ -37,6 +37,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 
 /**
@@ -84,13 +86,13 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     float rField[], iField[];
     private LinkedList<Double> previousAngles;
     private boolean isFirstSensorChanged;
-
+    private boolean timerInProcess;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_camera, container, false);
 
         mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
-
+        timerInProcess = false;
         previousAngles = new LinkedList();
         isVertical = false;
         isFirstSensorChanged = true;
@@ -316,7 +318,26 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                         sum += angle;
                     }
 
-                    float average = sum/previousAngles.size();
+                    final float average = sum/previousAngles.size();
+
+                    if((int)fromDegreeToProgress(average)==targetDegree && !timerInProcess){
+                        timerInProcess = true;
+                        System.out.println("CAM: timer started!");
+                        Timer timer = new Timer();
+                        timer.schedule(new TimerTask() {
+                            @Override
+                            public void run() {
+                                if((int)fromDegreeToProgress(average)<targetDegree+10 && (int)fromDegreeToProgress(average)>targetDegree-10){
+                                    //take picture
+                                    targetDegree = targetDegree+(360/nbrOfImages);
+                                    mSurfaceViewDraw.setTargetDegree((int)targetDegree);
+                                    mSurfaceViewDraw.setTargetAcquired(true);
+                                    System.out.println("CAM: picture taken! new target: " + targetDegree);
+                                }
+                                timerInProcess = false;
+                            }
+                        },1500);
+                    }
 
                     lastDegree = average;
                     int newProgressAngle = (int)fromDegreeToProgress(lastDegree);
