@@ -74,10 +74,12 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private Sensor accelerometer;
     private Sensor magnetometer;
     private SensorManager sensorManager;
+    private Sensor rotationVector;
     float[] mGravity;
     float[] mGeomagnetic;
     double currentDegrees;
     double lastDegree;
+    private float[] mRotationMatrix;
 
     private boolean isVertical;
     private boolean captureInProgress;
@@ -124,8 +126,13 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        rotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
+        sensorManager.registerListener(this,rotationVector,SensorManager.SENSOR_DELAY_UI);
+
+        orientation = new float[3];
+        mRotationMatrix = new float[9];
 
         //GUI: buttons & views
         angleImage = (ImageView) root.findViewById(R.id.angleImage);
@@ -201,6 +208,12 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         int centerY = size.y / 2;
         Point center = new Point(centerX, centerY);
         mSurfaceViewDraw.setCenter(center);
+
+        holdVerticallyImage.setVisibility(View.GONE);
+        holdVerticallyText.setVisibility(View.GONE);
+        captureButton.setVisibility(View.VISIBLE);
+        mSurfaceView.setVisibility(View.VISIBLE);
+        mSurfaceViewDraw.setVisibility(View.VISIBLE);
 
         return root;
     }
@@ -373,119 +386,61 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     //Sensors:
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
+        if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
+        {
+            if(captureInProgress){
+                // Convert the rotation-vector to a 4x4 matrix.
+                SensorManager.getRotationMatrixFromVector(mRotationMatrix,sensorEvent.values);
+                SensorManager.remapCoordinateSystem(mRotationMatrix,SensorManager.AXIS_X, SensorManager.AXIS_Z,mRotationMatrix);
+                SensorManager.getOrientation(mRotationMatrix, orientation);
+
+                // Optionally convert the result from radians to degrees
+                orientation[0] = (float) Math.toDegrees(orientation[0]);
+                orientation[1] = (float) Math.toDegrees(orientation[1]);
+                orientation[2] = (float) Math.toDegrees(orientation[2]);
 
 
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
-            mGravity = lowPass(sensorEvent.values.clone(), mGravity);
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
-            mGeomagnetic = lowPass(sensorEvent.values.clone(), mGeomagnetic);
-        if (mGravity != null && mGeomagnetic != null) {
-            rField = new float[9];
-            iField = new float[9];
-            boolean success = SensorManager.getRotationMatrix(rField, iField, mGravity, mGeomagnetic);
-            if (success) {
-
-                orientation = new float[3];
-                SensorManager.getOrientation(rField, orientation);
                 currentDegrees = fromSensorToDegrees(orientation[0]);
-                mSurfaceViewDraw.setCurrentDegree((int) currentDegrees);
-                //angleProgressBar.setProgress((int)currentDegrees);
-                //this is used to get DPI for the specific device
-                DisplayMetrics metrics = getResources().getDisplayMetrics();
+                System.out.println("orintation[1]: " + orientation[1]);
+                lastDegree = currentDegrees;
+                int newProgressAngle = (int)fromDegreeToProgress(lastDegree);
 
-                if (captureInProgress) {
 
-                    float sum = 0;
-                    if (previousAngles.size() == 3) {
-                        //Uses the third retrieved degree as start since first have a higher risk of being off
-                        if (isFirstSensorChanged) {
-                            startGyroDegree = currentDegrees;
-                            isFirstSensorChanged = false;
-                            mSurfaceViewDraw.setTargetDegree((int) startGyroDegree);
-                            mSurfaceViewDraw.setTargetAcquired(true);
-                        }
-                        previousAngles.poll();
-
-                    }
-                    previousAngles.offer(currentDegrees);
-                    for (double angle : previousAngles) {
-                        sum += angle;
-                    }
-
-                    final float average = sum / previousAngles.size();
-
-                    if ((int) fromDegreeToProgress(average) == targetDegree && !timerInProcess) {
-                        timerInProcess = true;
-                        System.out.println("CAM: timer started!");
-                        Timer timer = new Timer();
-                        timer.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                if ((int) fromDegreeToProgress(average) < targetDegree + 10 && (int) fromDegreeToProgress(average) > targetDegree - 10) {
-                                    //take picture
-                                    targetDegree = targetDegree + (360 / nbrOfImages);
-                                    mSurfaceViewDraw.setTargetDegree((int) targetDegree);
-                                    mSurfaceViewDraw.setTargetAcquired(true);
-                                    System.out.println("CAM: picture taken! new target: " + targetDegree);
-                                }
-                                timerInProcess = false;
-                            }
-                        }, 1500);
-                    }
-
-                    lastDegree = average;
-                    int newProgressAngle = (int) fromDegreeToProgress(lastDegree);
-                    System.out.println("angle: " + lastDegree + ". Progress: " + newProgressAngle);
-
-                    mSurfaceViewDraw.setCurrentDegree((int) lastDegree);
-
-                    //To prevent weird jumps
-                    if (Math.abs(lastProgressAngle - newProgressAngle) < 15 && Math.abs(newProgressAngle - lastProgressAngle) < 15) {
-                        if (newProgressAngle < 185 && newProgressAngle > 175 && isHalfWay != true) {
-                            System.out.println("halfway=true");
-                            isHalfWay = true;
-                        }
-
-                        lastProgressAngle = newProgressAngle;
-
-                        //Compare with 180 abd ifHalfWay so it doesn't register when we go from 1,0,360,359,...
-                        if (newProgressAngle < 180 && isHalfWay == false) {
-                            angleImage.setRotation(newProgressAngle);
-                            angleProgressBar.setProgress(newProgressAngle);
-                        } else if (newProgressAngle >= 180 && isHalfWay == true) {
-                            angleImage.setRotation(newProgressAngle);
-                            angleProgressBar.setProgress(newProgressAngle);
-                        }
-                    }
-                }
-
-                if (orientation[1] < 1.75 && orientation[1] > 1.25 || orientation[1] < -1.25 && orientation[1] > -1.75) {
-                    if (!isVertical) {
-                        isVertical = true;
-                        if (!captureInProgress) {
-                            holdVerticallyImage.setVisibility(View.GONE);
-                            holdVerticallyText.setVisibility(View.GONE);
-                            captureButton.setVisibility(View.VISIBLE);
-                            mSurfaceView.setVisibility(View.VISIBLE);
-                            mSurfaceViewDraw.setVisibility(View.VISIBLE);
-                        }
-                    }
-
-                } else {
-                    if (isVertical) {
-                        isVertical = false;
-                        if (!captureInProgress) {
-                            holdVerticallyImage.setVisibility(View.VISIBLE);
-                            holdVerticallyText.setVisibility(View.VISIBLE);
-                            captureButton.setVisibility(View.GONE);
-                            mSurfaceView.setVisibility(View.GONE);
-                            mSurfaceViewDraw.setVisibility(View.INVISIBLE);
-                        }
-                    }
-                }
+                lastDegree = orientation[0];
+                //int newProgressAngle = (int)fromDegreeToProgress(lastDegree);
+                angleImage.setRotation(orientation[0]);
+                angleProgressBar.setProgress((int)orientation[0]);
             }
         }
+
+
+
+        /*if (orientation[1] < 1.75 && orientation[1] > 1.25 || orientation[1] < -1.25 && orientation[1] > -1.75) {
+            if (!isVertical) {
+                isVertical = true;
+                if (!captureInProgress) {
+                    holdVerticallyImage.setVisibility(View.GONE);
+                    holdVerticallyText.setVisibility(View.GONE);
+                    captureButton.setVisibility(View.VISIBLE);
+                    mSurfaceView.setVisibility(View.VISIBLE);
+                    mSurfaceViewDraw.setVisibility(View.VISIBLE);
+                }
+            }
+
+        } else {
+            if (isVertical) {
+                isVertical = false;
+                if (!captureInProgress) {
+                    holdVerticallyImage.setVisibility(View.VISIBLE);
+                    holdVerticallyText.setVisibility(View.VISIBLE);
+                    captureButton.setVisibility(View.GONE);
+                    mSurfaceView.setVisibility(View.GONE);
+                    mSurfaceViewDraw.setVisibility(View.GONE);
+                }
+            }
+        }*/
     }
+
 
     public double fromDegreeToProgress(double degree) {
         if (degree >= startGyroDegree) {
