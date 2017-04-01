@@ -21,7 +21,7 @@ JNIEXPORT void JNICALL Java_com_ciux031701_kandidat360degrees_representation_Nat
             Mat & currentImage = *(Mat*)imgAddressArr[i];
             Mat newImage;
             //Convert to 3-channel Mat (for Stitcher module)
-            cvtColor(currentImage,newImage,CV_BGRA2RGB);
+            cvtColor(currentImage,newImage,CV_BGRA2BGR);
             //Reduce resolution for fast computation --> we may want to remove this part
             float scale = 1000.0f / currentImage.rows;
             resize(newImage,newImage,Size(scale*currentImage.rows,scale*currentImage.cols));
