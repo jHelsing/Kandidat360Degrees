@@ -7,6 +7,8 @@
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
     <uses-feature android:name="android.hardware.camera.front" android:required="false"/>
     <uses-feature android:name="android.hardware.camera.front.autofocus" android:required="false"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
@@ -35,9 +37,6 @@
             android:label="CameraActivity"
             android:screenOrientation="landscape"/>
 
-        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-        <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
@@ -55,11 +54,10 @@
 
         <service
             android:name=".communication.DownloadService"
-            android:enabled="true"
-            android:exported="true"></service>
+            android:exported="false"/>
         <service
             android:name=".communication.UploadService"
-            android:exported="false"></service>
+            android:exported="false"/>
     </application>
 
 </manifest>

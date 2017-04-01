@@ -1,5 +1,7 @@
 package com.ciux031701.kandidat360degrees;
 
+import android.*;
+import android.Manifest;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -7,11 +9,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -32,6 +37,7 @@ import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.ciux031701.kandidat360degrees.representation.JSONParser;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.ciux031701.kandidat360degrees.representation.RoundImageView;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -168,11 +174,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void showExploreView(){
-        ExploreFragment fragment = new ExploreFragment();
-        FragmentManager fragmentManager = getFragmentManager();
-        fragment.setArguments(setArgs);
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
-        setTitle("Explore");
+        if (canAccessLocation()) {
+            // We have access to the user's location, getting last known location
+            // and showing the explore view
+            Log.d("MainActivity - Explore", "Permission granted, continuing as usual");
+
+            // Starting GoogleAPIClient
+
+            // Fetching location
+            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+            // Show fragment
+            ExploreFragment fragment = new ExploreFragment();
+            FragmentManager fragmentManager = getFragmentManager();
+            fragment.setArguments(setArgs);
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
+            setTitle("Explore");
+        } else {
+            // We do not get access to location from the user, terminating app
+        }
     }
 
     private void destroySession(){
@@ -349,6 +369,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         startService(intent);
     }
 
+    private boolean canAccessLocation() {
+        // Check if we have persmission to use GPS location
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // Check Permissions Now
+            final int REQUEST_LOCATION = 2;
 
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // Display UI and wait for user interaction
+                Log.d("MainActivity - Explore", "shouldShowRequestPermissionRaionale is true");
+            } else {
+                ActivityCompat.requestPermissions(
+                        this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_LOCATION);
+                Log.d("MainActivity - Explore", "shouldShowRequestPermissionRaionale is false. Requesting persmission");
+            }
+        } else {
+            return true;
+        }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            return true;
+
+        return false;
+    }
 
 }

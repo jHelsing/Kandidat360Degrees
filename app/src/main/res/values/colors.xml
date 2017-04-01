@@ -5,8 +5,4 @@
     <color name="colorPrimaryDark">#52acb9</color>
     <color name="colorBackground">#e8eaea</color>
     <color name="colorAccent">#d2ffffff</color>
-    <color name="colorDrawerBackground">#3E413D</color>
-    <color name="colorLineBorder">#95989A</color>
-    <color name="colorToastBackground">#333333</color>
-    <color name="colorPanoramaLine">#ff8205</color>
 </resources>

@@ -1,13 +1,20 @@
 package com.ciux031701.kandidat360degrees;
 
+import android.*;
+import android.Manifest;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -28,19 +35,25 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.ciux031701.kandidat360degrees.adaptors.ExploreSearchAdapter;
+import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +65,7 @@ import java.util.List;
 public class ExploreFragment extends Fragment implements SearchView.OnQueryTextListener {
 
     private Geocoder geocoder;
-    MapView mMapView;
+    private MapView mMapView;
     private GoogleMap googleMap;
 
     private DrawerLayout mDrawerLayout;
@@ -67,50 +80,28 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
     private boolean isShowingPublic;
 
-    private ClusterManager<MyItem>  mClusterManager;
+    private ClusterManager<MyItem> mClusterManager;
 
     private ExploreSearchAdapter exploreSearchAdapter;
     private ArrayList<String> resultArrayList;
     private List<Address> globalList;
+    private ArrayList<ProfilePanorama> imagesToShow;
     private int lastSearchStringLength;
+
+    private Location lastKnownLocation;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_explore, container, false);
         setHasOptionsMenu(true);
-        lastSearchStringLength=0;
+        lastSearchStringLength = 0;
 
-        // Set up toolbar and navigation drawer.
-        Toolbar toolbar = (Toolbar) root.findViewById(R.id.tool_bar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
-        ImageButton toolbarMenuButton = (ImageButton) root.findViewById(R.id.toolbarMenuButton);
-        toolbarMenuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mDrawerLayout.openDrawer(Gravity.LEFT);
-            }
-        });
-
-        // Set up
+        // Set ups
         isShowingPublic = true;
+        setUpNavigationAndToolBar(root);
         setUpSearchFunctionality(root);
-
-        mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
-
-
-        // Set up camera button
-        ImageButton cameraButton = (ImageButton) root.findViewById(R.id.cameraButton);
-        cameraButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-                CameraFragment fragment = new CameraFragment();
-                FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-            }
-        });
-
+        setUpCamera(root);
+        //imagesToShow = (ArrayList<ProfilePanorama>) savedInstanceState.getSerializable("images");
         setUpMap(root, savedInstanceState);
 
         return root;
@@ -188,9 +179,9 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 }
                 return true;
             case R.id.action_search:
-                if(searchListView.getVisibility()==View.GONE) {
+                if (searchListView.getVisibility() == View.GONE) {
                     searchListView.setVisibility(View.VISIBLE);
-                }else{
+                } else {
                     searchListView.setVisibility(View.GONE);
                 }
                 return true;
@@ -201,16 +192,16 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
     public void performSearch(String query) throws IOException {
         geocoder = new Geocoder(getActivity());
-        List<Address> list = geocoder.getFromLocationName(query,1);
-        if(!(list.size() == 0)) {
+        List<Address> list = geocoder.getFromLocationName(query, 1);
+        if (!(list.size() == 0)) {
             Address address = list.get(0);
             double lat = address.getLatitude();
             double lng = address.getLongitude();
             LatLng latlng = new LatLng(lat, lng);
             CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latlng, 10);
             googleMap.moveCamera(update);
-        }else{
-            Toast.makeText(getActivity(), "Could not find "+query+".", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getActivity(), "Could not find " + query + ".", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -219,7 +210,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         try {
             searchListView.setVisibility(View.GONE);
             View currentFocus = getActivity().getCurrentFocus();
-            InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             performSearch(query);
         } catch (IOException e) {
@@ -231,13 +222,13 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     @Override
     public boolean onQueryTextChange(String newText) {
 
-        if(searchListView.getVisibility()==View.GONE){
+        if (searchListView.getVisibility() == View.GONE) {
             searchListView.setVisibility(View.VISIBLE);
         }
         //Only search for new results if we add characters
         //Should probably be done in another thread.
-        if(newText.length()>lastSearchStringLength) {
-            lastSearchStringLength=newText.length();
+        if (newText.length() > lastSearchStringLength) {
+            lastSearchStringLength = newText.length();
             //searchListView.invalidate();
             geocoder = new Geocoder(getActivity());
             try {
@@ -249,14 +240,14 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             for (Address address : globalList) {
 
                 System.out.println("Adding result: " + address.getLocality() + address.getFeatureName() + address.getAdminArea());
-                if(address.getLocality()!=null){
-                    resultArrayList.add(address.getLocality() + ", " +address.getCountryName());
+                if (address.getLocality() != null) {
+                    resultArrayList.add(address.getLocality() + ", " + address.getCountryName());
                 }
-                if(address.getAdminArea() != null){
-                    resultArrayList.add(address.getAdminArea() + ", "+ address.getCountryName());
+                if (address.getAdminArea() != null) {
+                    resultArrayList.add(address.getAdminArea() + ", " + address.getCountryName());
                 }
-                if(address.getFeatureName() != null){
-                    resultArrayList.add(address.getFeatureName()+ ", " + address.getCountryName());
+                if (address.getFeatureName() != null) {
+                    resultArrayList.add(address.getFeatureName() + ", " + address.getCountryName());
                 }
             }
 
@@ -270,12 +261,11 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 exploreSearchAdapter.filter(newText.toString());
             }*/
             return true;
-        }else{
-            lastSearchStringLength=newText.length();
+        } else {
+            lastSearchStringLength = newText.length();
         }
         return false;
     }
-
 
     private void setUpClusterer() {
         // Position the map.
@@ -283,7 +273,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         // Initialize the manager with the context and the map.
         // (Activity extends context, so we can pass 'this' in the constructor.)
         mClusterManager = new ClusterManager<MyItem>(getActivity(), googleMap);
-        mClusterManager.setRenderer(new CustomMarkerRenderer(getActivity(),googleMap, mClusterManager));
+        mClusterManager.setRenderer(new CustomMarkerRenderer(getActivity(), googleMap, mClusterManager));
         // Point the map's listeners at the listeners implemented by the cluster
         // manager.
         googleMap.setOnCameraIdleListener(mClusterManager);
@@ -292,6 +282,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         // Add cluster items (markers) to the cluster manager.
         addItems();
     }
+
     private void addItems() {
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(57.4, 12), 10));
         double lat = 57.7;
@@ -341,8 +332,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                     public void onInfoWindowClick(Marker marker) {
                         //Go to full screen view
                         //TODO: get fullscreen image from DB and send as argument
-                        Bundle args =  new Bundle();
-                        args.putString("origin","explore");
+                        Bundle args = new Bundle();
+                        args.putString("origin", "explore");
 
                         ImageViewFragment fragment = new ImageViewFragment();
                         fragment.setArguments(args);
@@ -353,15 +344,19 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
                 ((MainActivity) getActivity()).loadMapStyling(googleMap);
 
+
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
+
                 // For dropping a marker at a point on the Map
                 LatLng gothenburg = new LatLng(57.4, 12);
                 googleMap.addMarker(new MarkerOptions().position(gothenburg).title("Here we go bois")
                         .snippet("its happening!").icon(BitmapDescriptorFactory
                                 .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                 // For zooming automatically to the location of the marker
-                //CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(12).build();
-                //googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(12).build();
+                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+                // TODO load all images from imagesToShow and show them on map
             }
         });
     }
@@ -384,6 +379,35 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+        });
+    }
+
+    private void setUpNavigationAndToolBar(View root) {
+        // Set up toolbar and navigation drawer.
+        mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
+        Toolbar toolbar = (Toolbar) root.findViewById(R.id.tool_bar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
+        ImageButton toolbarMenuButton = (ImageButton) root.findViewById(R.id.toolbarMenuButton);
+        toolbarMenuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mDrawerLayout.openDrawer(Gravity.LEFT);
+            }
+        });
+    }
+
+    private void setUpCamera(View root) {
+        // Set up camera button
+        ImageButton cameraButton = (ImageButton) root.findViewById(R.id.cameraButton);
+        cameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
+                CameraFragment fragment = new CameraFragment();
+                FragmentManager fragmentManager = getFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
             }
         });
     }
