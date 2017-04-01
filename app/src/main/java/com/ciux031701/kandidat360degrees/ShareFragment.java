@@ -19,16 +19,11 @@ import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.adaptors.ShareAdapter;
-import com.ciux031701.kandidat360degrees.representation.FriendList;
-import com.ciux031701.kandidat360degrees.representation.FriendTuple;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import com.ciux031701.kandidat360degrees.communication.Friends;
+import com.ciux031701.kandidat360degrees.representation.UserTuple;
 
 /**
  * Created by Anna on 2017-03-06.
@@ -42,7 +37,7 @@ public class ShareFragment extends Fragment {
     private ImageView previewPic;
     private Button shareButton;
     private Switch publicSwitch;
-    private final FriendList friendList = new FriendList();
+    private final Friends friendList = new Friends();
     private RecyclerView mRecyclerView;
     private boolean firstView = false;
 
@@ -84,32 +79,12 @@ public class ShareFragment extends Fragment {
         if(!firstView){
             //TODO: Retrieve data from database to friendList instead!
             //Test for implementing a sorted arraylist that is sorted by names
-            friendList.add(new FriendTuple( "Jonathan", getActivity()));
-            friendList.add(new FriendTuple( "John", getActivity()));
-            friendList.add(new FriendTuple( "Amar", getActivity()));
-            friendList.add(new FriendTuple( "Bertil", getActivity()));
-            friendList.add(new FriendTuple( "Åsa", getActivity()));
-            friendList.add(new FriendTuple( "Bengt", getActivity()));
-            friendList.add(new FriendTuple( "Peter", getActivity()));
-            friendList.add(new FriendTuple( "Sigrid", getActivity()));
-            friendList.add(new FriendTuple( "Marcus", getActivity()));
-            friendList.add(new FriendTuple( "Daniel", getActivity()));
-            friendList.add(new FriendTuple( "Astrid", getActivity()));
-            friendList.add(new FriendTuple( "Linea", getActivity()));
-            friendList.add(new FriendTuple( "Olof", getActivity()));
-            friendList.add(new FriendTuple( "Fredrik", getActivity()));
-            friendList.add(new FriendTuple( "Isabell", getActivity()));
-            friendList.add(new FriendTuple( "Greta", getActivity()));
-            friendList.add(new FriendTuple( "Alexander", getActivity()));
-            friendList.add(new FriendTuple( "Linda", getActivity()));
-            friendList.add(new FriendTuple( "Sebastian", getActivity()));
-            friendList.add(new FriendTuple( "Axel", getActivity()));
-            friendList.add(new FriendTuple( "Steve", getActivity()));
+
 
             firstView = true;
         }
 
-        ShareAdapter adapter = new ShareAdapter(getActivity(),friendList);
+        ShareAdapter adapter = new ShareAdapter(getActivity());
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 

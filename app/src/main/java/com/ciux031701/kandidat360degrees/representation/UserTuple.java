@@ -11,17 +11,17 @@ import com.ciux031701.kandidat360degrees.R;
  * Created by AMAR on 2017-03-09.
  */
 
-public class FriendTuple {
+public class UserTuple {
     private String userName;
     private Drawable profilePicture;
     private Context context;
 
-    public FriendTuple(String userName, Drawable profilePicture){
+    public UserTuple(String userName, Drawable profilePicture){
         this.userName = userName;
         this.profilePicture = profilePicture;
     }
 
-    public FriendTuple(String userName, Context context){
+    public UserTuple(String userName, Context context){
         this.userName = userName;
         this.context = context;
         this.profilePicture = context.getResources().getDrawable(R.drawable.anonymous_profile_image_circle_small);

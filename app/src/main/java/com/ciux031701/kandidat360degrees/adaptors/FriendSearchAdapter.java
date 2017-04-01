@@ -1,7 +1,6 @@
 package com.ciux031701.kandidat360degrees.adaptors;
 
 import android.content.Context;
-import android.opengl.Visibility;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,16 +11,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.ciux031701.kandidat360degrees.MainActivity;
 import com.ciux031701.kandidat360degrees.R;
 import com.ciux031701.kandidat360degrees.communication.JReqAcceptFriend;
 import com.ciux031701.kandidat360degrees.communication.JReqCancelFriendrequest;
 import com.ciux031701.kandidat360degrees.communication.JReqDeclineFriend;
 import com.ciux031701.kandidat360degrees.communication.JReqRemoveFriend;
 import com.ciux031701.kandidat360degrees.communication.JReqSendFriendrequest;
-import com.ciux031701.kandidat360degrees.representation.FriendList;
-import com.ciux031701.kandidat360degrees.representation.FriendRequestList;
-import com.ciux031701.kandidat360degrees.representation.FriendTuple;
+import com.ciux031701.kandidat360degrees.communication.Friends;
+import com.ciux031701.kandidat360degrees.communication.FriendRequests;
+import com.ciux031701.kandidat360degrees.representation.UserTuple;
 import com.ciux031701.kandidat360degrees.representation.UserRelationship;
 
 import java.util.ArrayList;
@@ -31,24 +29,20 @@ import java.util.ArrayList;
  */
 
 public class FriendSearchAdapter extends RecyclerView.Adapter {
-    private ArrayList<FriendTuple> result;
+    private ArrayList<UserTuple> result;
     private Context context;
     private RecyclerView.ViewHolder holder;
-    private FriendList fList;
-    private FriendRequestList fRequestList;
     private UserRelationship relationship;
-    public FriendSearchAdapter(Context context, FriendRequestList fRequestList, FriendList fList, ArrayList<FriendTuple> result, UserRelationship relationship){
+    public FriendSearchAdapter(Context context, FriendRequests FriendRequests, Friends fList, ArrayList<UserTuple> result, UserRelationship relationship){
         this.context = context;
         this.result = result;
-        this.fList = fList;
-        this.fRequestList = fRequestList;
         this.relationship = relationship;
-        this.result.add(0, new FriendTuple("Results", context));
+        this.result.add(0, new UserTuple("Results", context));
     }
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.friends_list_item, parent, false);
-        holder = new FriendsListAdapter.ViewHolder(view);
+        holder = new FriendsAdapter.ViewHolder(view);
         view.setTag(holder);
         return holder;
     }
@@ -81,7 +75,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter {
         }
     }
 
-    private void setupButtons(final FriendTuple user, final Button rightButton, final Button leftButton){
+    private void setupButtons(final UserTuple user, final Button rightButton, final Button leftButton){
         leftButton.setVisibility(View.INVISIBLE);
         rightButton.setVisibility(View.INVISIBLE);
         if(relationship.getValue() == UserRelationship.SELF){
@@ -113,7 +107,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter {
                             JReqRemoveFriend jReqRemoveFriend = new JReqRemoveFriend(user.getUserName());
                             jReqRemoveFriend.sendRequest();
                             refreshButtons(new UserRelationship(UserRelationship.NONE), user, rightButton, leftButton);
-                            fList.remove(user);
+                            Friends.remove(user);
                         }
                     }
             );
@@ -144,7 +138,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter {
                         public void onClick(View v) {
                             JReqDeclineFriend jReqDeclineFriend = new JReqDeclineFriend(user.getUserName());
                             jReqDeclineFriend.sendRequest();
-                            fRequestList.remove(user);
+                            FriendRequests.remove(user);
                             refreshButtons(new UserRelationship(UserRelationship.NONE), user, rightButton, leftButton);
                         }
                     }
@@ -157,8 +151,8 @@ public class FriendSearchAdapter extends RecyclerView.Adapter {
                         public void onClick(View v) {
                             JReqAcceptFriend jReqAcceptFriend = new JReqAcceptFriend(user.getUserName());
                             jReqAcceptFriend.sendRequest();
-                            fRequestList.remove(user);
-                            fList.add(user);
+                            FriendRequests.remove(user);
+                            Friends.add(user);
                             refreshButtons(new UserRelationship(UserRelationship.FRIEND), user, rightButton, leftButton);
                         }
                     }
@@ -166,7 +160,7 @@ public class FriendSearchAdapter extends RecyclerView.Adapter {
         }
     }
 
-    private void refreshButtons(UserRelationship newRelationship, FriendTuple user, Button rightButton, Button leftButton){
+    private void refreshButtons(UserRelationship newRelationship, UserTuple user, Button rightButton, Button leftButton){
         relationship = newRelationship;
         setupButtons(user, rightButton, leftButton);
     }

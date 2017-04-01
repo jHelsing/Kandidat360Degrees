@@ -16,6 +16,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.ciux031701.kandidat360degrees.communication.FriendRequests;
+import com.ciux031701.kandidat360degrees.communication.Friends;
 import com.ciux031701.kandidat360degrees.communication.JReqCheckSession;
 import com.ciux031701.kandidat360degrees.communication.JReqLogin;
 import com.ciux031701.kandidat360degrees.communication.JRequest.JResultListener;
@@ -82,6 +84,8 @@ public class LoginFragment extends Fragment {
                                 if(!error){
                                     Session.setId(sessionId);
                                     Session.save();
+                                    Friends.init();
+                                    FriendRequests.init();
                                     Intent myIntent = new Intent(getActivity(), MainActivity.class);
                                     myIntent.putExtra("username", Session.getUser()); //Optional parameters
                                     startActivity(myIntent);
@@ -144,6 +148,8 @@ public class LoginFragment extends Fragment {
                                 boolean error = result.getBoolean("error");
                                 if(!error){
                                     Intent myIntent = new Intent(getActivity(), MainActivity.class);
+                                    Friends.init();
+                                    FriendRequests.init();
                                     myIntent.putExtra("username", Session.getUser()); //Optional parameters
                                     startActivity(myIntent);
                                 }
