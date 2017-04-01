@@ -32,6 +32,7 @@ import android.widget.Toast;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.communication.JReqDestroySession;
+import com.ciux031701.kandidat360degrees.communication.JReqLikeImage;
 import com.ciux031701.kandidat360degrees.communication.JReqProfile;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.communication.JRequester;
@@ -56,7 +57,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
- * Created by boking on 2017-02-14. Revised by Jonathan 2017-03-22
+ * Created by boking on 2017-02-14. Revised by Jonathan 2017-03-22. Modified by Amar on 2017-03-31.
  */
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -67,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private View drawerHeader;
     private View drawerFooter;
     private TextView usernameText;
+
+    private boolean errorLikeImage;
 
     Bundle b;
     Bundle setArgs;
@@ -398,6 +401,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
 
         return false;
+    }
+
+    /**
+     *
+     * This method makes the logged in user to like a specific image. It returns true if the image
+     * managed to be liked.
+     *
+     * @param imageID The ID of the image to like.
+     * @return Returns true if the image managed to be liked.
+     */
+    public boolean likeImageID(String imageID){
+        JReqLikeImage likeImageReq = new JReqLikeImage(imageID);
+        likeImageReq.setJResultListener(new JRequest.JResultListener() {
+            @Override
+            public void onHasResult(JSONObject result) {
+                try {
+                    errorLikeImage = result.getBoolean("error");
+                } catch (JSONException e) {
+                    errorLikeImage = true;
+                }
+                if(errorLikeImage){
+                    Toast.makeText(getApplicationContext(), "Something went wrong with the server, try again later.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        likeImageReq.sendRequest();
+        return !errorLikeImage;
     }
 
 }

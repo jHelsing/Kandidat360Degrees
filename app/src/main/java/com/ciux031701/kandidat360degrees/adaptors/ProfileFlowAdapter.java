@@ -49,7 +49,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
     }
 
     @Override
-    public View getView(final int position, View convertView, final ViewGroup parent){
+    public View getView(final int position, final View convertView, final ViewGroup parent){
 
         final ProfilePanorama singlePic = getItem(position);
         LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -149,8 +149,15 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                             - (favCountText.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width()
                                 - Math.round(16 * (getContext().getResources().getDisplayMetrics()
                                     .xdpi / DisplayMetrics.DENSITY_DEFAULT))))) {
+
+                        MainActivity mainActivity = (MainActivity) v.getContext();
                         if(!singlePic.isFavorite()){
-                            //Request to database that it is liked
+                            boolean isLiked = mainActivity.likeImageID(singlePic.getPanoramaID());
+                            if(isLiked){
+                                Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_clicked);
+                                favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
+                            }
+                        } else {
                         }
                         return true;
                     }
