@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -18,6 +19,8 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -371,7 +374,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     @Override
     public void onResume() {
         super.onResume();
-        mCam = Camera.open(0); // 0 = back camera
+        if (ContextCompat.checkSelfPermission(ThreeSixtyWorld.getAppContext(), android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
+            //ask for authorisation
+            ActivityCompat.requestPermissions(this.getActivity(), new String[]{android.Manifest.permission.CAMERA}, 50);
+        else
+            mCam = Camera.open(0); // 0 = back camera
     }
 
     //Low-pass filter
