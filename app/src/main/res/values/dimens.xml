@@ -12,4 +12,5 @@
 
     <!-- Progressbar specific dimensions -->
     <dimen name="progressbar_size">35.5dp</dimen>
+    <dimen name="profile_picture_size">86dp</dimen>
 </resources>
