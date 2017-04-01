@@ -16,6 +16,8 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -37,6 +39,7 @@ import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.ciux031701.kandidat360degrees.representation.JSONParser;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.ciux031701.kandidat360degrees.representation.RoundImageView;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -180,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.d("MainActivity - Explore", "Permission granted, continuing as usual");
 
             // Starting GoogleAPIClient
+            
 
             // Fetching location
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
