@@ -85,4 +85,10 @@ public class ProfilePanorama {
         this.preview = preview;
     }
 
+    public void setFavorite(boolean favorite){ this.favorite = favorite; }
+
+    public void increaseFavCount() { this.favCount++; }
+
+    public void decreaseFavCount() { this.favCount--; }
+
 }

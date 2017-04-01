@@ -21,6 +21,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.ImageViewFragment;
 import com.ciux031701.kandidat360degrees.MainActivity;
@@ -28,7 +29,13 @@ import com.ciux031701.kandidat360degrees.ProfileFragment;
 import com.ciux031701.kandidat360degrees.R;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
+import com.ciux031701.kandidat360degrees.communication.JReqLikeImage;
+import com.ciux031701.kandidat360degrees.communication.JReqUnLikeImage;
+import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.EOFException;
 import java.io.File;
@@ -90,7 +97,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                     if(i < getCount()) {
                         getItem(i).setPreview(previewDrawable);
                         ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
-                        imageView.setImageDrawable(getItem(position).getPreview());
+                        imageView.setImageDrawable(singlePic.getPreview());
                     }
                 }
             }
@@ -120,19 +127,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
         dateText.setText(singlePic.getDate().substring(0,10));
 
         //Show favstext for the item
-        DecimalFormat df = new DecimalFormat("#.#");
-        df.setRoundingMode(RoundingMode.CEILING);
-
-        int favCount = singlePic.getFavCount();
-        String favString = null;
-        if (favCount >= 1000 && favCount < 1000000) {
-            favString = df.format(favCount / 1000.0) + "k";
-        } else if (favCount >= 1000000) {
-            favString = df.format(favCount / 1000000) + "M";
-        } else{
-            favString = favCount + "";
-        }
-        favCountText.setText(favString);
+        setfavCountText(singlePic.getFavCount(), favCountText);
 
         //show if liked for the item
         if(singlePic.isFavorite()){
@@ -150,14 +145,55 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                                 - Math.round(16 * (getContext().getResources().getDisplayMetrics()
                                     .xdpi / DisplayMetrics.DENSITY_DEFAULT))))) {
 
-                        MainActivity mainActivity = (MainActivity) v.getContext();
+                        /**
+                         * Makes the logged in user to like or unlike a specific image. It returns true if the image
+                         * managed to be liked or unliked.
+                         */
+
                         if(!singlePic.isFavorite()){
-                            boolean isLiked = mainActivity.likeImageID(singlePic.getPanoramaID());
-                            if(isLiked){
-                                Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_clicked);
-                                favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
-                            }
+                            JReqLikeImage likeImageReq = new JReqLikeImage(singlePic.getPanoramaID());
+                            likeImageReq.setJResultListener(new JRequest.JResultListener() {
+                                @Override
+                                public void onHasResult(JSONObject result) {
+                                    boolean error;
+                                    try {
+                                        error = result.getBoolean("error");
+                                    } catch (JSONException e) {
+                                        error = true;
+                                    }
+                                    if(!error){
+                                        Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_clicked);
+                                        favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
+                                        singlePic.setFavorite(true);
+                                        singlePic.increaseFavCount();
+                                        setfavCountText(singlePic.getFavCount(), favCountText);
+                                    } else
+                                        Toast.makeText(getContext(), "Something went wrong with the server, try again later.", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            likeImageReq.sendRequest();
                         } else {
+                            JReqUnLikeImage unLikeImageReq = new JReqUnLikeImage(singlePic.getPanoramaID());
+                            unLikeImageReq.setJResultListener(new JRequest.JResultListener() {
+                                @Override
+                                public void onHasResult(JSONObject result) {
+                                    boolean error;
+                                    try {
+                                        error = result.getBoolean("error");
+                                    } catch (JSONException e) {
+                                        error = true;
+                                    }
+                                    if(!error){
+                                        Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_no_click);
+                                        favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
+                                        singlePic.setFavorite(false);
+                                        singlePic.decreaseFavCount();
+                                        setfavCountText(singlePic.getFavCount(), favCountText);
+                                    } else
+                                        Toast.makeText(getContext(), "Something went wrong with the server, try again later.", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            unLikeImageReq.sendRequest();
                         }
                         return true;
                     }
@@ -171,7 +207,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
             public void onClick(View v) {
                 //TODO: Get the real size image for the selected panorama id
                 //TODO: like below from the DB and add that as parameter to the imageviewfragment
-                ProfilePanorama selectedPanorama = getItem(position);
+                ProfilePanorama selectedPanorama = singlePic;
                 String panoramaID = selectedPanorama.getPanoramaID();
                 System.out.println("PanoramaID: " + panoramaID);
 
@@ -182,6 +218,22 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
 
         //Set image
         return customView;
+    }
+
+    public void setfavCountText(int favCount, TextView favCountText) {
+
+        DecimalFormat df = new DecimalFormat("#.#");
+        df.setRoundingMode(RoundingMode.CEILING);
+
+        String favString = null;
+        if (favCount >= 1000 && favCount < 1000000) {
+            favString = df.format(favCount / 1000.0) + "k";
+        } else if (favCount >= 1000000) {
+            favString = df.format(favCount / 1000000) + "M";
+        } else{
+            favString = favCount + "";
+        }
+        favCountText.setText(favString);
     }
 
 }
