@@ -87,14 +87,5 @@
         android:layout_marginTop="10dp"
         android:visibility="gone" />
 
-    <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        opencv:srcCompat="@android:drawable/ic_menu_upload"
-        android:id="@+id/angleImage"
-        android:layout_alignTop="@+id/backButton"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
 
 </RelativeLayout>

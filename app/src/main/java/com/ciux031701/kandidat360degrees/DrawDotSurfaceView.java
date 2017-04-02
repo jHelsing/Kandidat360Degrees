@@ -127,6 +127,9 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
 
     }
 
+    public double getTargetDegree(){
+        return this.targetDegree;
+    }
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         Rect rectangle = new Rect();

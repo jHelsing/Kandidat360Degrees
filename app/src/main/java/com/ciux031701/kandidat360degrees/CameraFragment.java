@@ -19,6 +19,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -67,7 +68,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private ImageView holdVerticallyImage;
     private ImageButton captureButton;
     private ImageView previewImage;
-    private ImageView angleImage;
 
     private SurfaceView mSurfaceView;
     private DrawDotSurfaceView mSurfaceViewDraw;
@@ -108,6 +108,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private LinkedList<Double> previousAngles;
     private boolean isFirstSensorChanged;
     private boolean timerInProcess;
+    private boolean proximityCheckerInProgress;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -116,7 +117,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
         timerInProcess = false;
         previousAngles = new LinkedList();
-
+        proximityCheckerInProgress = false;
         isVertical = false;
         isFirstSensorChanged = true;
         captureInProgress = false;
@@ -138,7 +139,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         mRotationMatrix = new float[9];
 
         //GUI: buttons & views
-        angleImage = (ImageView) root.findViewById(R.id.angleImage);
         angleProgressBar = (ProgressBar) root.findViewById(R.id.angleProgressBar);
         angleProgressBar.setVisibility(View.GONE);
         captureButton = (ImageButton) root.findViewById(R.id.sendToShareButton);
@@ -170,7 +170,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 //Take a picture
                 captureInProgress = true;
                 angleProgressBar.setVisibility(View.VISIBLE);
-                System.out.println("Startgyrodegree: " + startGyroDegree);
                 backButton.setVisibility(View.GONE);
                 if (mCam != null && isSafeToTakePicture) {
                     //set the flag to false so we don't take two pictures at the same time
@@ -178,7 +177,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     mCam.takePicture(null, null, jpegCallback);
                     nbrOfPicturesTaken++;
                 }
-                if (nbrOfPicturesTaken == 3) {
+                if (nbrOfPicturesTaken == 4) {
                     saveAndMakePanorama();
 
                     args = new Bundle();
@@ -212,12 +211,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         Point center = new Point(centerX, centerY);
         mSurfaceViewDraw.setCenter(center);
 
-        holdVerticallyImage.setVisibility(View.GONE);
-        holdVerticallyText.setVisibility(View.GONE);
-        captureButton.setVisibility(View.VISIBLE);
-        mSurfaceView.setVisibility(View.VISIBLE);
-        mSurfaceViewDraw.setVisibility(View.VISIBLE);
-
         return root;
     }
 
@@ -248,6 +241,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             listOfTakenImages.add(mat);
 
             targetDegree = startGyroDegree + listOfTakenImages.size() * (360 / nbrOfImages);
+            System.out.println("Setting new targetdegree: " +  targetDegree);
             mSurfaceViewDraw.setTargetDegree((int) targetDegree);
             mSurfaceViewDraw.setTargetAcquired(true);
             //Start preview of the camera & set safe to take pictures to true
@@ -360,7 +354,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         });
     }
 
-
     @Override
     public void onPause() {
         super.onPause();
@@ -436,15 +429,46 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     startGyroDegree=currentDegrees;
                 }
 
+                //If the targetangle is the same as current and we dont have a proximity timer started, start one
+                if(!proximityCheckerInProgress && (int)fromDegreeToProgress(currentDegrees)==(int)fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree())){
+
+                    proximityCheckerInProgress=true;
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            //is the current angle close enough to the target angle still?
+                            if ((int)fromDegreeToProgress(currentDegrees) > (int)(fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree())-3) && (int)fromDegreeToProgress(currentDegrees) < (int)(fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree())+3)){
+                                if (mCam != null && isSafeToTakePicture) {
+                                    //close enough
+                                    isSafeToTakePicture = false;
+                                    mCam.takePicture(null, null, jpegCallback);
+                                    nbrOfPicturesTaken++;
+                                }
+                                if (nbrOfPicturesTaken == 4) {
+                                    saveAndMakePanorama();
+
+                                    args = new Bundle();
+                                    args.putString("origin", "camera");
+                                    args.putParcelable("image", resultPanoramaBmp);
+                                    ImageViewFragment fragment = new ImageViewFragment();
+                                    fragment.setArguments(args);
+                                    FragmentManager fragmentManager = getFragmentManager();
+                                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("camera").commit();
+                                }
+                            }
+                            proximityCheckerInProgress=false;
+                        }
+                    }, 1000);//1000 milliseconds check
+                }
+
                 int newProgressAngle = (int)fromDegreeToProgress(currentDegrees);
                 System.out.println("orintation[0]: " + orientation[0] + " orintation[1]: " + orientation[1]);
                 System.out.println("current: " + currentDegrees);
                 System.out.println("progress: " + newProgressAngle);
-                System.out.println("fromorientationtodegrees: " + fromOrientationToDegrees(orientation[0]));
 
                 lastDegree = currentDegrees;
                 mSurfaceViewDraw.setCurrentDegree((int)currentDegrees);
-                angleImage.setRotation(newProgressAngle);
                 angleProgressBar.setProgress(newProgressAngle);
             }
         }
