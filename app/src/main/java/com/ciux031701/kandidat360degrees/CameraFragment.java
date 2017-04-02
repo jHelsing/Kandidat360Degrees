@@ -393,18 +393,41 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     //Sensors:
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
+
         if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
         {
-            if(captureInProgress){
-                // Convert the rotation-vector to a 4x4 matrix.
-                SensorManager.getRotationMatrixFromVector(mRotationMatrix,sensorEvent.values);
-                SensorManager.remapCoordinateSystem(mRotationMatrix,SensorManager.AXIS_X, SensorManager.AXIS_Z,mRotationMatrix);
-                SensorManager.getOrientation(mRotationMatrix, orientation);
+            // Convert the rotation-vector to a 4x4 matrix.
+            SensorManager.getRotationMatrixFromVector(mRotationMatrix,sensorEvent.values);
+            SensorManager.remapCoordinateSystem(mRotationMatrix,SensorManager.AXIS_X, SensorManager.AXIS_Z,mRotationMatrix);
+            SensorManager.getOrientation(mRotationMatrix, orientation);
 
-                // Optionally convert the result from radians to degrees
-                orientation[0] = (float) Math.toDegrees(orientation[0]);
-                orientation[1] = (float) Math.toDegrees(orientation[1]);
-                orientation[2] = (float) Math.toDegrees(orientation[2]);
+            // Optionally convert the result from radians to degrees
+            orientation[0] = (float) Math.toDegrees(orientation[0]);
+            orientation[1] = (float) Math.toDegrees(orientation[1]);
+            orientation[2] = (float) Math.toDegrees(orientation[2]);
+
+            if (orientation[1] > -10 && orientation[1] <15) {
+                if (!isVertical) {
+                    isVertical = true;
+                    holdVerticallyImage.setVisibility(View.GONE);
+                    holdVerticallyText.setVisibility(View.GONE);
+                    captureButton.setVisibility(View.VISIBLE);
+                    mSurfaceView.setVisibility(View.VISIBLE);
+                    mSurfaceViewDraw.setVisibility(View.VISIBLE);
+                }
+
+            } else {
+                if (isVertical) {
+                    isVertical = false;
+                    holdVerticallyImage.setVisibility(View.VISIBLE);
+                    holdVerticallyText.setVisibility(View.VISIBLE);
+                    captureButton.setVisibility(View.GONE);
+                    mSurfaceView.setVisibility(View.GONE);
+                    mSurfaceViewDraw.setVisibility(View.GONE);
+                }
+            }
+
+            if(captureInProgress&&isVertical){
 
                 currentDegrees = fromOrientationToDegrees(orientation[0]);
 
@@ -425,10 +448,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 angleProgressBar.setProgress(newProgressAngle);
             }
         }
-
-
-
-        /**/
     }
 
     public double fromOrientationToDegrees(double orientation){
