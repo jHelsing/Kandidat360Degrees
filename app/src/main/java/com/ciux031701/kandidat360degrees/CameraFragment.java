@@ -249,7 +249,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
             targetDegree = startGyroDegree + listOfTakenImages.size() * (360 / nbrOfImages);
             mSurfaceViewDraw.setTargetDegree((int) targetDegree);
-
+            mSurfaceViewDraw.setTargetAcquired(true);
             //Start preview of the camera & set safe to take pictures to true
             mCam.startPreview();
             isSafeToTakePicture = true;
@@ -406,48 +406,37 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 orientation[1] = (float) Math.toDegrees(orientation[1]);
                 orientation[2] = (float) Math.toDegrees(orientation[2]);
 
+                currentDegrees = fromOrientationToDegrees(orientation[0]);
 
-                currentDegrees = fromSensorToDegrees(orientation[0]);
-                System.out.println("orintation[1]: " + orientation[1]);
+                if(isFirstSensorChanged){
+                    isFirstSensorChanged=false;
+                    startGyroDegree=currentDegrees;
+                }
+
+                int newProgressAngle = (int)fromDegreeToProgress(currentDegrees);
+                System.out.println("orintation[0]: " + orientation[0] + " orintation[1]: " + orientation[1]);
+                System.out.println("current: " + currentDegrees);
+                System.out.println("progress: " + newProgressAngle);
+                System.out.println("fromorientationtodegrees: " + fromOrientationToDegrees(orientation[0]));
+
                 lastDegree = currentDegrees;
-                int newProgressAngle = (int)fromDegreeToProgress(lastDegree);
-
-
-                lastDegree = orientation[0];
-                //int newProgressAngle = (int)fromDegreeToProgress(lastDegree);
-                angleImage.setRotation(orientation[0]);
-                angleProgressBar.setProgress((int)orientation[0]);
+                mSurfaceViewDraw.setCurrentDegree((int)currentDegrees);
+                angleImage.setRotation(newProgressAngle);
+                angleProgressBar.setProgress(newProgressAngle);
             }
         }
 
 
 
-        /*if (orientation[1] < 1.75 && orientation[1] > 1.25 || orientation[1] < -1.25 && orientation[1] > -1.75) {
-            if (!isVertical) {
-                isVertical = true;
-                if (!captureInProgress) {
-                    holdVerticallyImage.setVisibility(View.GONE);
-                    holdVerticallyText.setVisibility(View.GONE);
-                    captureButton.setVisibility(View.VISIBLE);
-                    mSurfaceView.setVisibility(View.VISIBLE);
-                    mSurfaceViewDraw.setVisibility(View.VISIBLE);
-                }
-            }
-
-        } else {
-            if (isVertical) {
-                isVertical = false;
-                if (!captureInProgress) {
-                    holdVerticallyImage.setVisibility(View.VISIBLE);
-                    holdVerticallyText.setVisibility(View.VISIBLE);
-                    captureButton.setVisibility(View.GONE);
-                    mSurfaceView.setVisibility(View.GONE);
-                    mSurfaceViewDraw.setVisibility(View.GONE);
-                }
-            }
-        }*/
+        /**/
     }
 
+    public double fromOrientationToDegrees(double orientation){
+        if(orientation<0){
+            return 360-Math.abs(orientation);
+        }else
+            return orientation;
+    }
 
     public double fromDegreeToProgress(double degree) {
         if (degree >= startGyroDegree) {
