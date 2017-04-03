@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -47,6 +48,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.ciux031701.kandidat360degrees.communication.Session;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 
 import org.json.JSONArray;
@@ -81,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //Retrieves username parameter from login
         b = getIntent().getExtras();
         String userName = ""; // or other values
-        if(b != null)
+        if (b != null)
             userName = b.getString("username");
 
 
@@ -108,11 +110,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mDrawerList.addHeaderView(drawerHeader, null, false);
         //mDrawerList.addFooterView(drawerFooter, null, false);
 
-        mDrawerList.setAdapter(new DrawerAdapter(this,getApplicationContext(), mListOptions));
+        mDrawerList.setAdapter(new DrawerAdapter(this, getApplicationContext(), mListOptions));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         showExploreView();
     }
+
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
@@ -133,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Fragment fragment = null;
             Class fragmentClass;
 
-            switch(position) {
+            switch (position) {
                 case 0:
                     showExploreView();
                     break;
@@ -178,21 +181,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    public void showExploreView(){
+    public void showExploreView() {
         if (canAccessLocation()) {
             // We have access to the user's location, getting last known location
             // and showing the explore view
             Log.d("MainActivity - Explore", "Permission granted, continuing as usual");
 
-            // Starting GoogleAPIClient
-            
-
             // Fetching location
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            Location location = null;
+            LatLng latLng = null;
+            try {
+                location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            } catch (SecurityException e) {
+                Log.d("MainActivity - Explore", "Missing requirements, using default location");
+                latLng = new LatLng(57.4, 12);
+            }
+
+            ArrayList<ProfilePanorama> panoramas = new ArrayList<>();
 
             // Show fragment
             ExploreFragment fragment = new ExploreFragment();
             FragmentManager fragmentManager = getFragmentManager();
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("userLocation", latLng);
+            bundle.putSerializable("panoramaLocations", panoramas);
             fragment.setArguments(setArgs);
             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
             setTitle("Explore");
