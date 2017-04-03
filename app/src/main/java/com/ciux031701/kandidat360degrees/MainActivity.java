@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (canAccessLocation()) {
             // We have access to the user's location, getting last known location
             // and showing the explore view
-            Log.d("MainActivity - Explore", "Permission granted, continuing as usual");
+            /**Log.d("MainActivity - Explore", "Permission granted, continuing as usual");
 
             // Fetching location
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -200,13 +200,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
             ArrayList<ProfilePanorama> panoramas = new ArrayList<>();
-
+            **/
             // Show fragment
             ExploreFragment fragment = new ExploreFragment();
             FragmentManager fragmentManager = getFragmentManager();
             Bundle bundle = new Bundle();
-            bundle.putParcelable("userLocation", latLng);
-            bundle.putSerializable("panoramaLocations", panoramas);
+            //bundle.putParcelable("userLocation", latLng);
+            //bundle.putSerializable("panoramaLocations", panoramas);
             fragment.setArguments(setArgs);
             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
             setTitle("Explore");
