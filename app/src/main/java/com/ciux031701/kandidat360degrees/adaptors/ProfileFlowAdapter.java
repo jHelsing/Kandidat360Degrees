@@ -34,6 +34,7 @@ import com.ciux031701.kandidat360degrees.communication.JReqUnLikeImage;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 
+import org.apache.commons.net.pop3.POP3SClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -66,48 +67,8 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
         final TextView favCountText = (TextView) customView.findViewById(R.id.favCounter);
         TextView dateText = (TextView) customView.findViewById(R.id.dateText);
 
-        //Start fetching a preview for the item
-        Intent intent =  new Intent(getContext(), DownloadService.class);
-        intent.putExtra("IMAGETYPE", ImageType.PREVIEW);
-        intent.putExtra("IMAGEID", getItem(position).getPanoramaID());
-        intent.putExtra("TYPE", "DOWNLOAD");
-        intent.setAction(DownloadService.NOTIFICATION + getItem(position).getPanoramaID() + ".jpg");
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(DownloadService.NOTIFICATION + getItem(position).getPanoramaID() + ".jpg");
-        getContext().registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d("Yoo", "Yoo");
-                if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
-                    Log.d("Profile", "Preview (" + intent.getStringExtra("IMAGEID") + ") found and results from download are OK.");
-                    String imageID = intent.getStringExtra("IMAGEID");
-                    String path = context.getFilesDir() + "/previews/"
-                            + imageID;
-                    Drawable previewDrawable = Drawable.createFromPath(path);
-
-                    context.unregisterReceiver(this);
-
-                    // Add the image to the correct panorama in the arraylist
-
-                    int i=0;
-                    Log.d("Bilder", getItem(i).getPanoramaID() + "");
-                    Log.d("Bilder", imageID + "");
-                    while (i < getCount() && !(getItem(i).getPanoramaID() + ".jpg").equals(imageID))
-                        i++;
-                    if(i < getCount()) {
-                        getItem(i).setPreview(previewDrawable);
-                        ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
-                        imageView.setImageDrawable(getItem(i).getPreview());
-                    }
-
-                    File file = new File(path);
-                    if (file.delete()) {
-                        Log.d("Bilder", "Preview image has been deleted :" + imageID);
-                    }
-                }
-            }
-        }, filter);
-        getContext().startService(intent);
+        //Show preview
+        imageView.setImageDrawable(getItem(position).getPreview());
 
         //Show adress for the item
         Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());

@@ -18,7 +18,9 @@ import android.util.Log;
 import android.view.*;
 import android.widget.*;
 import com.ciux031701.kandidat360degrees.adaptors.ProfileFlowAdapter;
+import com.ciux031701.kandidat360degrees.communication.DownloadMultiplePreviewsService;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
+import com.ciux031701.kandidat360degrees.communication.FTPInfo;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.communication.JReqIsFriend;
 import com.ciux031701.kandidat360degrees.communication.JReqRemoveFriend;
@@ -99,9 +101,6 @@ public class ProfileFragment extends Fragment {
         // 100% sure of what it contains.
         pictures = (ArrayList<ProfilePanorama>) getArguments().getSerializable("images");
         pictureListView = (ListView) root.findViewById(R.id.profilePictureListView);
-        profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
-        pictureListView.setAdapter(profileFlowAdapter);
-        pictureListView.setOnItemClickListener(new FlowItemClickListener());
 
         return root;
     }
@@ -138,6 +137,45 @@ public class ProfileFragment extends Fragment {
         }
 
         fetchMap();
+    }
+
+    /**
+     * Starts to fetch all previews of the user from the server.
+     */
+    private void loadPreviews() {
+        Intent intent =  new Intent(getActivity(), DownloadMultiplePreviewsService.class);
+        intent.putParcelableArrayListExtra("panoramaArray", pictures);
+        intent.setAction(DownloadMultiplePreviewsService.NOTIFICATION);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DownloadMultiplePreviewsService.NOTIFICATION);
+        getActivity().registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.d("Profile", "OnReceive");
+                if (intent.getIntExtra("result", -100)  == Activity.RESULT_OK) {
+                    Log.d("Profile", "Previews found and results from download are OK.");
+                    pictures = intent.getParcelableArrayListExtra("panoramaArray");
+
+                    for(int i=0; i<pictures.size(); i++) {
+                        String panoramaID = pictures.get(i).getPanoramaID();
+                        File localFile = new File(getActivity().getFilesDir() + FTPInfo.PREVIEW_LOCAL_LOCATION + panoramaID + FTPInfo.FILETYPE);
+                        Drawable preview = Drawable.createFromPath(localFile.getPath());
+                        pictures.get(i).setPreview(preview);
+
+                        if (localFile.delete())
+                            Log.d("FTP", "Preview image has been deleted :" + panoramaID);
+                        else
+                            Log.d("FTP", "Preview image has not been deleted :" + panoramaID);
+                    }
+
+                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
+                    pictureListView.setAdapter(profileFlowAdapter);
+                    pictureListView.setOnItemClickListener(new FlowItemClickListener());
+                }
+                getActivity().unregisterReceiver(this);
+            }
+        }, filter);
+        getActivity().startService(intent);
     }
 
     /**
@@ -340,6 +378,7 @@ public class ProfileFragment extends Fragment {
                 Log.d("Profile", "Profile image has been deleted");
             }
             context.unregisterReceiver(this);
+            loadPreviews();
         }
     }
 

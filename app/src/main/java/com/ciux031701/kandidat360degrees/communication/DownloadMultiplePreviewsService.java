@@ -39,10 +39,9 @@ public class DownloadMultiplePreviewsService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         // Create the correct path for the file to be downloaded, both on the server and locally
-        String localFilePath = FTPInfo.PREVIEW_LOCAL_LOCATION;
         String serverFilePath = FTPInfo.PREVIEW_SERVER_LOCATION;
 
-        ArrayList<ProfilePanorama> panoramaList = (ArrayList<ProfilePanorama>) intent.getSerializableExtra("panoramaArray");
+        ArrayList<ProfilePanorama> panoramaList = intent.getParcelableArrayListExtra("panoramaArray");
 
         // Start up FTP connection and connect to the FTP server
         FTPClient ftpClient = new FTPClient();
@@ -122,9 +121,6 @@ public class DownloadMultiplePreviewsService extends IntentService {
                 Log.d("FTP", "Failed to fetch file from FTP-server: " + ftpClient.getReplyString());
                 publishResults(Activity.RESULT_CANCELED, "8");
             }
-
-            Drawable preview = Drawable.createFromPath(localFile.getPath());
-            panoramaList.get(i).setPreview(preview);
         }
         try {
             // Log out and disconnect from server so we do not take up unnecessary connections at server.
@@ -148,16 +144,16 @@ public class DownloadMultiplePreviewsService extends IntentService {
      */
     private void publishResults(int result, String error) {
         Intent intent = new Intent(NOTIFICATION);
-        intent.putExtra("RESULT", result);
-        intent.putExtra("ERROR",error);
+        intent.putExtra("result", result);
+        intent.putExtra("error",error);
         sendBroadcast(intent);
         this.stopSelf();
     }
 
     private void publishResults(int result, ArrayList<ProfilePanorama> panoramaList) {
         Intent intent = new Intent(NOTIFICATION);
-        intent.putExtra("RESULT", result);
-        intent.putExtra("PANORAMAS", panoramaList);
+        intent.putExtra("result", result);
+        intent.putParcelableArrayListExtra("panoramaArray", panoramaList);
         sendBroadcast(intent);
         this.stopSelf();
     }
