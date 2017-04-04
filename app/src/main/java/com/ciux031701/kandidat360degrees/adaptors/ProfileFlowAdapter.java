@@ -194,8 +194,12 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
         String favString = null;
         if (favCount >= 1000 && favCount < 1000000) {
             favString = df.format(favCount / 1000.0) + "k";
+            if(favString.contains("."))
+                favString = favString.substring(0,favString.indexOf('.')) + "k";
         } else if (favCount >= 1000000) {
             favString = df.format(favCount / 1000000) + "M";
+            if(favString.contains("."))
+                favString = favString.substring(0,favString.indexOf('.')) + "M";
         } else{
             favString = favCount + "";
         }

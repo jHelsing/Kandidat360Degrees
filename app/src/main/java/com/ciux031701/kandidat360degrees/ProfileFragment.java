@@ -252,29 +252,12 @@ public class ProfileFragment extends Fragment {
 
                 if (Session.getUser().equalsIgnoreCase(username)) {
                     menu.add(R.string.upload_profile_picture);
+                    popupMenu.show();
                 } else {
-                    JReqIsFriend jReqIsFriend = new JReqIsFriend(username);
-                    jReqIsFriend.setJResultListener(
-                            new JRequest.JResultListener() {
-                                @Override
-                                public void onHasResult(JSONObject result) {
-                                    try{
-                                        boolean error = result.getBoolean("error");
-                                        if(!error){
-                                            boolean isFriend = result.getBoolean("isfriend");
-                                            if(isFriend)
-                                                menu.add("Remove Friend");
-                                            else
-                                                menu.add("Add Friend");
-                                            popupMenu.show();
-                                        }
-                                    }catch(JSONException je){
 
-                                    }
-                                }
-                            }
-                    );
-                    jReqIsFriend.sendRequest();
+                    menu.add("Remove Friend");
+                    menu.add("Add Friend");
+                    popupMenu.show();
                 }
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
