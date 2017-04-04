@@ -88,8 +88,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     private ArrayList<ProfilePanorama> imagesToShow;
     private int lastSearchStringLength;
 
-    private Location lastKnownLocation;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_explore, container, false);
@@ -332,6 +330,9 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                     public void onInfoWindowClick(Marker marker) {
                         //Go to full screen view
                         //TODO: get fullscreen image from DB and send as argument
+
+                        
+
                         Bundle args = new Bundle();
                         args.putString("origin", "explore");
 
@@ -344,11 +345,10 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
                 ((MainActivity) getActivity()).loadMapStyling(googleMap);
 
-
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
 
                 // For dropping a marker at a point on the Map
-                LatLng gothenburg = new LatLng(57.4, 12);
+                LatLng gothenburg = new LatLng(57.688350, 11.979428);
                 googleMap.addMarker(new MarkerOptions().position(gothenburg).title("Here we go bois")
                         .snippet("its happening!").icon(BitmapDescriptorFactory
                                 .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));

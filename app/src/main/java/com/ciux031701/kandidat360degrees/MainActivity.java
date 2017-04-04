@@ -182,37 +182,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void showExploreView() {
-        if (canAccessLocation()) {
-            // We have access to the user's location, getting last known location
-            // and showing the explore view
-            /**Log.d("MainActivity - Explore", "Permission granted, continuing as usual");
-
-            // Fetching location
-            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            Location location = null;
-            LatLng latLng = null;
-            try {
-                location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                latLng = new LatLng(location.getLatitude(), location.getLongitude());
-            } catch (SecurityException e) {
-                Log.d("MainActivity - Explore", "Missing requirements, using default location");
-                latLng = new LatLng(57.4, 12);
-            }
-
-            ArrayList<ProfilePanorama> panoramas = new ArrayList<>();
-            **/
-            // Show fragment
-            ExploreFragment fragment = new ExploreFragment();
-            FragmentManager fragmentManager = getFragmentManager();
-            Bundle bundle = new Bundle();
-            //bundle.putParcelable("userLocation", latLng);
-            //bundle.putSerializable("panoramaLocations", panoramas);
-            fragment.setArguments(setArgs);
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
-            setTitle("Explore");
-        } else {
-            // We do not get access to location from the user, terminating app
-        }
+        ExploreFragment fragment = new ExploreFragment();
+        FragmentManager fragmentManager = getFragmentManager();
+        Bundle bundle = new Bundle();
+        fragment.setArguments(setArgs);
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
+        setTitle("Explore");
     }
 
     private void destroySession(){
@@ -387,32 +362,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }, filter);
         startService(intent);
-    }
-
-    private boolean canAccessLocation() {
-        // Check if we have persmission to use GPS location
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            // Check Permissions Now
-            final int REQUEST_LOCATION = 2;
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // Display UI and wait for user interaction
-                Log.d("MainActivity - Explore", "shouldShowRequestPermissionRaionale is true");
-            } else {
-                ActivityCompat.requestPermissions(
-                        this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
-                        REQUEST_LOCATION);
-                Log.d("MainActivity - Explore", "shouldShowRequestPermissionRaionale is false. Requesting persmission");
-            }
-        } else {
-            return true;
-        }
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-            return true;
-
-        return false;
     }
 }
