@@ -29,6 +29,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     private ShapeDrawable aimCircle;
     private int targetDegree;
     private Integer currentDegree;
+    private int currentVerticalDegree;
     private int radius = 40;
     private int unfilledRadius =0;
     private int width;
@@ -106,7 +107,17 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     }
     private Rect getNewBounds(int dDeg){
         int dPixel = Math.round(dDeg*degToPixFactor);
-        return new Rect(center.x-dPixel-radius,center.y-radius,center.x+radius-dPixel,center.y+radius);
+        int dPixelVertical = Math.round(getVerticalOffset(currentVerticalDegree)*degToPixFactor);
+        return new Rect(center.x-dPixel-radius,center.y-dPixelVertical-radius,center.x+radius-dPixel,center.y+radius-dPixelVertical);
+    }
+
+    private int getVerticalOffset(int degree){
+        if(degree>180){
+            //*-1 is how we define whats is up and down
+            return (360-degree)*-1;
+        }else{
+            return degree;
+        }
     }
 
     public void setTargetDegree(int targetDegree) {
@@ -116,6 +127,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     public void setCurrentDegree(int currentDegree) {
         this.currentDegree = currentDegree;
     }
+
 
     public void setTargetAcquired(boolean targetAcquired) {
         this.targetAcquired = targetAcquired;
@@ -151,5 +163,9 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     public void surfaceDestroyed(SurfaceHolder holder) {
         stopThread();
         drawThread = null;
+    }
+
+    public void setCurrentVerticalDegree(int currentVerticalDegree) {
+        this.currentVerticalDegree = currentVerticalDegree;
     }
 }

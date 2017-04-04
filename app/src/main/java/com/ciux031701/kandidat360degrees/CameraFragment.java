@@ -399,7 +399,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             orientation[1] = (float) Math.toDegrees(orientation[1]);
             orientation[2] = (float) Math.toDegrees(orientation[2]);
 
-            if (orientation[1] > -10 && orientation[1] <15) {
+            if (orientation[1] > -12 && orientation[1] <12) {
                 if (!isVertical) {
                     isVertical = true;
                     holdVerticallyImage.setVisibility(View.GONE);
@@ -469,6 +469,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
                 lastDegree = currentDegrees;
                 mSurfaceViewDraw.setCurrentDegree((int)currentDegrees);
+                mSurfaceViewDraw.setCurrentVerticalDegree((int)fromOrientationToDegrees(orientation[1]));
                 angleProgressBar.setProgress(newProgressAngle);
             }
         }
