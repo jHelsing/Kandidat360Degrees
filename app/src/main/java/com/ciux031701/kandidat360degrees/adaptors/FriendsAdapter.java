@@ -209,6 +209,7 @@ public class FriendsAdapter extends RecyclerView.Adapter {
 
             titleTextView = (TextView) itemView.findViewById(R.id.friends_list_title);
             thumbnailImageView = (ImageView) itemView.findViewById(R.id.friends_list_thumbnail);
+
         }
     }
 

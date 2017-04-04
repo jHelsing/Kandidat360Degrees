@@ -4,21 +4,30 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Switch;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.adaptors.ShareAdapter;
@@ -36,17 +45,19 @@ public class ShareFragment extends Fragment {
     private DrawerLayout mDrawerLayout;
     private ImageView previewPic;
     private Button shareButton;
-    private Switch publicSwitch;
+    private MenuItem earthButton;
     private final Friends friendList = new Friends();
     private RecyclerView mRecyclerView;
     private boolean firstView = false;
+    private boolean makePublic = false;
+    private Menu toolbarMenu;
 
     private Bundle args;
     private Bitmap pictureInBitmap;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View root = inflater.inflate(R.layout.fragment_share, container, false);
-
+        setHasOptionsMenu(true);
         //The toolbar:
         toolbar = (Toolbar) root.findViewById(R.id.tool_bar);
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
@@ -62,9 +73,8 @@ public class ShareFragment extends Fragment {
         });
 
         shareButton = (Button)root.findViewById(R.id.shareButton);
-        publicSwitch = (Switch)root.findViewById(R.id.publicSwitch);
+
         addListenerToShareButton(shareButton);
-        addListenerToSwitch(publicSwitch);
 
         //The picture to be shared:
         args = getArguments();
@@ -76,19 +86,38 @@ public class ShareFragment extends Fragment {
         //The friends list:
         mRecyclerView = (RecyclerView) root.findViewById(R.id.share_friends_recycle_view);
 
-        if(!firstView){
-            //TODO: Retrieve data from database to friendList instead!
-            //Test for implementing a sorted arraylist that is sorted by names
-
-
-            firstView = true;
-        }
 
         ShareAdapter adapter = new ShareAdapter(getActivity());
         mRecyclerView.setAdapter(adapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         return root;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.toolmenu_share, menu);
+        this.toolbarMenu = menu;
+        earthButton = menu.findItem(R.id.sharePublic);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.sharePublic:
+                if (makePublic) {
+                    toolbarMenu.getItem(0).setIcon(R.drawable.temp_earthblack);
+                    makePublic = false;
+
+                } else {
+                    toolbarMenu.getItem(0).setIcon(R.drawable.temp_earthwhite);
+                    makePublic = true;
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void addListenerToShareButton(Button shareButton) {
@@ -106,20 +135,6 @@ public class ShareFragment extends Fragment {
                 fragmentTransaction.replace(R.id.content_frame, fragment);
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
-            }
-        });
-    }
-
-    private void addListenerToSwitch(Switch publicSwitch) {
-        publicSwitch.setChecked(true);
-        publicSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked){
-                    //Switch is ON
-                }else{
-                    //Switch is OFF
-                }
             }
         });
     }
