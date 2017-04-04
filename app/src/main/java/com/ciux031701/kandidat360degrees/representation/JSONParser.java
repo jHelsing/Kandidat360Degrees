@@ -1,5 +1,10 @@
 package com.ciux031701.kandidat360degrees.representation;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+
+import com.ciux031701.kandidat360degrees.R;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -43,9 +48,9 @@ public class JSONParser {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-        ProfilePanorama pp = new ProfilePanorama(imageID, favorite, uploadDate,
-                latitude, longitude, favCount, viewCount, publicImage, description);
+        ProfilePanorama pp = new ProfilePanorama(imageID, viewCount, favorite, uploadDate,
+                latitude, longitude, favCount, publicImage, description);
         return pp;
+
     }
 }

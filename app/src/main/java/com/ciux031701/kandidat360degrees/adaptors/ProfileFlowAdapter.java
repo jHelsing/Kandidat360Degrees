@@ -34,6 +34,7 @@ import com.ciux031701.kandidat360degrees.communication.JReqUnLikeImage;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 
+import org.apache.commons.net.pop3.POP3SClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -58,7 +59,6 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
     @Override
     public View getView(final int position, final View convertView, final ViewGroup parent){
 
-        final ProfilePanorama singlePic = getItem(position);
         LayoutInflater inflater = LayoutInflater.from(getContext());
         final View customView = inflater.inflate(R.layout.picture_profile_layout,parent,false);
 
@@ -67,47 +67,13 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
         final TextView favCountText = (TextView) customView.findViewById(R.id.favCounter);
         TextView dateText = (TextView) customView.findViewById(R.id.dateText);
 
-        //Start fetching a preview for the item
-        Intent intent =  new Intent(getContext(), DownloadService.class);
-        intent.putExtra("IMAGETYPE", ImageType.PREVIEW);
-        intent.putExtra("IMAGEID", singlePic.getPanoramaID());
-        intent.putExtra("TYPE", "DOWNLOAD");
-        intent.setAction(DownloadService.NOTIFICATION + singlePic.getPanoramaID() + ".jpg");
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(DownloadService.NOTIFICATION + singlePic.getPanoramaID() + ".jpg");
-        getContext().registerReceiver(new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
-                    Log.d("Profile", "Preview (" + intent.getStringExtra("IMAGEID") + ") found and results from download are OK.");
-                    String imageID = intent.getStringExtra("IMAGEID");
-                    String path = context.getFilesDir() + "/previews/"
-                            + imageID;
-                    Drawable previewDrawable = Drawable.createFromPath(path);
-
-                    context.unregisterReceiver(this);
-
-                    // Add the image to the correct panorama in the arraylist
-
-                    int i=0;
-                    Log.d("Bilder", getItem(i).getPanoramaID() + "");
-                    Log.d("Bilder", imageID + "");
-                    while (i < getCount() && !(getItem(i).getPanoramaID() + ".jpg").equals(imageID))
-                        i++;
-                    if(i < getCount()) {
-                        getItem(i).setPreview(previewDrawable);
-                        ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
-                        imageView.setImageDrawable(singlePic.getPreview());
-                    }
-                }
-            }
-        }, filter);
-        getContext().startService(intent);
+        //Show preview
+        imageView.setImageDrawable(getItem(position).getPreview());
 
         //Show adress for the item
         Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
-        double latitude = Double.parseDouble(singlePic.getLatitude());
-        double longitude = Double.parseDouble(singlePic.getLongitude());
+        double latitude = Double.parseDouble(getItem(position).getLatitude());
+        double longitude = Double.parseDouble(getItem(position).getLongitude());
         try {
             List<Address> address = geocoder.getFromLocation(latitude, longitude, 1);
             String city;
@@ -124,13 +90,13 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
         }
 
         //Show date for the item
-        dateText.setText(singlePic.getDate().substring(0,10));
+        dateText.setText(getItem(position).getDate().substring(0,10));
 
         //Show favstext for the item
-        setfavCountText(singlePic.getFavCount(), favCountText);
+        setfavCountText(getItem(position).getFavCount(), favCountText);
 
         //show if liked for the item
-        if(singlePic.isFavorite()){
+        if(getItem(position).isFavorite()){
             Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_clicked);
             favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
         }
@@ -150,8 +116,8 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                          * managed to be liked or unliked.
                          */
 
-                        if(!singlePic.isFavorite()){
-                            JReqLikeImage likeImageReq = new JReqLikeImage(singlePic.getPanoramaID());
+                        if(!getItem(position).isFavorite()){
+                            JReqLikeImage likeImageReq = new JReqLikeImage(getItem(position).getPanoramaID());
                             likeImageReq.setJResultListener(new JRequest.JResultListener() {
                                 @Override
                                 public void onHasResult(JSONObject result) {
@@ -164,16 +130,16 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                                     if(!error){
                                         Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_clicked);
                                         favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
-                                        singlePic.setFavorite(true);
-                                        singlePic.increaseFavCount();
-                                        setfavCountText(singlePic.getFavCount(), favCountText);
+                                        getItem(position).setFavorite(true);
+                                        getItem(position).increaseFavCount();
+                                        setfavCountText(getItem(position).getFavCount(), favCountText);
                                     } else
                                         Toast.makeText(getContext(), "Something went wrong with the server, try again later.", Toast.LENGTH_SHORT).show();
                                 }
                             });
                             likeImageReq.sendRequest();
                         } else {
-                            JReqUnLikeImage unLikeImageReq = new JReqUnLikeImage(singlePic.getPanoramaID());
+                            JReqUnLikeImage unLikeImageReq = new JReqUnLikeImage(getItem(position).getPanoramaID());
                             unLikeImageReq.setJResultListener(new JRequest.JResultListener() {
                                 @Override
                                 public void onHasResult(JSONObject result) {
@@ -186,9 +152,9 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                                     if(!error){
                                         Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_no_click);
                                         favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
-                                        singlePic.setFavorite(false);
-                                        singlePic.decreaseFavCount();
-                                        setfavCountText(singlePic.getFavCount(), favCountText);
+                                        getItem(position).setFavorite(false);
+                                        getItem(position).decreaseFavCount();
+                                        setfavCountText(getItem(position).getFavCount(), favCountText);
                                     } else
                                         Toast.makeText(getContext(), "Something went wrong with the server, try again later.", Toast.LENGTH_SHORT).show();
                                 }
@@ -207,7 +173,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
             public void onClick(View v) {
                 //TODO: Get the real size image for the selected panorama id
                 //TODO: like below from the DB and add that as parameter to the imageviewfragment
-                ProfilePanorama selectedPanorama = singlePic;
+                ProfilePanorama selectedPanorama = getItem(position);
                 String panoramaID = selectedPanorama.getPanoramaID();
                 System.out.println("PanoramaID: " + panoramaID);
 
