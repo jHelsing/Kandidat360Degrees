@@ -2,9 +2,13 @@ package com.ciux031701.kandidat360degrees;
 
 import android.*;
 import android.Manifest;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -20,6 +24,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -37,6 +42,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.adaptors.ExploreSearchAdapter;
+import com.ciux031701.kandidat360degrees.communication.DownloadService;
+import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdate;
@@ -54,6 +61,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -292,6 +300,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             lat = lat + offset;
             lng = lng + offset;
             MyItem offsetItem = new MyItem(lat, lng);
+            offsetItem.setTitle("111");
             mClusterManager.addItem(offsetItem);
         }
     }
@@ -329,17 +338,47 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                     @Override
                     public void onInfoWindowClick(Marker marker) {
                         //Go to full screen view
-                        //TODO: get fullscreen image from DB and send as argument
+                        final String imageID = marker.getTitle();
+                        if (imageID == null || imageID.equals("Your position"))
+                            return;
 
-                        
+                        Intent intent =  new Intent(getActivity(), DownloadService.class);
+                        intent.putExtra("IMAGETYPE", ImageType.PANORAMA);
+                        intent.putExtra("IMAGEID", imageID);
+                        intent.setAction(DownloadService.NOTIFICATION + imageID + ".jpg");
+                        IntentFilter filter = new IntentFilter();
+                        filter.addAction(DownloadService.NOTIFICATION + imageID + ".jpg");
+                        getActivity().registerReceiver(new BroadcastReceiver() {
+                            @Override
+                            public void onReceive(Context context, Intent intent) {
+                                if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
+                                    Log.d("Explore", "Panorama image found and results from download are OK.");
 
-                        Bundle args = new Bundle();
-                        args.putString("origin", "explore");
+                                    String path = context.getFilesDir() + "/panoramas/"
+                                            + imageID + ".jpg";
+                                    Drawable panoramaImage = Drawable.createFromPath(path);
 
-                        ImageViewFragment fragment = new ImageViewFragment();
-                        fragment.setArguments(args);
-                        FragmentManager fragmentManager = getFragmentManager();
-                        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
+                                    File file = new File(path);
+                                    if (file.delete()) {
+                                        Log.d("Explore", "Panorama image has been deleted");
+                                    }
+                                    context.unregisterReceiver(this);
+
+                                    Bundle args = new Bundle();
+                                    args.putString("origin", "Explore");
+                                    args.putString("imageid", imageID);
+                                    ArrayList<Drawable> arrayList = new ArrayList<Drawable>();
+                                    arrayList.add(panoramaImage);
+                                    args.putSerializable("panorama", arrayList);
+                                    ImageViewFragment fragment = new ImageViewFragment();
+                                    fragment.setArguments(args);
+                                    FragmentManager fragmentManager = getFragmentManager();
+                                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
+                                }
+                            }
+                        }, filter);
+                        getActivity().startService(intent);
+
                     }
                 });
 
@@ -347,13 +386,18 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
 
-                // For dropping a marker at a point on the Map
+                // Set default position
                 LatLng gothenburg = new LatLng(57.688350, 11.979428);
-                googleMap.addMarker(new MarkerOptions().position(gothenburg).title("Here we go bois")
-                        .snippet("its happening!").icon(BitmapDescriptorFactory
-                                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
-                // For zooming automatically to the location of the marker
-                CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(12).build();
+                MarkerOptions position = new MarkerOptions();
+                position.position(gothenburg);
+                position.title("Your position");
+                position.snippet("Default position");
+                position.icon(BitmapDescriptorFactory
+                        .defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+                googleMap.addMarker(position);
+
+                // Zoom automatically to the default position
+                CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(10).build();
                 googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
                 // TODO load all images from imagesToShow and show them on map
