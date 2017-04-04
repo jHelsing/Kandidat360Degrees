@@ -167,28 +167,16 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Take a picture
-                captureInProgress = true;
-                angleProgressBar.setVisibility(View.VISIBLE);
-                backButton.setVisibility(View.GONE);
-                if (mCam != null && isSafeToTakePicture) {
-                    //set the flag to false so we don't take two pictures at the same time
-                    isSafeToTakePicture = false;
-                    mCam.takePicture(null, null, jpegCallback);
-                    nbrOfPicturesTaken++;
-                }
-                if (nbrOfPicturesTaken == 4) {
+                if(captureInProgress){
                     saveAndMakePanorama();
-
-                    args = new Bundle();
-                    args.putString("origin", "camera");
-                    args.putParcelable("image", resultPanoramaBmp);
-                    ImageViewFragment fragment = new ImageViewFragment();
-                    fragment.setArguments(args);
-                    FragmentManager fragmentManager = getFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("camera").commit();
+                    sendPanoramaToImageView();
+                }else {
+                    captureInProgress = true;
+                    captureButton.setImageResource(R.drawable.temp_check_black);
+                    angleProgressBar.setVisibility(View.VISIBLE);
+                    backButton.setVisibility(View.GONE);
+                    takePicture();
                 }
-
             }
         });
 
@@ -439,22 +427,12 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                         public void run() {
                             //is the current angle close enough to the target angle still?
                             if ((int)fromDegreeToProgress(currentDegrees) > (int)(fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree())-3) && (int)fromDegreeToProgress(currentDegrees) < (int)(fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree())+3)){
-                                if (mCam != null && isSafeToTakePicture) {
-                                    //close enough
-                                    isSafeToTakePicture = false;
-                                    mCam.takePicture(null, null, jpegCallback);
-                                    nbrOfPicturesTaken++;
-                                }
-                                if (nbrOfPicturesTaken == 4) {
-                                    saveAndMakePanorama();
+                                //close enough
+                                takePicture();
 
-                                    args = new Bundle();
-                                    args.putString("origin", "camera");
-                                    args.putParcelable("image", resultPanoramaBmp);
-                                    ImageViewFragment fragment = new ImageViewFragment();
-                                    fragment.setArguments(args);
-                                    FragmentManager fragmentManager = getFragmentManager();
-                                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("camera").commit();
+                                if (nbrOfPicturesTaken == nbrOfImages) {
+                                    saveAndMakePanorama();
+                                    sendPanoramaToImageView();
                                 }
                             }
                             proximityCheckerInProgress=false;
@@ -475,6 +453,24 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         }
     }
 
+    private void sendPanoramaToImageView(){
+        args = new Bundle();
+        args.putString("origin", "camera");
+        args.putParcelable("image", resultPanoramaBmp);
+        ImageViewFragment fragment = new ImageViewFragment();
+        fragment.setArguments(args);
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("camera").commit();
+    }
+
+    private void takePicture(){
+        if (mCam != null && isSafeToTakePicture) {
+
+            isSafeToTakePicture = false;
+            mCam.takePicture(null, null, jpegCallback);
+            nbrOfPicturesTaken++;
+        }
+    }
     public double fromOrientationToDegrees(double orientation){
         if(orientation<0){
             return 360-Math.abs(orientation);

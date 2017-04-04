@@ -46,8 +46,9 @@
         android:layout_height="70dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="490dp"
-        opencv:srcCompat="@drawable/open_camera_icon"
-        android:background="@null" />
+        android:background="@null"
+        android:scaleType="fitXY"
+        opencv:srcCompat="@drawable/open_camera_icon" />
 
     <ImageButton
         opencv:srcCompat="@drawable/temp_fullscreen"
