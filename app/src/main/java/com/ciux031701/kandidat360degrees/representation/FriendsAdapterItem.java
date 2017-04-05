@@ -10,6 +10,7 @@ public class FriendsAdapterItem {
     public static final int HEADER = 0;
     public static final int REQUEST = 1;
     public static final int FRIEND = 2;
+    private boolean selected = false;
     private int type;
     private UserTuple data;
     public FriendsAdapterItem(Context context, String header){
@@ -24,4 +25,11 @@ public class FriendsAdapterItem {
     public String getDataText(){return data.getUserName();}
     public UserTuple getData(){return data;}
 
+    public boolean isSelected(){
+        return selected;
+    }
+
+    public void setSelected(boolean sel){
+        selected = sel;
+    }
 }

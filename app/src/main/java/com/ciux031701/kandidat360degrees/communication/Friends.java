@@ -86,7 +86,21 @@ public class Friends {
     }
 
     private static ArrayList<UserTuple> getSection(UserTuple item){
-        return sections.get(item.getUserName().substring(0,1).toUpperCase());
+        return getSection(item.getUserName());
+    }
+
+    private static ArrayList<UserTuple> getSection(String username){
+        return sections.get(username.substring(0,1).toUpperCase());
+    }
+
+    public static UserTuple get(String username){
+        ArrayList<UserTuple> section = getSection(username.substring(0,1).toUpperCase());
+        for(int i = 0; i < section.size(); i++){
+            UserTuple user = section.get(i);
+            if(user.getUserName().equals(username))
+                return user;
+        }
+        return null;
     }
 
     public static ArrayList<FriendsAdapterItem> getFriendsAdapterItems(){return showing;}

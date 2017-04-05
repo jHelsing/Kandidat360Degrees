@@ -124,17 +124,22 @@ public class ShareFragment extends Fragment {
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //arguments so that the explore view can show some kind of loading Toast "Sharing..."
-                Toast.makeText(getActivity(), "Sharing...",
-                        Toast.LENGTH_SHORT).show();
-                args = new Bundle();
-                args.putString("shared", "somekindofID");
-                Fragment fragment = new ExploreFragment();
-                FragmentManager fragmentManager = getActivity().getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+                ShareAdapter adapter = (ShareAdapter)mRecyclerView.getAdapter();
+                String selectedNames = adapter.getSelectedString();
+                UserTuple test = Friends.get("helsing");
+                if(!selectedNames.isEmpty()) {
+                    //arguments so that the explore view can show some kind of loading Toast "Sharing..."
+                    Toast.makeText(getActivity(), "Sharing...",
+                            Toast.LENGTH_SHORT).show();
+                    args = new Bundle();
+                    args.putString("shared", "somekindofID");
+                    Fragment fragment = new ExploreFragment();
+                    FragmentManager fragmentManager = getActivity().getFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.replace(R.id.content_frame, fragment);
+                    fragmentTransaction.addToBackStack(null);
+                    fragmentTransaction.commit();
+                }
             }
         });
     }

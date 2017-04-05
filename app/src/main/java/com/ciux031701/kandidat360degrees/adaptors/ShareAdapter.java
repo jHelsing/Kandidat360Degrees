@@ -5,7 +5,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -16,6 +18,8 @@ import com.ciux031701.kandidat360degrees.communication.Friends;
 import com.ciux031701.kandidat360degrees.representation.FriendsAdapterItem;
 import com.ciux031701.kandidat360degrees.representation.UserTuple;
 import com.ciux031701.kandidat360degrees.R;
+
+import org.json.JSONArray;
 
 import java.util.ArrayList;
 
@@ -69,7 +73,8 @@ public class ShareAdapter extends RecyclerView.Adapter {
                 shareCheck.setVisibility(View.VISIBLE);
                 headerLayout.setVisibility(View.GONE);
                 itemLayout.setVisibility(View.VISIBLE);
-                setItemClickListener(holder, shareCheck, position);
+                setItemClickListener(holder, shareCheck);
+                setCheckChangedListener(shareCheck, position);
                 break;
         }
 
@@ -77,7 +82,7 @@ public class ShareAdapter extends RecyclerView.Adapter {
 
     }
 
-    private void setItemClickListener(RecyclerView.ViewHolder holder, final CheckBox shareCheck, final int position){
+    private void setItemClickListener(RecyclerView.ViewHolder holder, final CheckBox shareCheck){
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -89,9 +94,47 @@ public class ShareAdapter extends RecyclerView.Adapter {
         });
     }
 
+    private void setCheckChangedListener(final CheckBox shareCheck, final int position){
+        shareCheck.setOnCheckedChangeListener(
+                new CheckBox.OnCheckedChangeListener(){
+
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        if(isChecked)
+                            dataSource.get(position).setSelected(true);
+                        else
+                            dataSource.get(position).setSelected(false);
+                    }
+                });
+    }
+
     @Override
     public int getItemCount() {
         return dataSource.size();
+    }
+
+    public ArrayList<FriendsAdapterItem> getSelected(){
+        ArrayList<FriendsAdapterItem> selectedItems = new ArrayList<>();
+        for(int i = 0; i < dataSource.size();i++){
+            FriendsAdapterItem item = dataSource.get(i);
+            if(item.isSelected())
+                selectedItems.add(item);
+        }
+        return selectedItems;
+    }
+
+    public String getSelectedString(){
+        String selectedNames = "";
+        for(int i = 0; i < dataSource.size();i++){
+            FriendsAdapterItem item = dataSource.get(i);
+            if(item.isSelected())
+                selectedNames += "," + item.getDataText();
+        }
+        return selectedNames.substring(1);
+    }
+
+    public boolean hasSelected(){
+        return !getSelected().isEmpty();
     }
 
     private static class ViewHolder extends RecyclerView.ViewHolder {
