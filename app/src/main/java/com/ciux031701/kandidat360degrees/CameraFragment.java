@@ -419,7 +419,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 }
 
                 //If the targetangle is the same as current and we dont have a proximity timer started, start one
-                if(!proximityCheckerInProgress && (int)fromDegreeToProgress(currentDegrees)==(int)fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree())){
+                int diff = Math.abs((int)fromDegreeToProgress(currentDegrees)-(int)fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree()));
+                if(!proximityCheckerInProgress && diff < 3 &&
+                        mSurfaceViewDraw.getVerticalOffset((int)fromOrientationToDegrees(orientation[1])) < 3 &&
+                        mSurfaceViewDraw.getVerticalOffset((int)fromOrientationToDegrees(orientation[1])) > -3){
 
                     if(!mSurfaceViewDraw.isStillShowingGreen()){
                         mSurfaceViewDraw.setCircleColor(Color.YELLOW);

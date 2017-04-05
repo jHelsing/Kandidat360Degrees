@@ -97,6 +97,8 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         return isStillShowingGreen;
     }
 
+
+
     public void setCircleColor(final int color){
         if(color==Color.GREEN){
             isStillShowingGreen=true;
@@ -136,7 +138,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         return new Rect(center.x-dPixel-radius,center.y-dPixelVertical-radius,center.x+radius-dPixel,center.y+radius-dPixelVertical);
     }
 
-    private int getVerticalOffset(int degree){
+    public int getVerticalOffset(int degree){
         //latches onto center if close enough
         if(degree<=1&&degree>=1){
             return 0;
