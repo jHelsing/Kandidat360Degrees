@@ -304,7 +304,7 @@ public class ProfileFragment extends Fragment {
                                             error = true;
                                         }
                                         if(!error){
-                                            Friends.fetch();
+                                            Friends.remove(Friends.get(username));
                                         }
                                         else
                                             Toast.makeText(getActivity(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
