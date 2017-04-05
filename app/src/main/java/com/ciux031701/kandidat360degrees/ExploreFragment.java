@@ -44,6 +44,11 @@ import android.widget.Toast;
 import com.ciux031701.kandidat360degrees.adaptors.ExploreSearchAdapter;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
+import com.ciux031701.kandidat360degrees.communication.JReqImages;
+import com.ciux031701.kandidat360degrees.communication.JRequest;
+import com.ciux031701.kandidat360degrees.communication.Session;
+import com.ciux031701.kandidat360degrees.representation.ExplorePanorama;
+import com.ciux031701.kandidat360degrees.representation.JSONParser;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdate;
@@ -60,6 +65,10 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
 import com.google.maps.android.clustering.view.DefaultClusterRenderer;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
@@ -93,7 +102,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     private ExploreSearchAdapter exploreSearchAdapter;
     private ArrayList<String> resultArrayList;
     private List<Address> globalList;
-    private ArrayList<ProfilePanorama> imagesToShow;
+    private ArrayList<ExplorePanorama> imagesToShow;
     private int lastSearchStringLength;
 
     @Override
@@ -107,7 +116,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         setUpNavigationAndToolBar(root);
         setUpSearchFunctionality(root);
         setUpCamera(root);
-        //imagesToShow = (ArrayList<ProfilePanorama>) savedInstanceState.getSerializable("images");
         setUpMap(root, savedInstanceState);
 
         return root;
@@ -175,12 +183,12 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             case R.id.togglePermission:
                 if (isShowingPublic) {
                     toolbarMenu.getItem(0).setIcon(R.drawable.temp_earthblack);
-                    //Reload markers for the private map
+                    // TODO Reload markers for the private map
                     isShowingPublic = false;
 
                 } else {
                     toolbarMenu.getItem(0).setIcon(R.drawable.temp_earthwhite);
-                    //Reload markers for the public map
+                    // TODO Reload markers for the public map
                     isShowingPublic = true;
                 }
                 return true;
@@ -259,13 +267,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
             exploreSearchAdapter.notifyDataSetChanged();
 
-
-            /*if (TextUtils.isEmpty(newText)) {
-                exploreSearchAdapter.filter("");
-                searchListView.clearTextFilter();
-            } else {
-                exploreSearchAdapter.filter(newText.toString());
-            }*/
             return true;
         } else {
             lastSearchStringLength = newText.length();
@@ -401,6 +402,26 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
                 // TODO load all images from imagesToShow and show them on map
+                JReqImages request = new JReqImages(Session.getId());
+                request.setJResultListener(new JRequest.JResultListener() {
+                    @Override
+                    public void onHasResult(JSONObject result) {
+                        Log.d("Explore", result.toString());
+                        imagesToShow = new ArrayList<ExplorePanorama>();
+                        try {
+                            JSONArray resultArray = result.getJSONArray("images");
+                            if (resultArray.length() != 0) {
+                                for(int i=0; i<resultArray.length(); i++) {
+                                    imagesToShow.add(JSONParser.parseToExplorePanorama(resultArray.getJSONArray(i)));
+                                }
+                            }
+                        } catch(JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                });
+                request.sendRequest();
             }
         });
     }

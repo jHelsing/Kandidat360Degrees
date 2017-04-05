@@ -53,4 +53,28 @@ public class JSONParser {
         return pp;
 
     }
+
+    public static ExplorePanorama parseToExplorePanorama(JSONArray imageArray) {
+        if (imageArray.length() == 0) {
+            return null;
+        }
+        String imageID = "";
+        boolean publicImage = false;
+        Double longitude = 0.0;
+        Double latitude = 0.0;
+        String uploader = "";
+        try {
+            imageID = imageArray.get(0).toString();
+            uploader = imageArray.get(1).toString();
+            int publicInt = Integer.parseInt(imageArray.get(6).toString());
+            if (publicInt == 1)
+                publicImage = true;
+            longitude = Double.parseDouble(imageArray.get(4).toString());
+            latitude = Double.parseDouble(imageArray.get(5).toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return new ExplorePanorama(imageID, uploader, latitude, longitude, publicImage);
+    }
 }
