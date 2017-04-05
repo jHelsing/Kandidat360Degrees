@@ -369,10 +369,12 @@ public class ProfileFragment extends Fragment {
 
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
                 // For dropping a marker at a point on the Map
-                LatLng gothenburg = new LatLng(57.4, 12);
-                googleMap.addMarker(new MarkerOptions().position(gothenburg).title("Here we go bois")
-                        .snippet("its happening!").icon(BitmapDescriptorFactory
-                                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                for (int i = 0; i < pictures.size(); i++){
+                    double latitude = Double.parseDouble(pictures.get(i).getLatitude());
+                    double longitude = Double.parseDouble(pictures.get(i).getLongitude());
+                    LatLng position = new LatLng(latitude, longitude);
+                    googleMap.addMarker(new MarkerOptions().position(position).title(pictures.get(i).getPanoramaID()).icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon)));
+                }
                 // For zooming automatically to the location of the marker
                 //CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(12).build();
                 //googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
