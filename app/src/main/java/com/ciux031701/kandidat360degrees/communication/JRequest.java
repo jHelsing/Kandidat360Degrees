@@ -5,6 +5,8 @@ package com.ciux031701.kandidat360degrees.communication;
  */
 
 
+import android.util.Log;
+
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -34,6 +36,7 @@ public class JRequest {
                         response = response.trim();
                         try {
                             JSONResult = new JSONObject(response);
+                            Log.d("Profile", response);
                             fireResultListener(JSONResult);
                         } catch (JSONException e) {
                             e.printStackTrace();
