@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -420,6 +421,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 //If the targetangle is the same as current and we dont have a proximity timer started, start one
                 if(!proximityCheckerInProgress && (int)fromDegreeToProgress(currentDegrees)==(int)fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree())){
 
+                    if(!mSurfaceViewDraw.isStillShowingGreen()){
+                        mSurfaceViewDraw.setCircleColor(Color.YELLOW);
+                    }
                     proximityCheckerInProgress=true;
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
@@ -428,12 +432,15 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                             //is the current angle close enough to the target angle still?
                             if ((int)fromDegreeToProgress(currentDegrees) > (int)(fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree())-3) && (int)fromDegreeToProgress(currentDegrees) < (int)(fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree())+3)){
                                 //close enough
+                                mSurfaceViewDraw.setCircleColor(Color.GREEN);
                                 takePicture();
 
                                 if (nbrOfPicturesTaken == nbrOfImages) {
                                     saveAndMakePanorama();
                                     sendPanoramaToImageView();
                                 }
+                            }else{
+                                mSurfaceViewDraw.setCircleColor(Color.RED);
                             }
                             proximityCheckerInProgress=false;
                         }

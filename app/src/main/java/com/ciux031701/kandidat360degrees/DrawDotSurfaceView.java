@@ -10,6 +10,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.OvalShape;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.SurfaceHolder;
@@ -35,6 +36,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     private int width;
     private float degToPixFactor;
     private boolean targetAcquired = false;
+    private boolean isStillShowingGreen;
 
     public DrawDotSurfaceView(Context context) {
         super(context);
@@ -56,10 +58,11 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
 
     private void initialize() {
         getHolder().addCallback(this);
-        paint.setColor(Color.GREEN);
+        paint.setColor(Color.RED);
+        isStillShowingGreen=false;
         setFocusable(false);
         filledCircle = new ShapeDrawable(new OvalShape());
-        filledCircle.getPaint().setColor(0xff74AC23); //default is black
+        filledCircle.getPaint().setColor(Color.RED);
         filledCircle.setBounds(center.x - radius, center.y - radius, center.x + radius, center.y + radius); //needed, the shape is not drawn
 
         aimCircle = new ShapeDrawable(new OvalShape());
@@ -89,6 +92,25 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
 //            return false;
 //        }
 //    }
+
+    public boolean isStillShowingGreen(){
+        return isStillShowingGreen;
+    }
+
+    public void setCircleColor(final int color){
+        if(color==Color.GREEN){
+            isStillShowingGreen=true;
+            final Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    filledCircle.getPaint().setColor(Color.RED);
+                    isStillShowingGreen=false;
+                }
+            }, 1000);
+        }
+        filledCircle.getPaint().setColor(color); //default is black
+    }
 
     @Override
     public void draw(Canvas canvas) {
