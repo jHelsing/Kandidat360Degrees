@@ -65,7 +65,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         aimCircle = new ShapeDrawable(new OvalShape());
         aimCircle.getPaint().setStyle(Paint.Style.STROKE);
         aimCircle.getPaint().setStrokeWidth(5);
-        unfilledRadius = radius + 15;
+        unfilledRadius = radius + 20;
         aimCircle.setBounds(center.x-unfilledRadius,center.y-unfilledRadius,center.x+unfilledRadius,center.y+unfilledRadius);
     }
 
@@ -101,6 +101,9 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         aimCircle.draw(canvas);
         if(targetAcquired) {
             int deltaDegree = currentDegree - targetDegree; //positive value - right of targetDegree
+            if(deltaDegree >= -1 && deltaDegree <= 1){
+                deltaDegree=0;
+            }
             filledCircle.setBounds(getNewBounds(deltaDegree));
             filledCircle.draw(canvas);
         }
@@ -112,6 +115,10 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     }
 
     private int getVerticalOffset(int degree){
+        //latches onto center if close enough
+        if(degree<=1&&degree>=1){
+            return 0;
+        }
         if(degree>180){
             //*-1 is how we define whats is up and down
             return (360-degree)*-1;
