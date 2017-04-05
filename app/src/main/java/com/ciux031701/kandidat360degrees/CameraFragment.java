@@ -218,10 +218,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             //byte[] --> bitmap
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 
-            //Rotate the picture to fit portrait mode
+            //Rotate the picture to fit portrait mode-- This is whats taking so long
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
+            System.out.println("JPEG rotated and created bitmap");
 
             //Convert the image to Mat, to be able to use openCV
             Mat mat = new Mat(bitmap.getWidth(), bitmap.getHeight(), 16); //type of Mat needs to 16, CV_8UC3, to be able to use matToBitmap(..) later
@@ -229,14 +230,12 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             listOfTakenImages.add(mat);
 
             targetDegree = startGyroDegree + listOfTakenImages.size() * (360 / nbrOfImages);
-            System.out.println("Setting new targetdegree: " +  targetDegree);
             mSurfaceViewDraw.setTargetDegree((int) targetDegree);
             mSurfaceViewDraw.setTargetAcquired(true);
             //Start preview of the camera & set safe to take pictures to true
             mCam.startPreview();
             isSafeToTakePicture = true;
         }
-
     };
 
     private SurfaceHolder.Callback mSurfaceCallback = new SurfaceHolder.Callback() {
@@ -259,6 +258,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             if (myBestSize != null) {
                 //Set the preview size
                 myParameters.setPreviewSize(myBestSize.width, myBestSize.height);
+                myParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
                 //Set the parameters to the camera
                 mCam.setParameters(myParameters);
                 //Rotate to portrait mode (90 degrees)
