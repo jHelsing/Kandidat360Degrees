@@ -21,6 +21,7 @@ import com.ciux031701.kandidat360degrees.adaptors.ProfileFlowAdapter;
 import com.ciux031701.kandidat360degrees.communication.DownloadMultiplePreviewsService;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
 import com.ciux031701.kandidat360degrees.communication.FTPInfo;
+import com.ciux031701.kandidat360degrees.communication.Friends;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.communication.JReqIsFriend;
 import com.ciux031701.kandidat360degrees.communication.JReqRemoveFriend;
@@ -28,6 +29,7 @@ import com.ciux031701.kandidat360degrees.communication.JReqSendFriendrequest;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.communication.Session;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
+import com.ciux031701.kandidat360degrees.representation.UserTuple;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
@@ -67,6 +69,8 @@ public class ProfileFragment extends Fragment {
     private boolean listMode;
     private boolean first;
     private Bundle instanceState;
+
+    private boolean isFriend;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -240,6 +244,13 @@ public class ProfileFragment extends Fragment {
             favString = favCount + "";
         }
         favCountView.setText(favString);
+
+        try {
+            if(!getArguments().getString("isFriend").equals(null))
+                isFriend = true;
+        } catch (NumberFormatException e){
+            e.printStackTrace();
+        }
     }
 
     private void setUpProfileMenuButton() {
@@ -252,26 +263,54 @@ public class ProfileFragment extends Fragment {
 
                 if (Session.getUser().equalsIgnoreCase(username)) {
                     menu.add(R.string.upload_profile_picture);
-                    popupMenu.show();
                 } else {
-
-                    menu.add("Remove Friend");
-                    menu.add("Add Friend");
-                    popupMenu.show();
+                    if(isFriend)
+                        menu.add("Remove Friend");
+                    else
+                        menu.add("Add Friend");
                 }
+                popupMenu.show();
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getTitle().toString()) {
                             case "Add Friend":
                                 JReqSendFriendrequest jReqSendFriendRequest = new JReqSendFriendrequest(username);
+                                jReqSendFriendRequest.setJResultListener(new JRequest.JResultListener() {
+                                    @Override
+                                    public void onHasResult(JSONObject result) {
+                                        boolean error;
+                                        try {
+                                            error = result.getBoolean("error");
+                                        } catch (JSONException e) {
+                                            error = true;
+                                        }
+                                        if(error) {
+                                            Toast.makeText(getActivity(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
                                 jReqSendFriendRequest.sendRequest();
-                                // TODO Error handling with JResultListener?
                                 break;
                             case "Remove Friend":
                                 JReqRemoveFriend jReqRemoveFriend = new JReqRemoveFriend(username);
+                                jReqRemoveFriend.setJResultListener(new JRequest.JResultListener() {
+                                    @Override
+                                    public void onHasResult(JSONObject result) {
+                                        boolean error;
+                                        try {
+                                            error = result.getBoolean("error");
+                                        } catch (JSONException e) {
+                                            error = true;
+                                        }
+                                        if(!error){
+                                            Friends.fetch();
+                                        }
+                                        else
+                                            Toast.makeText(getActivity(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                                 jReqRemoveFriend.sendRequest();
-                                // TODO Error handling with JResultListener?
                                 break;
                             case "Change profile picture":
                                 // TODO add support for uploading profile picture to server
@@ -350,15 +389,14 @@ public class ProfileFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
                 Log.d("Profile", "Profile image found and results from download are OK.");
-            }
-
-            String path = context.getFilesDir() + "/profiles/"
-                    + username + ".jpg";
-            Drawable profileImage = Drawable.createFromPath(path);
-            ((ImageView) root.findViewById(R.id.profileProfileImage)).setImageDrawable(profileImage);
-            File file = new File(path);
-            if (file.delete()) {
-                Log.d("Profile", "Profile image has been deleted");
+                String path = context.getFilesDir() + "/profiles/"
+                        + username + ".jpg";
+                Drawable profileImage = Drawable.createFromPath(path);
+                ((ImageView) root.findViewById(R.id.profileProfileImage)).setImageDrawable(profileImage);
+                File file = new File(path);
+                if (file.delete()) {
+                    Log.d("Profile", "Profile image has been deleted");
+                }
             }
             context.unregisterReceiver(this);
             loadPreviews();

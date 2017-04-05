@@ -29,7 +29,7 @@ public class Friends {
         }
         fetch();
     }
-    private static void fetch(){
+    public static void fetch(){
         JReqFriends jReqFriends = new JReqFriends();
         jReqFriends.setJResultListener(
                 new JRequest.JResultListener() {

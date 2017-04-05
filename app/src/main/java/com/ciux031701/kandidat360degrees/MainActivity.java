@@ -223,13 +223,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
      * @param username - The username to show the profile page for.
      */
     public void showProfile(String username) {
-        JReqProfile profileReq = new JReqProfile(username, Session.getId(), Session.getUser());
+        JReqProfile profileReq = new JReqProfile(username, Session.getId());
         profileReq.setJResultListener(
                 new JRequest.JResultListener(){
                     @Override
                     public void onHasResult(JSONObject result) {
                         boolean error;
-                        String message = null, username = null, uploaded = null, views = null, favs = null;
+                        String message = null, username = null, uploaded = null, views = null, favs = null, isFriend = null;
                         JSONArray images = new JSONArray();
                         try {
                             error = result.getBoolean("error");
@@ -238,6 +238,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             uploaded = result.getString("uploaded");
                             views = result.getString("views");
                             favs = result.getString("likes");
+                            isFriend = result.getString("isFriend");
                             images = result.getJSONArray("images");
                         } catch(JSONException je){
                             error = true;
@@ -263,6 +264,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             b.putString("uploadCount",uploaded);
                             b.putString("viewsCount",views);
                             b.putString("favsCount",favs);
+                            b.putString("isFriend", isFriend);
                             b.putSerializable("images", imgs);
                             fragment.setArguments(b);
                             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
