@@ -58,6 +58,7 @@ import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -285,26 +286,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         // manager.
         googleMap.setOnCameraIdleListener(mClusterManager);
         googleMap.setOnMarkerClickListener(mClusterManager);
-
-        // Add cluster items (markers) to the cluster manager.
-        addItems();
     }
 
-    private void addItems() {
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(57.4, 12), 10));
-        double lat = 57.7;
-        double lng = 12.2;
-
-        // Add ten cluster items in close proximity, for purposes of this example.
-        for (int i = 0; i < 10; i++) {
-            double offset = i / 60d;
-            lat = lat + offset;
-            lng = lng + offset;
-            MyItem offsetItem = new MyItem(lat, lng);
-            offsetItem.setTitle("111");
-            mClusterManager.addItem(offsetItem);
-        }
-    }
 
     private void setUpMap(View root, Bundle bundle) {
         mMapView = (MapView) root.findViewById(R.id.mapView);
@@ -414,12 +397,13 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                                 for(int i=0; i<resultArray.length(); i++) {
                                     imagesToShow.add(JSONParser.parseToExplorePanorama(resultArray.getJSONArray(i)));
                                 }
+                                showImagesOnMap();
                             }
                         } catch(JSONException e) {
                             e.printStackTrace();
                         }
-
                     }
+
                 });
                 request.sendRequest();
             }
@@ -477,6 +461,16 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         });
     }
 
+    private void showImagesOnMap() {
+        for (int i=0; i<imagesToShow.size(); i++) {
+            ExplorePanorama ep = imagesToShow.get(i);
+            MyItem newImageToShow = new MyItem(ep.getLocation().latitude, ep.getLocation().longitude);
+            newImageToShow.setTitle(ep.getImageID());
+            newImageToShow.setEp(ep);
+            mClusterManager.addItem(newImageToShow);
+        }
+    }
+
     public class CustomMarkerRenderer extends DefaultClusterRenderer<MyItem>{
 
         public CustomMarkerRenderer(Context context, GoogleMap map,
@@ -488,8 +482,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         @Override
         protected void onBeforeClusterItemRendered(MyItem item,
                                                    MarkerOptions markerOptions) {
-            markerOptions.icon(BitmapDescriptorFactory
-                    .defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+            // TODO change which bitmap to display
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
         }
     }
 }

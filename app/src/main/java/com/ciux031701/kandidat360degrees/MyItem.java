@@ -22,6 +22,7 @@ package com.ciux031701.kandidat360degrees;
  * limitations under the License.
  */
 
+        import com.ciux031701.kandidat360degrees.representation.ExplorePanorama;
         import com.google.android.gms.maps.model.LatLng;
         import com.google.maps.android.clustering.ClusterItem;
 
@@ -30,6 +31,7 @@ public class MyItem implements ClusterItem {
     private final LatLng mPosition;
     private String mTitle;
     private String mSnippet;
+    private ExplorePanorama ep;
 
     public MyItem(double lat, double lng) {
         mPosition = new LatLng(lat, lng);
@@ -68,6 +70,10 @@ public class MyItem implements ClusterItem {
      */
     public void setSnippet(String snippet) {
         mSnippet = snippet;
+    }
+
+    public void setEp(ExplorePanorama ep) {
+        this.ep = ep;
     }
 }
 
