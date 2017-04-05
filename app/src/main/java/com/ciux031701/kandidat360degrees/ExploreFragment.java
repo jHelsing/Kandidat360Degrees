@@ -383,8 +383,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 // Zoom automatically to the default position
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(10).build();
                 googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-                // TODO load all images from imagesToShow and show them on map
                 JReqImages request = new JReqImages(Session.getId());
                 request.setJResultListener(new JRequest.JResultListener() {
                     @Override
@@ -396,6 +394,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                             if (resultArray.length() != 0) {
                                 for(int i=0; i<resultArray.length(); i++) {
                                     imagesToShow.add(JSONParser.parseToExplorePanorama(resultArray.getJSONArray(i)));
+                                    // TODO update different stuff, check if friend, update visibility of panorama based on that
                                 }
                                 showImagesOnMap();
                             }
