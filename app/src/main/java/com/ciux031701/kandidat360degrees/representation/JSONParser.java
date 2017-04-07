@@ -59,22 +59,24 @@ public class JSONParser {
             return null;
         }
         String imageID = "";
+        String date = "";
         boolean publicImage = false;
         Double longitude = 0.0;
         Double latitude = 0.0;
         String uploader = "";
         try {
-            imageID = imageArray.get(0).toString();
-            uploader = imageArray.get(1).toString();
-            int publicInt = Integer.parseInt(imageArray.get(6).toString());
+            imageID = imageArray.getString(0);
+            uploader = imageArray.getString(1);
+            date = imageArray.getString(2);
+            int publicInt = Integer.parseInt(imageArray.getString(6));
             if (publicInt == 1)
                 publicImage = true;
-            longitude = Double.parseDouble(imageArray.get(4).toString());
-            latitude = Double.parseDouble(imageArray.get(5).toString());
+            longitude = Double.parseDouble(imageArray.getString(4));
+            latitude = Double.parseDouble(imageArray.getString(5));
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return new ExplorePanorama(imageID, uploader, latitude, longitude, publicImage);
+        return new ExplorePanorama(imageID, uploader, latitude, longitude, publicImage, "lol");
     }
 }

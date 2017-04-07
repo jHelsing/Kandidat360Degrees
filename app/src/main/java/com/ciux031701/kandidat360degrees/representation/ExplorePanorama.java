@@ -12,22 +12,25 @@ public class ExplorePanorama {
     private String imageID;
     private LatLng location;
     private String uploader;
+    private String date;
     private boolean isPublic;
     private boolean canView;
     private Drawable preview;
 
-    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic) {
+    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date) {
         this.imageID = imageID;
         this.uploader = uploader;
+        this.date = date;
         this.location = new LatLng(lat, lng);
         this.isPublic = isPublic;
         if (isPublic)
             canView = true;
     }
 
-    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, Drawable preview) {
+    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date, Drawable preview) {
         this.imageID = imageID;
         this.uploader = uploader;
+        this.date = date;
         this.location = new LatLng(lat, lng);
         this.isPublic = isPublic;
         if (isPublic)
@@ -35,11 +38,12 @@ public class ExplorePanorama {
         this.preview = preview;
     }
 
-    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, boolean canView, Drawable preview) {
+    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date, boolean canView, Drawable preview) {
         this.imageID = imageID;
         this.uploader = uploader;
         this.location = new LatLng(lat, lng);
         this.isPublic = isPublic;
+        this.date = date;
         this.canView = canView;
     }
 
@@ -66,6 +70,8 @@ public class ExplorePanorama {
     public Drawable getPreview() {
         return preview;
     }
+
+    public String getDate() { return date; }
 
     public void setPreview(Drawable preview) {
         this.preview = preview;

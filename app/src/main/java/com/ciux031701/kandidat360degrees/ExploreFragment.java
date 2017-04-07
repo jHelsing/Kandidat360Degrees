@@ -139,7 +139,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         }
 
         if (markerPanorama != null) {
-
+            dateView.setText(markerPanorama.getDate());
+            userView.setText(markerPanorama.getUploader());
         }
 
         return v;
