@@ -90,8 +90,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     private SearchView searchView;
     private ListView searchListView;
 
-    private TextView infoWindowText;
-    private ImageView infoWindowImage;
     private MenuItem earthButton;
 
     private Menu toolbarMenu;
@@ -123,13 +121,27 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     }
 
     public View onMarkerClicked(Marker marker) {
-        View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_window, null);
+        View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_explore_view, null);
 
-        // Getting reference to the TextView to set latitude
-        infoWindowText = (TextView) v.findViewById(R.id.infoWindowText);
-        infoWindowImage = (ImageView) v.findViewById(R.id.infoWindowImage);
+        // Getting references to the different views in the marker window
+        TextView dateView = (TextView) v.findViewById(R.id.exploreInfoViewDateView);
+        TextView userView = (TextView) v.findViewById(R.id.exploreInfoViewUserNameView);
+        ImageView previewView = (ImageView) v.findViewById(R.id.exploreInfoViewPreviewView);
 
-        infoWindowText.setText(marker.getPosition().toString());
+        // Find the correct ExplorePanorama for the marker
+        String imageID = marker.getTitle();
+        ExplorePanorama markerPanorama = null;
+        for (int i=0; i<imagesToShow.size(); i++) {
+            if(imagesToShow.get(i).getImageID().equals(imageID)) {
+                markerPanorama = imagesToShow.get(i);
+                i = imagesToShow.size();
+            }
+        }
+
+        if (markerPanorama != null) {
+
+        }
+
         return v;
     }
 

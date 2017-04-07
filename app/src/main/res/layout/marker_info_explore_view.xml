@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/colorPrimary">
+
+        <ImageView
+            android:id="@+id/exploreInfoViewPreviewView"
+            android:scaleType="fitXY"
+            android:layout_height="50dp"
+            android:layout_width="150dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:id="@+id/exploreInfoViewUserNameView"
+            android:textColor="@android:color/white"
+            android:text="PLACEHOLDER USER"
+            android:lines="1"
+            android:textAlignment="center" />
+
+        <TextView
+            android:text="PLACEHOLD DATE"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:id="@+id/exploreInfoViewDateView"
+            android:textColor="@android:color/white"
+            android:drawableLeft="@drawable/profile_time_icon"
+            android:drawableStart="@drawable/profile_time_icon"
+            android:drawablePadding="10dp"
+            android:lines="1" />
+
+</LinearLayout>
