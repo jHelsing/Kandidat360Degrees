@@ -93,6 +93,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     private ListView searchListView;
 
     private MenuItem earthButton;
+    private ImageView windowImageView;
 
     private Menu toolbarMenu;
 
@@ -122,12 +123,16 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         return root;
     }
 
-    public View onMarkerClicked(Marker marker) {
-        final View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_explore_view, null);
+    public View onMarkerClicked(final Marker marker) {
+        if (marker.getTitle().equalsIgnoreCase("Your position")) {
+            return null;
+        }
+        View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_explore_view, null);
 
         // Getting references to the different views in the marker window
         TextView dateView = (TextView) v.findViewById(R.id.exploreInfoViewDateView);
         TextView userView = (TextView) v.findViewById(R.id.exploreInfoViewUserNameView);
+        windowImageView = (ImageView) v.findViewById(R.id.exploreInfoViewPreviewView);
 
         // Find the correct ExplorePanorama for the marker
         final String imageID = marker.getTitle();
@@ -160,20 +165,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                                 + imageID + ".jpg";
 
                         // Set the drawable to the ImageView
-                        ImageView previewView = (ImageView) v.findViewById(R.id.exploreInfoViewPreviewView);
-                        Drawable d = Drawable.createFromPath(path);
-                        previewView.setImageDrawable(d);
-
-                        // Set click listener for the ImageView
-                        previewView.setOnTouchListener(new View.OnTouchListener() {
-                            @Override
-                            public boolean onTouch(View v, MotionEvent event) {
-                                Log.d("Explore", "Touch on ImageView registered, will call MainActivity to "
-                                        + "show the panorama belonging to " + imageID);
-                                ((MainActivity) getActivity()).showPanorama("explore", imageID);
-                                return false;
-                            }
-                        });
+                        windowImageView.setImageDrawable(Drawable.createFromPath(path));
 
                         context.unregisterReceiver(this);
 
@@ -187,6 +179,21 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 }
             }, filter);
             getActivity().startService(intent);
+        } else {
+            // Preview exists
+            ImageView previewView = (ImageView) v.findViewById(R.id.exploreInfoViewPreviewView);
+            previewView.setImageDrawable(markerPanorama.getPreview());
+
+            // Set click listener for the ImageView
+            previewView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    Log.d("Explore", "Touch on ImageView registered, will call MainActivity to "
+                            + "show the panorama belonging to " + imageID);
+                    ((MainActivity) getActivity()).showPanorama("explore", imageID);
+                    return false;
+                }
+            });
         }
 
         return v;
@@ -375,53 +382,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                     @Override
                     public View getInfoContents(Marker marker) {
                         return null;
-                    }
-                });
-                googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-                    @Override
-                    public void onInfoWindowClick(Marker marker) {
-                        //Go to full screen view
-                        final String imageID = marker.getTitle();
-                        if (imageID == null || imageID.equals("Your position"))
-                            return;
-
-                        Intent intent =  new Intent(getActivity(), DownloadService.class);
-                        intent.putExtra("IMAGETYPE", ImageType.PANORAMA);
-                        intent.putExtra("IMAGEID", imageID);
-                        intent.setAction(DownloadService.NOTIFICATION + imageID + ".jpg");
-                        IntentFilter filter = new IntentFilter();
-                        filter.addAction(DownloadService.NOTIFICATION + imageID + ".jpg");
-                        getActivity().registerReceiver(new BroadcastReceiver() {
-                            @Override
-                            public void onReceive(Context context, Intent intent) {
-                                if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
-                                    Log.d("Explore", "Panorama image found and results from download are OK.");
-
-                                    String path = context.getFilesDir() + "/panoramas/"
-                                            + imageID + ".jpg";
-                                    Drawable panoramaImage = Drawable.createFromPath(path);
-
-                                    File file = new File(path);
-                                    if (file.delete()) {
-                                        Log.d("Explore", "Panorama image has been deleted");
-                                    }
-                                    context.unregisterReceiver(this);
-
-                                    Bundle args = new Bundle();
-                                    args.putString("origin", "Explore");
-                                    args.putString("imageid", imageID);
-                                    ArrayList<Drawable> arrayList = new ArrayList<Drawable>();
-                                    arrayList.add(panoramaImage);
-                                    args.putSerializable("panorama", arrayList);
-                                    ImageViewFragment fragment = new ImageViewFragment();
-                                    fragment.setArguments(args);
-                                    FragmentManager fragmentManager = getFragmentManager();
-                                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
-                                }
-                            }
-                        }, filter);
-                        getActivity().startService(intent);
-
                     }
                 });
 
