@@ -23,13 +23,11 @@ import com.ciux031701.kandidat360degrees.communication.DownloadService;
 import com.ciux031701.kandidat360degrees.communication.FTPInfo;
 import com.ciux031701.kandidat360degrees.communication.Friends;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
-import com.ciux031701.kandidat360degrees.communication.JReqIsFriend;
 import com.ciux031701.kandidat360degrees.communication.JReqRemoveFriend;
 import com.ciux031701.kandidat360degrees.communication.JReqSendFriendrequest;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.communication.Session;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
-import com.ciux031701.kandidat360degrees.representation.UserTuple;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
@@ -124,12 +122,16 @@ public class ProfileFragment extends Fragment {
     //Get info for specific image from DB here.
     //Use the marker as a reference when doing so.
     private View onMarkerClicked(Marker marker) {
-        View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_window, null);
+        final View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_window, null);
 
-        // Getting reference to the TextView to set latitude
         TextView infoWindowText = (TextView) v.findViewById(R.id.infoWindowText);
+        int i = 0;
+        while(!marker.getTitle().equals(pictures.get(i).getPanoramaID())) {
+            i++;
+        }
 
-        infoWindowText.setText(marker.getPosition().toString());
+        infoWindowText.setText(pictures.get(i).getDate().substring(0,10));
+
         return v;
     }
 
