@@ -30,6 +30,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -43,6 +44,7 @@ import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.adaptors.ExploreSearchAdapter;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
+import com.ciux031701.kandidat360degrees.communication.FTPInfo;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.communication.JReqImages;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
@@ -121,15 +123,14 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     }
 
     public View onMarkerClicked(Marker marker) {
-        View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_explore_view, null);
+        final View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_explore_view, null);
 
         // Getting references to the different views in the marker window
         TextView dateView = (TextView) v.findViewById(R.id.exploreInfoViewDateView);
         TextView userView = (TextView) v.findViewById(R.id.exploreInfoViewUserNameView);
-        ImageView previewView = (ImageView) v.findViewById(R.id.exploreInfoViewPreviewView);
 
         // Find the correct ExplorePanorama for the marker
-        String imageID = marker.getTitle();
+        final String imageID = marker.getTitle();
         ExplorePanorama markerPanorama = null;
         for (int i=0; i<imagesToShow.size(); i++) {
             if(imagesToShow.get(i).getImageID().equals(imageID)) {
@@ -138,9 +139,54 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             }
         }
 
-        if (markerPanorama != null) {
-            dateView.setText(markerPanorama.getDate());
-            userView.setText(markerPanorama.getUploader());
+        dateView.setText(markerPanorama.getDate());
+        userView.setText(markerPanorama.getUploader());
+        if(markerPanorama.getPreview() == null) {
+            // We fetch the preview from the server and assign it to the ImageView
+            Intent intent =  new Intent(getActivity(), DownloadService.class);
+            intent.putExtra("IMAGETYPE", ImageType.PREVIEW);
+            intent.putExtra("IMAGEID", imageID);
+            intent.setAction(DownloadService.NOTIFICATION + imageID + ".jpg");
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(DownloadService.NOTIFICATION + imageID + ".jpg");
+            getActivity().registerReceiver(new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
+                        Log.d("Explore", "Preview image found and results from download are OK.");
+
+                        // Create a File instance for the preview
+                        String path = context.getFilesDir() + FTPInfo.PREVIEW_LOCAL_LOCATION
+                                + imageID + ".jpg";
+
+                        // Set the drawable to the ImageView
+                        ImageView previewView = (ImageView) v.findViewById(R.id.exploreInfoViewPreviewView);
+                        Drawable d = Drawable.createFromPath(path);
+                        previewView.setImageDrawable(d);
+
+                        // Set click listener for the ImageView
+                        previewView.setOnTouchListener(new View.OnTouchListener() {
+                            @Override
+                            public boolean onTouch(View v, MotionEvent event) {
+                                Log.d("Explore", "Touch on ImageView registered, will call MainActivity to "
+                                        + "show the panorama belonging to " + imageID);
+                                ((MainActivity) getActivity()).showPanorama("explore", imageID);
+                                return false;
+                            }
+                        });
+
+                        context.unregisterReceiver(this);
+
+                        // Remove the preview from device storage
+                        File file = new File(path);
+                        if (file.delete()) {
+                            Log.d("Explore", "Preview image has been deleted");
+                        }
+
+                    }
+                }
+            }, filter);
+            getActivity().startService(intent);
         }
 
         return v;
