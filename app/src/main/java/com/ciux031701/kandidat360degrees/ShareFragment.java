@@ -32,7 +32,12 @@ import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.adaptors.ShareAdapter;
 import com.ciux031701.kandidat360degrees.communication.Friends;
+import com.ciux031701.kandidat360degrees.communication.JReqShareImage;
+import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.representation.UserTuple;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Created by Anna on 2017-03-06.
@@ -126,19 +131,35 @@ public class ShareFragment extends Fragment {
             public void onClick(View view) {
                 ShareAdapter adapter = (ShareAdapter)mRecyclerView.getAdapter();
                 String selectedNames = adapter.getSelectedString();
-                UserTuple test = Friends.get("helsing");
                 if(!selectedNames.isEmpty()) {
-                    //arguments so that the explore view can show some kind of loading Toast "Sharing..."
-                    Toast.makeText(getActivity(), "Sharing...",
-                            Toast.LENGTH_SHORT).show();
-                    args = new Bundle();
-                    args.putString("shared", "somekindofID");
-                    Fragment fragment = new ExploreFragment();
-                    FragmentManager fragmentManager = getActivity().getFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    fragmentTransaction.replace(R.id.content_frame, fragment);
-                    fragmentTransaction.addToBackStack(null);
-                    fragmentTransaction.commit();
+                    JReqShareImage jReqShareImage = new JReqShareImage("111", selectedNames);
+                    jReqShareImage.setJResultListener(
+                            new JRequest.JResultListener() {
+                                @Override
+                                public void onHasResult(JSONObject result) {
+                                    try {
+                                        boolean error = result.getBoolean("error");
+                                        if(!error){
+                                            //arguments so that the explore view can show some kind of loading Toast "Sharing..."
+                                            Toast.makeText(getActivity(), "Sharing...",
+                                                    Toast.LENGTH_SHORT).show();
+                                            args = new Bundle();
+                                            args.putString("shared", "somekindofID");
+                                            Fragment fragment = new ExploreFragment();
+                                            FragmentManager fragmentManager = getActivity().getFragmentManager();
+                                            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                                            fragmentTransaction.replace(R.id.content_frame, fragment);
+                                            fragmentTransaction.addToBackStack(null);
+                                            fragmentTransaction.commit();
+                                        }
+                                    }
+                                    catch(JSONException je){
+
+                                    }
+                                }
+                            }
+                    );
+                    jReqShareImage.sendRequest();
                 }
             }
         });

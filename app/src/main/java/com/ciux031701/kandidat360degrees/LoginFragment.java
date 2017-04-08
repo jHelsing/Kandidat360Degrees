@@ -22,6 +22,7 @@ import com.ciux031701.kandidat360degrees.communication.JReqCheckSession;
 import com.ciux031701.kandidat360degrees.communication.JReqLogin;
 import com.ciux031701.kandidat360degrees.communication.JRequest.JResultListener;
 import com.ciux031701.kandidat360degrees.communication.JRequester;
+import com.ciux031701.kandidat360degrees.communication.MD5;
 import com.ciux031701.kandidat360degrees.communication.Session;
 
 import org.json.JSONException;
@@ -44,7 +45,6 @@ public class LoginFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-
         //If there is a saved session, skip login.
         inSession();
 
