@@ -29,6 +29,18 @@ JNIEXPORT void JNICALL Java_com_ciux031701_kandidat360degrees_representation_Nat
         }
         Mat & result = *(Mat*) outputAddress;
         Stitcher stitcher = Stitcher::createDefault();
+        //Set parameters:
+        //Warper
+        stitcher.setWarper(new CompressedRectilinearWarper(2.0f, 1.0f)); //May want to change this later when we actually do 360-degrees images
+                                                                         //but this one looks good when having around 3 images
+        //Feature finder with ORB-algorithm
+        stitcher.setFeaturesFinder(new cv::detail::OrbFeaturesFinder());
+
+        //Exposure compensator (should test more if this or BlockGainCompensator (default) is the best)
+        stitcher.setExposureCompensator(makePtr<detail::GainCompensator>());
+
+         //OBS: should only use homography model for all parameters (panorama mode)
+
         stitcher.stitch(imageVector,result);
         //Release imgAdressArr
         env->ReleaseLongArrayElements(imageAddressArray,imgAddressArr,0);
