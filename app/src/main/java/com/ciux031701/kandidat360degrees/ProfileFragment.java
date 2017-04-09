@@ -363,14 +363,10 @@ public class ProfileFragment extends Fragment {
                     @Override
                     public void onInfoWindowClick(Marker marker) {
                         //Go to full screen view
-                        //TODO: get fullscreen image from DB and send as argument
-                        Bundle args =  new Bundle();
-                        args.putString("origin","profile");
+                        //TODO: get fullscreen image from DB
                         listMode=false;
-                        ImageViewFragment fragment = new ImageViewFragment();
-                        fragment.setArguments(args);
-                        FragmentManager fragmentManager = getActivity().getFragmentManager();
-                        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("view").commit();
+                        MainActivity mainActivity = (MainActivity) getActivity();
+                        mainActivity.showPanorama("profile", marker.getTitle());
                     }
                 });
 
@@ -440,6 +436,8 @@ public class ProfileFragment extends Fragment {
                     viewSwitchButton.setImageDrawable(getResources()
                             .getDrawable(R.drawable.disable_map_view_icon_profile));
                     mapView.setVisibility(View.GONE);
+                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
+                    pictureListView.setAdapter(profileFlowAdapter);
                 }
             }
         });

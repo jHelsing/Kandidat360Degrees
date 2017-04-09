@@ -175,7 +175,6 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                 //TODO: like below from the DB and add that as parameter to the imageviewfragment
                 ProfilePanorama selectedPanorama = getItem(position);
                 String panoramaID = selectedPanorama.getPanoramaID();
-                System.out.println("PanoramaID: " + panoramaID);
 
                 MainActivity mainActivity = (MainActivity) v.getContext();
                 mainActivity.showPanorama("profile", panoramaID);
