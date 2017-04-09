@@ -18,7 +18,6 @@ public class ExplorePanorama implements Parcelable {
     private String date;
     private boolean isPublic;
     private boolean canView;
-    private Drawable preview;
 
     public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date) {
         this.imageID = imageID;
@@ -30,18 +29,7 @@ public class ExplorePanorama implements Parcelable {
             canView = true;
     }
 
-    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date, Drawable preview) {
-        this.imageID = imageID;
-        this.uploader = uploader;
-        this.date = date;
-        this.location = new LatLng(lat, lng);
-        this.isPublic = isPublic;
-        if (isPublic)
-            canView = true;
-        this.preview = preview;
-    }
-
-    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date, boolean canView, Drawable preview) {
+    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date, boolean canView) {
         this.imageID = imageID;
         this.uploader = uploader;
         this.location = new LatLng(lat, lng);
@@ -79,14 +67,10 @@ public class ExplorePanorama implements Parcelable {
         return canView;
     }
 
-    public Drawable getPreview() {
-        return preview;
-    }
-
     public String getDate() { return date; }
 
-    public void setPreview(Drawable preview) {
-        this.preview = preview;
+    public void setCanView(boolean canView) {
+        this.canView = canView;
     }
 
     @Override

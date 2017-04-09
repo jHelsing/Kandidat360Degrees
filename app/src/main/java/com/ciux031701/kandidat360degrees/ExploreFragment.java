@@ -48,6 +48,7 @@ import com.ciux031701.kandidat360degrees.communication.DownloadMultiplePreviewsS
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
 import com.ciux031701.kandidat360degrees.communication.FTPInfo;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
+import com.ciux031701.kandidat360degrees.communication.JReqFriends;
 import com.ciux031701.kandidat360degrees.communication.JReqImages;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.communication.Session;
@@ -77,6 +78,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -130,10 +132,17 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 try {
                     JSONArray resultArray = result.getJSONArray("images");
                     if (resultArray.length() != 0) {
+                        ArrayList<ExplorePanorama> permissionCheckNeeded = new ArrayList<ExplorePanorama>();
                         for(int i=0; i<resultArray.length(); i++) {
                             imagesToShow.add(JSONParser.parseToExplorePanorama(resultArray.getJSONArray(i)));
-                            // TODO update different stuff, check if friend, update visibility of panorama based on that
+                            if(!imagesToShow.get(i).isPublic())
+                                permissionCheckNeeded.add(imagesToShow.get(i));
+                            else
+                                imagesToShow.get(i).setCanView(true);
                         }
+
+                        // TODO Check the users friends, who they are and if they match private images
+
                         showImagesOnMap();
 
                         // Fetch previews to local storage
