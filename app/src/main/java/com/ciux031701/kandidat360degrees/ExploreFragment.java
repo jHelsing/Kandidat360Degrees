@@ -95,7 +95,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     private ListView searchListView;
 
     private MenuItem earthButton;
-    private ImageView windowImageView;
 
     private Menu toolbarMenu;
 
@@ -122,8 +121,31 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         setUpCamera(root);
         setUpMap(root, savedInstanceState);
 
-        // Fetch previews to local storage
-        fetchPreviews();
+        JReqImages request = new JReqImages(Session.getId());
+        request.setJResultListener(new JRequest.JResultListener() {
+            @Override
+            public void onHasResult(JSONObject result) {
+                Log.d("Explore", result.toString());
+                imagesToShow = new ArrayList<ExplorePanorama>();
+                try {
+                    JSONArray resultArray = result.getJSONArray("images");
+                    if (resultArray.length() != 0) {
+                        for(int i=0; i<resultArray.length(); i++) {
+                            imagesToShow.add(JSONParser.parseToExplorePanorama(resultArray.getJSONArray(i)));
+                            // TODO update different stuff, check if friend, update visibility of panorama based on that
+                        }
+                        showImagesOnMap();
+
+                        // Fetch previews to local storage
+                        fetchPreviews();
+                    }
+                } catch(JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        });
+        request.sendRequest();
 
         return root;
     }
@@ -137,7 +159,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         // Getting references to the different views in the marker window
         TextView dateView = (TextView) v.findViewById(R.id.exploreInfoViewDateView);
         TextView userView = (TextView) v.findViewById(R.id.exploreInfoViewUserNameView);
-        windowImageView = (ImageView) v.findViewById(R.id.exploreInfoViewPreviewView);
+        ImageView previewView = (ImageView) v.findViewById(R.id.exploreInfoViewPreviewView);
 
         // Find the correct ExplorePanorama for the marker
         final String imageID = marker.getTitle();
@@ -151,54 +173,10 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
         dateView.setText(markerPanorama.getDate());
         userView.setText(markerPanorama.getUploader());
-        if(markerPanorama.getPreview() == null) {
-            // We fetch the preview from the server and assign it to the ImageView
-            Intent intent =  new Intent(getActivity(), DownloadService.class);
-            intent.putExtra("IMAGETYPE", ImageType.PREVIEW);
-            intent.putExtra("IMAGEID", imageID);
-            intent.setAction(DownloadService.NOTIFICATION + imageID + ".jpg");
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(DownloadService.NOTIFICATION + imageID + ".jpg");
-            getActivity().registerReceiver(new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
-                        Log.d("Explore", "Preview image found and results from download are OK.");
 
-                        // Create a File instance for the preview
-                        String path = context.getFilesDir() + FTPInfo.PREVIEW_LOCAL_LOCATION
-                                + imageID + ".jpg";
-
-                        // Set the drawable to the ImageView
-                        windowImageView.setImageDrawable(Drawable.createFromPath(path));
-
-                        context.unregisterReceiver(this);
-
-                        // Remove the preview from device storage
-                        File file = new File(path);
-                        if (file.delete()) {
-                            Log.d("Explore", "Preview image has been deleted");
-                        }
-
-                    }
-                }
-            }, filter);
-            getActivity().startService(intent);
-        } else {
-            // Preview exists
-            windowImageView.setImageDrawable(markerPanorama.getPreview());
-
-            // Set click listener for the ImageView
-            windowImageView.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View v, MotionEvent event) {
-                    Log.d("Explore", "Touch on ImageView registered, will call MainActivity to "
-                            + "show the panorama belonging to " + imageID);
-                    ((MainActivity) getActivity()).showPanorama("explore", imageID);
-                    return false;
-                }
-            });
-        }
+        File localFile = new File(getActivity().getFilesDir() + FTPInfo.PREVIEW_LOCAL_LOCATION + markerPanorama.getImageID() + FTPInfo.FILETYPE);
+        Drawable preview = Drawable.createFromPath(localFile.getPath());
+        previewView.setImageDrawable(preview);
 
         return v;
     }
@@ -406,28 +384,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 // Zoom automatically to the default position
                 CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(10).build();
                 googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                JReqImages request = new JReqImages(Session.getId());
-                request.setJResultListener(new JRequest.JResultListener() {
-                    @Override
-                    public void onHasResult(JSONObject result) {
-                        Log.d("Explore", result.toString());
-                        imagesToShow = new ArrayList<ExplorePanorama>();
-                        try {
-                            JSONArray resultArray = result.getJSONArray("images");
-                            if (resultArray.length() != 0) {
-                                for(int i=0; i<resultArray.length(); i++) {
-                                    imagesToShow.add(JSONParser.parseToExplorePanorama(resultArray.getJSONArray(i)));
-                                    // TODO update different stuff, check if friend, update visibility of panorama based on that
-                                }
-                                showImagesOnMap();
-                            }
-                        } catch(JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                });
-                request.sendRequest();
             }
         });
     }
@@ -494,6 +450,31 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     }
 
     private void fetchPreviews() {
+        // Fetch all the image IDs that are to be downloaded
+        String[] imageIDs = new String[imagesToShow.size()];
+        for(int i=0; i<imagesToShow.size(); i++) {
+            imageIDs[i] = imagesToShow.get(i).getImageID();
+        }
+
+        // Start the service that downloads the previews
+        Intent intent =  new Intent(getActivity(), DownloadMultiplePreviewsService.class);
+        intent.putExtra("panoramaArray", imageIDs);
+        intent.setAction(DownloadMultiplePreviewsService.NOTIFICATION);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DownloadMultiplePreviewsService.NOTIFICATION);
+        getActivity().registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                Log.d("Explore", "Recieving notification from downloaded previews");
+                if (intent.getIntExtra("result", -100)  == Activity.RESULT_OK) {
+                    Log.d("Explore", "Results OK! Unregestring reciever");
+                }
+
+            }
+        }, filter);
+        getActivity().startService(intent);
+
 
     }
 
