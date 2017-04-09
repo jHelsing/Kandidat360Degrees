@@ -350,6 +350,7 @@ public class ProfileFragment extends Fragment {
                 googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
                     @Override
                     public View getInfoWindow(Marker marker) {
+                        marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon_selected));
                         return onMarkerClicked(marker);
                     }
 
