@@ -41,7 +41,7 @@ public class DownloadMultiplePreviewsService extends IntentService {
         // Create the correct path for the file to be downloaded, both on the server and locally
         String serverFilePath = FTPInfo.PREVIEW_SERVER_LOCATION;
 
-        ArrayList<ProfilePanorama> panoramaList = intent.getParcelableArrayListExtra("panoramaArray");
+        String[] imageIDs = intent.getStringArrayExtra("panoramaArray");
 
         // Start up FTP connection and connect to the FTP server
         FTPClient ftpClient = new FTPClient();
@@ -99,8 +99,8 @@ public class DownloadMultiplePreviewsService extends IntentService {
         if(!localFolder.exists())
             localFolder.mkdirs();
 
-        for(int i=0; i<panoramaList.size(); i++){
-            String panoramaID = panoramaList.get(i).getPanoramaID();
+        for(int i=0; i<imageIDs.length; i++){
+            String panoramaID = imageIDs[i];
 
             File localFile = new File(getApplicationContext().getFilesDir() + FTPInfo.PREVIEW_LOCAL_LOCATION + panoramaID + FTPInfo.FILETYPE);
             if(!localFile.exists()) {
@@ -135,7 +135,7 @@ public class DownloadMultiplePreviewsService extends IntentService {
         } catch (IOException e){
             Log.d("FTP", "Failed to disconnect from FTP-server: " + ftpClient.getReplyString());
         }
-        publishResults(Activity.RESULT_OK, panoramaList);
+        publishResults(Activity.RESULT_OK, imageIDs);
     }
 
     /**
@@ -150,10 +150,10 @@ public class DownloadMultiplePreviewsService extends IntentService {
         this.stopSelf();
     }
 
-    private void publishResults(int result, ArrayList<ProfilePanorama> panoramaList) {
+    private void publishResults(int result, String[] imageIDs) {
         Intent intent = new Intent(NOTIFICATION);
         intent.putExtra("result", result);
-        intent.putParcelableArrayListExtra("panoramaArray", panoramaList);
+        intent.putExtra("panoramaArray", imageIDs);
         sendBroadcast(intent);
         this.stopSelf();
     }

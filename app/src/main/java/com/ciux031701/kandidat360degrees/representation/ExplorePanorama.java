@@ -1,13 +1,16 @@
 package com.ciux031701.kandidat360degrees.representation;
 
 import android.graphics.drawable.Drawable;
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.gms.maps.model.LatLng;
 
 /**
  * Created by Jonathan on 2017-04-05.
  */
 
-public class ExplorePanorama {
+public class ExplorePanorama implements Parcelable {
 
     private String imageID;
     private LatLng location;
@@ -47,6 +50,15 @@ public class ExplorePanorama {
         this.canView = canView;
     }
 
+    protected ExplorePanorama(Parcel in) {
+        imageID = in.readString();
+        location = (LatLng) in.readValue(LatLng.class.getClassLoader());
+        uploader = in.readString();
+        date = in.readString();
+        isPublic = in.readByte() != 0x00;
+        canView = in.readByte() != 0x00;
+    }
+
     public String getImageID() {
         return imageID;
     }
@@ -77,4 +89,31 @@ public class ExplorePanorama {
         this.preview = preview;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(imageID);
+        dest.writeValue(location);
+        dest.writeString(uploader);
+        dest.writeString(date);
+        dest.writeByte((byte) (isPublic ? 0x01 : 0x00));
+        dest.writeByte((byte) (canView ? 0x01 : 0x00));
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<ExplorePanorama> CREATOR = new Parcelable.Creator<ExplorePanorama>() {
+        @Override
+        public ExplorePanorama createFromParcel(Parcel in) {
+            return new ExplorePanorama(in);
+        }
+
+        @Override
+        public ExplorePanorama[] newArray(int size) {
+            return new ExplorePanorama[size];
+        }
+    };
 }

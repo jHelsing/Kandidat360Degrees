@@ -43,6 +43,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.adaptors.ExploreSearchAdapter;
+import com.ciux031701.kandidat360degrees.adaptors.ProfileFlowAdapter;
+import com.ciux031701.kandidat360degrees.communication.DownloadMultiplePreviewsService;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
 import com.ciux031701.kandidat360degrees.communication.FTPInfo;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
@@ -120,6 +122,9 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         setUpCamera(root);
         setUpMap(root, savedInstanceState);
 
+        // Fetch previews to local storage
+        fetchPreviews();
+
         return root;
     }
 
@@ -181,11 +186,10 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             getActivity().startService(intent);
         } else {
             // Preview exists
-            ImageView previewView = (ImageView) v.findViewById(R.id.exploreInfoViewPreviewView);
-            previewView.setImageDrawable(markerPanorama.getPreview());
+            windowImageView.setImageDrawable(markerPanorama.getPreview());
 
             // Set click listener for the ImageView
-            previewView.setOnTouchListener(new View.OnTouchListener() {
+            windowImageView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     Log.d("Explore", "Touch on ImageView registered, will call MainActivity to "
@@ -487,6 +491,10 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             newImageToShow.setEp(ep);
             mClusterManager.addItem(newImageToShow);
         }
+    }
+
+    private void fetchPreviews() {
+
     }
 
     public class CustomMarkerRenderer extends DefaultClusterRenderer<MyItem>{

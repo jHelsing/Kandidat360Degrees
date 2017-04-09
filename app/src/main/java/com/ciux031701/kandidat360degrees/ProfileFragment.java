@@ -150,7 +150,11 @@ public class ProfileFragment extends Fragment {
      */
     private void loadPreviews() {
         Intent intent =  new Intent(getActivity(), DownloadMultiplePreviewsService.class);
-        intent.putParcelableArrayListExtra("panoramaArray", pictures);
+        String[] imageIDs = new String[pictures.size()];
+        for (int i=0; i<pictures.size(); i++) {
+            imageIDs[i] = pictures.get(i).getPanoramaID();
+        }
+        intent.putExtra("panoramaArray", imageIDs);
         intent.setAction(DownloadMultiplePreviewsService.NOTIFICATION);
         IntentFilter filter = new IntentFilter();
         filter.addAction(DownloadMultiplePreviewsService.NOTIFICATION);
@@ -160,10 +164,10 @@ public class ProfileFragment extends Fragment {
                 Log.d("Profile", "OnReceive");
                 if (intent.getIntExtra("result", -100)  == Activity.RESULT_OK) {
                     Log.d("Profile", "Previews found and results from download are OK.");
-                    pictures = intent.getParcelableArrayListExtra("panoramaArray");
+                    String[] imageIDs = intent.getStringArrayExtra("panoramaArray");
 
-                    for(int i=0; i<pictures.size(); i++) {
-                        String panoramaID = pictures.get(i).getPanoramaID();
+                    for(int i=0; i<imageIDs.length; i++) {
+                        String panoramaID = imageIDs[i];
                         File localFile = new File(getActivity().getFilesDir() + FTPInfo.PREVIEW_LOCAL_LOCATION + panoramaID + FTPInfo.FILETYPE);
                         Drawable preview = Drawable.createFromPath(localFile.getPath());
                         pictures.get(i).setPreview(preview);
