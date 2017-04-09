@@ -125,12 +125,15 @@ public class ProfileFragment extends Fragment {
         final View v = getActivity().getLayoutInflater().inflate(R.layout.marker_info_window, null);
 
         TextView infoWindowText = (TextView) v.findViewById(R.id.infoWindowText);
+        ImageView infoWindowImage = (ImageView) v.findViewById(R.id.infoWindowImage);
         int i = 0;
         while(!marker.getTitle().equals(pictures.get(i).getPanoramaID())) {
             i++;
         }
 
         infoWindowText.setText(pictures.get(i).getDate().substring(0,10));
+
+        infoWindowImage.setImageDrawable(pictures.get(i).getPreview());
 
         return v;
     }
