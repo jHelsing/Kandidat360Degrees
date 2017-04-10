@@ -108,6 +108,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     private ArrayList<String> resultArrayList;
     private List<Address> globalList;
     private ArrayList<ExplorePanorama> imagesToShow;
+    private ArrayList<String> friends;
     private int lastSearchStringLength;
 
     @Override
@@ -127,30 +128,89 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         request.setJResultListener(new JRequest.JResultListener() {
             @Override
             public void onHasResult(JSONObject result) {
-                Log.d("Explore", result.toString());
-                imagesToShow = new ArrayList<ExplorePanorama>();
-                try {
-                    JSONArray resultArray = result.getJSONArray("images");
-                    if (resultArray.length() != 0) {
-                        ArrayList<ExplorePanorama> permissionCheckNeeded = new ArrayList<ExplorePanorama>();
-                        for(int i=0; i<resultArray.length(); i++) {
-                            imagesToShow.add(JSONParser.parseToExplorePanorama(resultArray.getJSONArray(i)));
-                            if(!imagesToShow.get(i).isPublic())
-                                permissionCheckNeeded.add(imagesToShow.get(i));
-                            else
-                                imagesToShow.get(i).setCanView(true);
-                        }
-
-                        // TODO Check the users friends, who they are and if they match private images
-
-                        showImagesOnMap();
-
-                        // Fetch previews to local storage
-                        fetchPreviews();
+            Log.d("Explore", result.toString());
+            imagesToShow = new ArrayList<ExplorePanorama>();
+            try {
+                JSONArray resultArray = result.getJSONArray("images");
+                if (resultArray.length() != 0) {
+                    for(int i=0; i<resultArray.length(); i++) {
+                        imagesToShow.add(JSONParser.parseToExplorePanorama(resultArray.getJSONArray(i)));
                     }
-                } catch(JSONException e) {
-                    e.printStackTrace();
+
+                    // TODO Check the users friends, who they are and if they match private images
+                    JReqFriends reqFriends = new JReqFriends();
+                    reqFriends.setJResultListener(new JRequest.JResultListener() {
+                        @Override
+                        public void onHasResult(JSONObject result) {
+                            Log.d("Explore", "Friends result: " + result.toString());
+                            try {
+                                JSONArray arr = result.getJSONArray("friends");
+                                Log.d("Explore", "Friends arr: " + arr.toString());
+                                friends = new ArrayList<String>();
+                                for (int i=0; i<arr.length(); i++) {
+                                    String friend = arr.getJSONObject(i).getString("name");
+                                    Log.d("Explore", "Friend: " + friend);
+                                    friends.add(friend);
+                                }
+                            } catch (JSONException e) {
+                                Log.d("Explore", "Fetching friends failed");
+                            }
+
+                            if (friends.size() != 0) {
+                                // Has friends, in other words it is required to check if the
+                                // private images are friends of the user
+                                int index = 0;
+                                while (index < imagesToShow.size()) {
+                                    boolean couldView = true;
+                                    ExplorePanorama image = imagesToShow.get(index);
+
+                                    if (image.isPublic())
+                                        image.setCanView(true);
+                                    else {
+                                        int j = 0;
+                                        for (; j<friends.size(); j++) {
+                                            if(image.getUploader().equals(friends.get(j))) {
+                                                image.setCanView(true);
+                                                j = friends.size() + 5;
+                                            }
+                                        }
+                                        if (j == friends.size()) {
+                                            couldView = false;
+                                            image.setCanView(false);
+                                        }
+                                    }
+
+                                    if (couldView)
+                                        index++;
+                                    else {
+                                        Log.d("Explore", "User can not view " + image.getImageID()
+                                            + " due to it being private and users not being friends");
+                                        imagesToShow.remove(index);
+                                        // Delete image from local storage
+                                        String path = getActivity().getFilesDir()
+                                                + FTPInfo.PREVIEW_LOCAL_LOCATION + image.getImageID()
+                                                + FTPInfo.FILETYPE;
+                                        File localFile = new File(path);
+                                        localFile.delete();
+                                    }
+                                }
+                            } else {
+                                // Can only view public photos,
+                                // just filter on what is public and what isn't
+
+                            }
+
+                            showImagesOnMap();
+
+                            // Fetch previews to local storage
+                            fetchPreviews();
+                        }
+                    });
+                    reqFriends.sendRequest();
                 }
+            } catch(JSONException e) {
+                e.printStackTrace();
+            }
             }
 
         });
@@ -183,7 +243,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         dateView.setText(markerPanorama.getDate());
         userView.setText(markerPanorama.getUploader());
 
-        File localFile = new File(getActivity().getFilesDir() + FTPInfo.PREVIEW_LOCAL_LOCATION + markerPanorama.getImageID() + FTPInfo.FILETYPE);
+        File localFile = new File(getActivity().getFilesDir() + FTPInfo.PREVIEW_LOCAL_LOCATION
+                + markerPanorama.getImageID() + FTPInfo.FILETYPE);
         Drawable preview = Drawable.createFromPath(localFile.getPath());
         previewView.setImageDrawable(preview);
 
@@ -200,7 +261,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         searchMenuItem.setIcon(searchIcon);
         searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 
-        MenuItemCompat.setOnActionExpandListener(searchMenuItem, new MenuItemCompat.OnActionExpandListener() {
+        MenuItemCompat.setOnActionExpandListener(searchMenuItem,
+                new MenuItemCompat.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
                 return true;
@@ -215,19 +277,23 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         });
         earthButton = menu.findItem(R.id.togglePermission);
         searchView.setQueryHint("Search!");
-        int searchPlateId = searchView.getContext().getResources().getIdentifier("android:id/search_plate", null, null);
+        int searchPlateId = searchView.getContext().getResources()
+                .getIdentifier("android:id/search_plate", null, null);
         View searchPlate = searchView.findViewById(searchPlateId);
         if (searchPlate != null) {
             searchPlate.setBackgroundColor(Color.DKGRAY);
-            int searchTextId = searchPlate.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+            int searchTextId = searchPlate.getContext().getResources()
+                    .getIdentifier("android:id/search_src_text", null, null);
             TextView searchText = (TextView) searchPlate.findViewById(searchTextId);
             if (searchText != null) {
                 searchText.setTextColor(Color.WHITE);
                 searchText.setHintTextColor(Color.WHITE);
             }
         }
-        ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setTextColor(Color.BLACK);
-        ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(Color.LTGRAY);
+        ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text))
+                .setTextColor(Color.BLACK);
+        ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text))
+                .setHintTextColor(Color.LTGRAY);
         searchView.setBackgroundColor(Color.WHITE);
         searchView.setOnQueryTextListener(this);
 
@@ -282,7 +348,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         try {
             searchListView.setVisibility(View.GONE);
             View currentFocus = getActivity().getCurrentFocus();
-            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) getActivity()
+                    .getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             performSearch(query);
         } catch (IOException e) {
@@ -311,7 +378,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             exploreSearchAdapter.clear();
             for (Address address : globalList) {
 
-                System.out.println("Adding result: " + address.getLocality() + address.getFeatureName() + address.getAdminArea());
+                System.out.println("Adding result: " + address.getLocality()
+                        + address.getFeatureName() + address.getAdminArea());
                 if (address.getLocality() != null) {
                     resultArrayList.add(address.getLocality() + ", " + address.getCountryName());
                 }
@@ -391,7 +459,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 googleMap.addMarker(position);
 
                 // Zoom automatically to the default position
-                CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(10).build();
+                CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg)
+                        .zoom(10).build();
                 googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             }
         });
@@ -400,7 +469,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     private void setUpSearchFunctionality(View root) {
         resultArrayList = new ArrayList<>();
         searchListView = (ListView) root.findViewById(R.id.searchListView);
-        exploreSearchAdapter = new ExploreSearchAdapter(resultArrayList, getActivity().getApplicationContext());
+        exploreSearchAdapter = new ExploreSearchAdapter(resultArrayList,
+                getActivity().getApplicationContext());
         searchListView.setAdapter(exploreSearchAdapter);
         searchListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -410,7 +480,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                     performSearch((String)exploreSearchAdapter.getItemWithoutCountry(i));
                     //closes virtual keyboard
                     View currentFocus = getActivity().getCurrentFocus();
-                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = (InputMethodManager)getActivity()
+                            .getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
                 } catch (IOException e) {
                     e.printStackTrace();
