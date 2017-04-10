@@ -79,7 +79,11 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
             String city;
             String country;
             if(address.size() != 0){
-                city = address.get(0).getLocality();
+                if(address.get(0).getLocality() != null) {
+                    city = address.get(0).getLocality();
+                } else {
+                    city = "Unknown City";
+                }
                 country = address.get(0).getCountryName();
                 locationText.setText(city + ", " + country);
             } else {
