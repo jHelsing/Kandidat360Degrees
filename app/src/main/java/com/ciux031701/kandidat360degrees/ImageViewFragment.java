@@ -46,7 +46,10 @@ public class ImageViewFragment extends Fragment{
         View root = inflater.inflate(R.layout.fragment_imageview, container, false);
         origin = getArguments().getString("origin");
         imageid = getArguments().getString("imageid");
-        image = ((ArrayList<Drawable>) getArguments().getSerializable("panorama")).get(0);
+        if(origin.equals("profile")) {
+            image = ((ArrayList<Drawable>) getArguments().getSerializable("panorama")).get(0);
+            imageView1.setImageDrawable(image);
+        }
 
 
         doneButton = (ImageButton)root.findViewById(R.id.sendToShareButton);
@@ -78,8 +81,6 @@ public class ImageViewFragment extends Fragment{
         }
         scrollView = (HorizontalScrollView) root.findViewById(R.id.horizontalScrollView);
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
-
-        imageView1.setImageDrawable(image);
 
         backButton = (ImageButton)root.findViewById(R.id.viewingBackButton);
         //Scroll to middle dependent on image size
