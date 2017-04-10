@@ -254,12 +254,7 @@ public class ProfileFragment extends Fragment {
         }
         favCountView.setText(favString);
 
-        try {
-            if(!getArguments().getString("isFriend").equals(null))
-                isFriend = true;
-        } catch (NumberFormatException e){
-            e.printStackTrace();
-        }
+        isFriend = getArguments().getBoolean("isFriend");
     }
 
     private void setUpProfileMenuButton() {
@@ -345,12 +340,23 @@ public class ProfileFragment extends Fragment {
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap mMap) {
-
                 googleMap = mMap;
                 googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+                    Marker oldMarker;
                     @Override
-                    public View getInfoWindow(Marker marker) {
+                    public View getInfoWindow(final Marker marker) {
                         marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon_selected));
+                        if(oldMarker != null && !(marker.getTitle().equals(oldMarker.getTitle())))
+                            oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
+                        oldMarker = marker;
+
+                        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                            @Override
+                            public void onMapClick(LatLng latLng) {
+                                marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
+                            }
+                        });
+
                         return onMarkerClicked(marker);
                     }
 
@@ -407,7 +413,8 @@ public class ProfileFragment extends Fragment {
                 }
             }
             context.unregisterReceiver(this);
-            loadPreviews();
+            if(pictures.size() != 0)
+                loadPreviews();
         }
     }
 
@@ -437,6 +444,7 @@ public class ProfileFragment extends Fragment {
                     viewSwitchButton.setImageDrawable(getResources()
                             .getDrawable(R.drawable.disable_map_view_icon_profile));
                     mapView.setVisibility(View.GONE);
+                    googleMap.clear();
                     profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
                     pictureListView.setAdapter(profileFlowAdapter);
                 }
