@@ -73,6 +73,8 @@ public class ExplorePanorama implements Parcelable {
         this.canView = canView;
     }
 
+    public boolean getCanView() { return this.canView;}
+
     @Override
     public int describeContents() {
         return 0;
