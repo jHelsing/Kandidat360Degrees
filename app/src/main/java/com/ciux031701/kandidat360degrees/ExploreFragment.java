@@ -164,6 +164,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                                     boolean couldView = true;
                                     ExplorePanorama image = imagesToShow.get(index);
 
+                                    Log.d("Explore", "Checking Image ID: " + image.getImageID() + " Index: " + index);
+
                                     if (image.isPublic())
                                         image.setCanView(true);
                                     else {
@@ -186,18 +188,18 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                                         Log.d("Explore", "User can not view " + image.getImageID()
                                             + " due to it being private and users not being friends");
                                         imagesToShow.remove(index);
-                                        // Delete image from local storage
-                                        String path = getActivity().getFilesDir()
-                                                + FTPInfo.PREVIEW_LOCAL_LOCATION + image.getImageID()
-                                                + FTPInfo.FILETYPE;
-                                        File localFile = new File(path);
-                                        localFile.delete();
+                                        Log.d("Explore", "Removing index: " + index);
                                     }
+                                    Log.d("Explore", "Index: " + index);
                                 }
                             } else {
                                 // Can only view public photos,
                                 // just filter on what is public and what isn't
 
+                            }
+
+                            for(int i=0; i<imagesToShow.size(); i++) {
+                                Log.d("Explore", "Image ID: " + imagesToShow.get(i).getImageID() + " Index: " + i + " Can view: " + imagesToShow.get(i).getCanView());
                             }
 
                             showImagesOnMap();
