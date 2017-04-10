@@ -31,6 +31,7 @@ import com.ciux031701.kandidat360degrees.communication.JReqRemoveFriend;
 import com.ciux031701.kandidat360degrees.communication.JReqSendFriendrequest;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.communication.Session;
+import com.ciux031701.kandidat360degrees.communication.UploadService;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -46,7 +47,9 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -463,11 +466,33 @@ public class ProfileFragment extends Fragment {
         //Detects request codes
         if(requestCode==GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
             Uri selectedImage = data.getData();
-            Bitmap bitmap = null;
             try {
-                bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
-                ((ImageView) root.findViewById(R.id.profileProfileImage)).setImageDrawable(new BitmapDrawable(getResources(), bitmap));
+                final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
+                final File file = new File(getActivity().getFilesDir() + FTPInfo.PROFILE_LOCAL_LOCATION + Session.getUser() + FTPInfo.FILETYPE);
+                OutputStream outputStream = new FileOutputStream(file.getPath());
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
 
+                //Start the upload service
+                Intent intent =  new Intent(getActivity(), UploadService.class);
+                intent.putExtra("IMAGETYPE", ImageType.PROFILE);
+                intent.putExtra("IMAGEID", Session.getUser());
+                intent.setAction(UploadService.NOTIFICATION + Session.getUser() + FTPInfo.FILETYPE);
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(UploadService.NOTIFICATION + Session.getUser() + FTPInfo.FILETYPE);
+                getActivity().registerReceiver(new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
+                            ((ImageView) root.findViewById(R.id.profileProfileImage)).setImageDrawable(new BitmapDrawable(getResources(), bitmap));
+                            if (file.delete()) {
+                                Log.d("Profile", "Profile image has been deleted after upload");
+                            }
+                        } else
+                            Toast.makeText(getActivity(), "Could not upload the profile picture, please try again later.",Toast.LENGTH_SHORT).show();
+                        getActivity().unregisterReceiver(this);
+                    }
+                }, filter);
+                getActivity().startService(intent);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
