@@ -81,8 +81,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private Sensor rotationVector;
     float[] mGravity;
     float[] mGeomagnetic;
-    double currentDegrees;
-    double lastDegree;
+    float currentDegrees;
+    float lastDegree;
     private float[] mRotationMatrix;
 
     private boolean isVertical;
@@ -97,18 +97,16 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private DrawerLayout mDrawerLayout;
     private ArrayList<Mat> listOfTakenImages = new ArrayList<>();
     private int nbrOfImages = 20;
-    private double targetDegree;
+    private float targetDegree;
 
     private Bundle args;
     private ProgressBar angleProgressBar;
-    private double startGyroDegree;
+    private float startGyroDegree;
     private int lastProgressAngle;
-    private boolean isHalfWay; //temporary until we get actual picture steps going
     private float orientation[];
     float rField[], iField[];
     private LinkedList<Double> previousAngles;
     private boolean isFirstSensorChanged;
-    private boolean timerInProcess;
     private boolean proximityCheckerInProgress;
 
     @Override
@@ -116,14 +114,12 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         View root = inflater.inflate(R.layout.fragment_camera, container, false);
 
         mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
-        timerInProcess = false;
         previousAngles = new LinkedList();
         proximityCheckerInProgress = false;
         isVertical = false;
         isFirstSensorChanged = true;
         captureInProgress = false;
 
-        isHalfWay = false;
         lastProgressAngle = 0;
 
         lastDegree = 0;
@@ -174,7 +170,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 }else {
                     captureInProgress = true;
                     captureButton.setImageResource(R.drawable.temp_check_black);
-                    angleProgressBar.setVisibility(View.VISIBLE);
+                    //angleProgressBar.setVisibility(View.VISIBLE);
                     backButton.setVisibility(View.GONE);
                     takePicture();
                 }
@@ -230,8 +226,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             Utils.bitmapToMat(bitmap, mat);
             listOfTakenImages.add(mat);
 
-            targetDegree = startGyroDegree + listOfTakenImages.size() * (360 / nbrOfImages);
-            mSurfaceViewDraw.setTargetDegree((int) targetDegree);
+            targetDegree = fromDegreeToProgress(startGyroDegree + listOfTakenImages.size() * (360 / nbrOfImages));
+            mSurfaceViewDraw.setTargetDegree(targetDegree);
             mSurfaceViewDraw.setTargetAcquired(true);
             //Start preview of the camera & set safe to take pictures to true
             mCam.startPreview();
@@ -419,10 +415,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 }
 
                 //If the targetangle is the same as current and we dont have a proximity timer started, start one
-                int diff = Math.abs((int)fromDegreeToProgress(currentDegrees)-(int)fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree()));
-                if(!proximityCheckerInProgress && diff < 3 &&
-                        mSurfaceViewDraw.getVerticalOffset((int)fromOrientationToDegrees(orientation[1])) < 3 &&
-                        mSurfaceViewDraw.getVerticalOffset((int)fromOrientationToDegrees(orientation[1])) > -3){
+                float diff = Math.abs(fromDegreeToProgress(currentDegrees)-mSurfaceViewDraw.getTargetDegree());
+                if(!proximityCheckerInProgress && diff <= 2 &&
+                        mSurfaceViewDraw.getVerticalOffset(fromOrientationToDegrees(orientation[1])) <= 2 &&
+                        mSurfaceViewDraw.getVerticalOffset(fromOrientationToDegrees(orientation[1])) >= -2){
 
                     if(!mSurfaceViewDraw.isStillShowingGreen()){
                         mSurfaceViewDraw.setCircleColor(Color.YELLOW);
@@ -433,7 +429,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                         @Override
                         public void run() {
                             //is the current angle close enough to the target angle still?
-                            if ((int)fromDegreeToProgress(currentDegrees) > (int)(fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree())-3) && (int)fromDegreeToProgress(currentDegrees) < (int)(fromDegreeToProgress(mSurfaceViewDraw.getTargetDegree())+3)){
+                            if (fromDegreeToProgress(currentDegrees) > (mSurfaceViewDraw.getTargetDegree()-2) && fromDegreeToProgress(currentDegrees) < (mSurfaceViewDraw.getTargetDegree()+2)){
                                 //close enough
                                 mSurfaceViewDraw.setCircleColor(Color.GREEN);
                                 takePicture();
@@ -450,15 +446,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     }, 1000);//1000 milliseconds check
                 }
 
-                int newProgressAngle = (int)fromDegreeToProgress(currentDegrees);
-                System.out.println("orintation[0]: " + orientation[0] + " orintation[1]: " + orientation[1]);
-                System.out.println("current: " + currentDegrees);
-                System.out.println("progress: " + newProgressAngle);
-
                 lastDegree = currentDegrees;
-                mSurfaceViewDraw.setCurrentDegree((int)currentDegrees);
-                mSurfaceViewDraw.setCurrentVerticalDegree((int)fromOrientationToDegrees(orientation[1]));
-                angleProgressBar.setProgress(newProgressAngle);
+                mSurfaceViewDraw.setCurrentDegree(fromDegreeToProgress(currentDegrees));
+                mSurfaceViewDraw.setCurrentVerticalDegree(fromOrientationToDegrees(orientation[1]));
             }
         }
     }
@@ -481,14 +471,14 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             nbrOfPicturesTaken++;
         }
     }
-    public double fromOrientationToDegrees(double orientation){
+    public float fromOrientationToDegrees(double orientation){
         if(orientation<0){
-            return 360-Math.abs(orientation);
+            return (float)(360-Math.abs(orientation));
         }else
-            return orientation;
+            return (float)orientation;
     }
 
-    public double fromDegreeToProgress(double degree) {
+    public float fromDegreeToProgress(float degree) {
         if (degree >= startGyroDegree) {
             return degree - startGyroDegree;
         } else {

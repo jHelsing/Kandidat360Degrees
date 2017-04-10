@@ -28,15 +28,17 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     private Point center;
     private ShapeDrawable filledCircle;
     private ShapeDrawable aimCircle;
-    private int targetDegree;
-    private Integer currentDegree;
-    private int currentVerticalDegree;
+    private float targetDegree;
+    private float currentDegree;
+    private float currentVerticalDegree;
     private int radius = 40;
     private int unfilledRadius =0;
     private int width;
     private float degToPixFactor;
     private boolean targetAcquired = false;
     private boolean isStillShowingGreen;
+    private float verticalOffset;
+    private float horizontalOffset;
 
     public DrawDotSurfaceView(Context context) {
         super(context);
@@ -106,11 +108,13 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    paint.setColor(Color.RED);
                     filledCircle.getPaint().setColor(Color.RED);
                     isStillShowingGreen=false;
                 }
             }, 1000);
         }
+        paint.setColor(color);
         filledCircle.getPaint().setColor(color); //default is black
     }
 
@@ -124,38 +128,43 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
 
         aimCircle.draw(canvas);
         if(targetAcquired) {
-            int deltaDegree = currentDegree - targetDegree; //positive value - right of targetDegree
-            if(deltaDegree >= -1 && deltaDegree <= 1){
-                deltaDegree=0;
+            horizontalOffset = currentDegree - targetDegree; //positive value - right of targetDegree
+            verticalOffset = getVerticalOffset(currentVerticalDegree);
+            if(horizontalOffset >= -2 && horizontalOffset <= 2 && verticalOffset >= -2 && verticalOffset <= 2 ){
+                horizontalOffset=0;
+                verticalOffset=0;
             }
-            filledCircle.setBounds(getNewBounds(deltaDegree));
-            filledCircle.draw(canvas);
+            //filledCircle.setBounds(getNewBounds(deltaDegree));
+            float dPixelVertical = Math.round(verticalOffset*degToPixFactor);
+            float dPixel = Math.round(horizontalOffset*degToPixFactor);
+            canvas.drawCircle(center.x-dPixel,center.y-dPixelVertical,radius,paint);
+            //filledCircle.draw(canvas);
         }
     }
+    /*
     private Rect getNewBounds(int dDeg){
         int dPixel = Math.round(dDeg*degToPixFactor);
         int dPixelVertical = Math.round(getVerticalOffset(currentVerticalDegree)*degToPixFactor);
         return new Rect(center.x-dPixel-radius,center.y-dPixelVertical-radius,center.x+radius-dPixel,center.y+radius-dPixelVertical);
-    }
+    }*/
 
-    public int getVerticalOffset(int degree){
-        //latches onto center if close enough
-        if(degree<=1&&degree>=1){
-            return 0;
-        }
+    public float getVerticalOffset(float degree){
+        float returnDegree;
+
         if(degree>180){
             //*-1 is how we define whats is up and down
-            return (360-degree)*-1;
+            returnDegree = (360-degree)*-1;
         }else{
-            return degree;
+            returnDegree = degree;
         }
+        return returnDegree;
     }
 
-    public void setTargetDegree(int targetDegree) {
+    public void setTargetDegree(float targetDegree) {
         this.targetDegree = targetDegree;
     }
 
-    public void setCurrentDegree(int currentDegree) {
+    public void setCurrentDegree(float currentDegree) {
         this.currentDegree = currentDegree;
     }
 
@@ -170,7 +179,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
 
     }
 
-    public double getTargetDegree(){
+    public float getTargetDegree(){
         return this.targetDegree;
     }
     @Override
@@ -179,7 +188,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         Display display = ((Activity)getContext()).getWindowManager().getDefaultDisplay();
         display.getRectSize(rectangle);
         width = rectangle.width(); //pixlar tror vi
-        degToPixFactor = (width*40)/(360*3);
+        degToPixFactor = ((width)*40)/(360*3);
 
         drawThread = new DrawThread(getHolder(),this);
         startThread();
@@ -196,7 +205,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         drawThread = null;
     }
 
-    public void setCurrentVerticalDegree(int currentVerticalDegree) {
+    public void setCurrentVerticalDegree(float currentVerticalDegree) {
         this.currentVerticalDegree = currentVerticalDegree;
     }
 }
