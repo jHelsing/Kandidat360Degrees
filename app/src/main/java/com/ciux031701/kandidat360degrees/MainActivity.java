@@ -64,6 +64,11 @@ import java.util.ArrayList;
  */
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+    static {
+        System.loadLibrary("opencv_java3");
+        System.loadLibrary("MyLib");
+    }
+
     private String[] mListOptions;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;

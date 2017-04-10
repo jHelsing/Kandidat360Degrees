@@ -17,10 +17,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/surfaceView"/>
-    <SurfaceView
+    <com.ciux031701.kandidat360degrees.DrawDotSurfaceView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/surfaceViewDraw"/>
+        android:id="@+id/surfaceViewDraw">
+    </com.ciux031701.kandidat360degrees.DrawDotSurfaceView>
 
     <ImageButton
         android:id="@+id/backButton"
@@ -45,8 +46,9 @@
         android:layout_height="70dp"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="490dp"
-        opencv:srcCompat="@drawable/open_camera_icon"
-        android:background="@null" />
+        android:background="@null"
+        android:scaleType="fitXY"
+        opencv:srcCompat="@drawable/open_camera_icon" />
 
     <ImageButton
         opencv:srcCompat="@drawable/temp_fullscreen"
@@ -85,15 +87,6 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
         android:visibility="gone" />
-
-    <ImageView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        opencv:srcCompat="@android:drawable/ic_menu_upload"
-        android:id="@+id/angleImage"
-        android:layout_alignTop="@+id/backButton"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
 
 
 </RelativeLayout>
