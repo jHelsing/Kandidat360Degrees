@@ -252,7 +252,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 + markerPanorama.getImageID() + FTPInfo.FILETYPE);
         Drawable preview = Drawable.createFromPath(localFile.getPath());
         previewView.setImageDrawable(preview);
-
         return v;
     }
 
@@ -575,7 +574,12 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         protected void onBeforeClusterItemRendered(MyItem item,
                                                    MarkerOptions markerOptions) {
             // TODO change which bitmap to display
-            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
+            if (item.getEp().getUploader().equals(Session.getUser()))
+                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon));
+            else if (item.getEp().isPublic())
+                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
+            else
+                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon));
         }
     }
 }

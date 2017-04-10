@@ -75,5 +75,7 @@ public class MyItem implements ClusterItem {
     public void setEp(ExplorePanorama ep) {
         this.ep = ep;
     }
+
+    public ExplorePanorama getEp() {return ep; }
 }
 
