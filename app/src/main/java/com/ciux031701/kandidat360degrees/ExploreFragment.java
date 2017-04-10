@@ -137,7 +137,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                         imagesToShow.add(JSONParser.parseToExplorePanorama(resultArray.getJSONArray(i)));
                     }
 
-                    // TODO Check the users friends, who they are and if they match private images
                     JReqFriends reqFriends = new JReqFriends();
                     reqFriends.setJResultListener(new JRequest.JResultListener() {
                         @Override
