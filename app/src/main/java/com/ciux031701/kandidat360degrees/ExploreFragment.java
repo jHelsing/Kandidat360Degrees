@@ -195,11 +195,15 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                             } else {
                                 // Can only view public photos,
                                 // just filter on what is public and what isn't
-
-                            }
-
-                            for(int i=0; i<imagesToShow.size(); i++) {
-                                Log.d("Explore", "Image ID: " + imagesToShow.get(i).getImageID() + " Index: " + i + " Can view: " + imagesToShow.get(i).getCanView());
+                                int i = 0;
+                                while (i < imagesToShow.size()) {
+                                    ExplorePanorama image = imagesToShow.get(i);
+                                    if (!image.isPublic()) {
+                                        imagesToShow.remove(i);
+                                    } else {
+                                        i++;
+                                    }
+                                }
                             }
 
                             showImagesOnMap();
