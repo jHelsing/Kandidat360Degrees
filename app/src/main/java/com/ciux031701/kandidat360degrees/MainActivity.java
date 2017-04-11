@@ -338,7 +338,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Intent intent =  new Intent(this, DownloadService.class);
         intent.putExtra("IMAGETYPE", ImageType.PANORAMA);
         intent.putExtra("IMAGEID", imageID);
-        intent.putExtra("TYPE", "DOWNLOAD");
         intent.setAction(DownloadService.NOTIFICATION + imageID + ".jpg");
         IntentFilter filter = new IntentFilter();
         filter.addAction(DownloadService.NOTIFICATION + imageID + ".jpg");
@@ -348,26 +347,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
                     Log.d("MainActivity", "Panorama image found and results from download are OK.");
 
-                    String path = context.getFilesDir() + "/panoramas/"
-                            + imageID + ".jpg";
-                    Drawable panoramaImage = Drawable.createFromPath(path);
-
-                    File file = new File(path);
-                    if (file.delete()) {
-                        Log.d("MainActivity", "Panorama image has been deleted");
-                    }
                     context.unregisterReceiver(this);
 
                     Bundle args = new Bundle();
                     args.putString("origin", origin);
                     args.putString("imageid", imageID);
-                    ArrayList<Drawable> arrayList = new ArrayList<Drawable>();
-                    arrayList.add(panoramaImage);
-                    args.putSerializable("panorama", arrayList);
                     ImageViewFragment fragment = new ImageViewFragment();
                     fragment.setArguments(args);
                     FragmentManager fragmentManager = getFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(origin).commit();
                 }
             }
         }, filter);
