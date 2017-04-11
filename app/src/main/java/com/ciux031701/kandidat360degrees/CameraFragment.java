@@ -7,10 +7,8 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.hardware.Camera;
@@ -19,12 +17,10 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -34,29 +30,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-
 import org.opencv.core.Mat;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
-
 import com.ciux031701.kandidat360degrees.representation.NativePanorama;
-
 import org.opencv.android.Utils;
 import org.opencv.imgcodecs.Imgcodecs;
-
 import java.io.File;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import static android.content.ContentValues.TAG;
-
 
 /**
  * Created by boking on 2017-02-17.
@@ -68,20 +53,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private ImageButton backButton;
     private ImageView holdVerticallyImage;
     private ImageButton captureButton;
-    private ImageView previewImage;
 
     private SurfaceView mSurfaceView;
     private DrawDotSurfaceView mSurfaceViewDraw;
     private Camera mCam;
 
-    //Sensor stuff
-    private Sensor accelerometer;
-    private Sensor magnetometer;
-    private Sensor gyroscope;
-    private SensorManager sensorManager;
-    private Sensor rotationVector;
-    float[] mGravity;
-    float[] mGeomagnetic;
     float currentDegrees;
     float lastDegree;
     private float[] mRotationMatrix;
@@ -89,24 +65,19 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private boolean isVertical;
     private boolean captureInProgress;
     private boolean isSafeToTakePicture = true; //is it safe to capture a picture?
-    private int nbrOfPicturesTaken = 0; //number of pictures taken in the panorama
+    private int nbrOfPicturesTaken = 0; //nbr of currently taken pictures
 
     private ProgressDialog progressDialog;
-    private Mat resultPanorama;
     private Bitmap resultPanoramaBmp;
 
     private DrawerLayout mDrawerLayout;
     private ArrayList<Mat> listOfTakenImages = new ArrayList<>();
     private int nbrOfImages = 20;
-    private float targetDegree;
 
-    private Bundle args;
-    private ProgressBar angleProgressBar;
     private float startGyroDegree;
-    private int lastProgressAngle;
     private float orientation[];
-    float rField[], iField[];
-    private LinkedList<Double> previousAngles;
+
+    private LinkedList previousAngles;
     private boolean isFirstSensorChanged;
     private boolean proximityCheckerInProgress;
 
@@ -121,24 +92,17 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         isFirstSensorChanged = true;
         captureInProgress = false;
 
-        lastProgressAngle = 0;
-
         lastDegree = 0;
         //For the sensors:
-        sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        rotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        SensorManager sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        Sensor magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        Sensor rotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_UI);
         sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
-        sensorManager.registerListener(this,rotationVector,SensorManager.SENSOR_DELAY_UI);
-
-        orientation = new float[3];
-        mRotationMatrix = new float[9];
+        sensorManager.registerListener(this, rotationVector,SensorManager.SENSOR_DELAY_UI);
 
         //GUI: buttons & views
-        angleProgressBar = (ProgressBar) root.findViewById(R.id.angleProgressBar);
-        angleProgressBar.setVisibility(View.GONE);
         captureButton = (ImageButton) root.findViewById(R.id.sendToShareButton);
         holdVerticallyText = (TextView) root.findViewById(R.id.holdVerticallyText);
         holdVerticallyImage = (ImageView) root.findViewById(R.id.holdVerticallyImage);
@@ -148,7 +112,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
         orientation = new float[3];
         mRotationMatrix = new float[9];
-
 
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -162,9 +125,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             }
         });
 
-        //If not taking pictures or in finalization -- take a picture.
-        //If in finalization - switch to upload-fragment.
-        //If taken a picture - go to finalization (show the panorama)
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -174,14 +134,12 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 }else {
                     captureInProgress = true;
                     captureButton.setImageResource(R.drawable.temp_check_black);
-                    //angleProgressBar.setVisibility(View.VISIBLE);
                     backButton.setVisibility(View.GONE);
                     takePicture();
                 }
             }
         });
 
-        //Views to show the camera and the most recently taken picture in:
         mSurfaceView = (SurfaceView) root.findViewById(R.id.surfaceView);
         mSurfaceView.getHolder().addCallback(mSurfaceCallback);
         mSurfaceView.setVisibility(View.GONE);
@@ -213,13 +171,12 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         super.onStart();
     }
 
-    //To save pictures & show the last taken picture:
     private final Camera.PictureCallback jpegCallback = new Camera.PictureCallback() {
         public void onPictureTaken(byte[] data, Camera camera) {
             //byte[] --> bitmap
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 
-            //Rotate the picture to fit portrait mode-- This is whats taking so long
+            //Rotate the picture to fit portrait mode
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
@@ -230,7 +187,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             Utils.bitmapToMat(bitmap, mat);
             listOfTakenImages.add(mat);
 
-            targetDegree = fromDegreeToProgress(startGyroDegree + listOfTakenImages.size() * (360 / nbrOfImages));
+            float targetDegree = fromDegreeToProgress(startGyroDegree + listOfTakenImages.size() * (360 / nbrOfImages));
             mSurfaceViewDraw.setTargetDegree(targetDegree);
             mSurfaceViewDraw.setTargetAcquired(true);
             //Start preview of the camera & set safe to take pictures to true
@@ -264,7 +221,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 mCam.setParameters(myParameters);
                 //Rotate to portrait mode (90 degrees)
                 mCam.setDisplayOrientation(90);
-
                 mCam.startPreview();
             }
         }
@@ -283,7 +239,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             for (int i = 0; i < nbrOfImages; i++) {
                 imageAddresses[i] = listOfTakenImages.get(i).getNativeObjAddr();
             }
-            resultPanorama = new Mat(); //a mat to store the final panorama in
+            Mat resultPanorama = new Mat();
             NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
             //Save the image to internal memory ------------------ not working :(
             File path = new File(getActivity().getFilesDir() + "/panoramas/");
@@ -363,15 +319,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             mCam = Camera.open(0); // 0 = back camera
     }
 
-    //Low-pass filter
-    protected float[] lowPass(float[] input, float[] output) {
-        if (output == null) return input;
-        for (int i = 0; i < input.length; i++) {
-            output[i] = output[i] + 0.15f * (input[i] - output[i]);
-        }
-        return output;
-    }
-
     //Sensors:
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
@@ -388,6 +335,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             orientation[1] = (float) Math.toDegrees(orientation[1]);
             orientation[2] = (float) Math.toDegrees(orientation[2]);
 
+            //The device is considered vertical if the pitch is in the range -12-12
             if (orientation[1] > -12 && orientation[1] <12) {
                 if (!isVertical) {
                     isVertical = true;
@@ -409,16 +357,16 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 }
             }
 
+            //Save current degree if taking a pano and holding phone vertically
             if(captureInProgress&&isVertical){
-
                 currentDegrees = fromOrientationToDegrees(orientation[0]);
-
                 if(isFirstSensorChanged){
                     isFirstSensorChanged=false;
                     startGyroDegree=currentDegrees;
                 }
 
-                //If the targetangle is the same as current and we dont have a proximity timer started, start one
+                //If the difference between target and currentangle are <= 2 (both horizontal and vertical)
+                // and we dont have a proximity timer started, start one
                 float diff = Math.abs(fromDegreeToProgress(currentDegrees)-mSurfaceViewDraw.getTargetDegree());
                 if(!proximityCheckerInProgress && diff <= 2 &&
                         mSurfaceViewDraw.getVerticalOffset(fromOrientationToDegrees(orientation[1])) <= 2 &&
@@ -427,14 +375,15 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     if(!mSurfaceViewDraw.isStillShowingGreen()){
                         mSurfaceViewDraw.setCircleColor(Color.YELLOW);
                     }
+
                     proximityCheckerInProgress=true;
                     final Handler handler = new Handler();
+
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             //is the current angle close enough to the target angle still?
                             if (fromDegreeToProgress(currentDegrees) > (mSurfaceViewDraw.getTargetDegree()-2) && fromDegreeToProgress(currentDegrees) < (mSurfaceViewDraw.getTargetDegree()+2)){
-                                //close enough
                                 mSurfaceViewDraw.setCircleColor(Color.GREEN);
                                 takePicture();
 
@@ -458,7 +407,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     }
 
     private void sendPanoramaToImageView(){
-        args = new Bundle();
+        Bundle args = new Bundle();
         args.putString("origin", "camera");
         args.putParcelable("image", resultPanoramaBmp);
         ImageViewFragment fragment = new ImageViewFragment();
@@ -490,21 +439,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         }
     }
 
-    public double fromSensorToDegrees(float sensorValue) {
-        if (sensorValue < 0) {
-            return 60 * sensorValue + 360;
-        } else {
-            return 60 * sensorValue;
-        }
-    }
-
     @Override
-    public void onAccuracyChanged(Sensor sensor, int i) {
-
-    }
+    public void onAccuracyChanged(Sensor sensor, int i) {}
 
     private Camera.Size getBestPreviewSize(Camera.Parameters parameters) {
-        Camera.Size bestSize = null;
+        Camera.Size bestSize;
         List<Camera.Size> listOfSizes = parameters.getSupportedPreviewSizes();
         bestSize = listOfSizes.get(0);
         for (int i = 1; i < listOfSizes.size(); i++) {
@@ -514,5 +453,4 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         }
         return bestSize;
     }
-
 }
