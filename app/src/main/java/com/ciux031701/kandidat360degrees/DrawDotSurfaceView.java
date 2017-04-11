@@ -15,9 +15,6 @@ import android.util.AttributeSet;
 import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
-
-import org.w3c.dom.Attr;
 
 /**
  * Created by Anna on 2017-03-28.
@@ -26,14 +23,12 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     private DrawThread drawThread;
     private Paint paint = new Paint();
     private Point center;
-    private ShapeDrawable filledCircle;
     private ShapeDrawable aimCircle;
     private float targetDegree;
     private float currentDegree;
     private float currentVerticalDegree;
     private int radius = 40;
     private int unfilledRadius =0;
-    private int width;
     private float degToPixFactor;
     private boolean targetAcquired = false;
     private boolean isStillShowingGreen;
@@ -63,9 +58,6 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         paint.setColor(Color.RED);
         isStillShowingGreen=false;
         setFocusable(false);
-        filledCircle = new ShapeDrawable(new OvalShape());
-        filledCircle.getPaint().setColor(Color.RED);
-        filledCircle.setBounds(center.x - radius, center.y - radius, center.x + radius, center.y + radius); //needed, the shape is not drawn
 
         aimCircle = new ShapeDrawable(new OvalShape());
         aimCircle.getPaint().setStyle(Paint.Style.STROKE);
@@ -109,13 +101,11 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
                 @Override
                 public void run() {
                     paint.setColor(Color.RED);
-                    filledCircle.getPaint().setColor(Color.RED);
                     isStillShowingGreen=false;
                 }
             }, 1000);
         }
         paint.setColor(color);
-        filledCircle.getPaint().setColor(color); //default is black
     }
 
     @Override
@@ -130,23 +120,17 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         if(targetAcquired) {
             horizontalOffset = currentDegree - targetDegree; //positive value - right of targetDegree
             verticalOffset = getVerticalOffset(currentVerticalDegree);
-            if(horizontalOffset >= -2 && horizontalOffset <= 2 && verticalOffset >= -2 && verticalOffset <= 2 ){
+
+            //Checks if the dot should snap to the center
+            if(horizontalOffset >= -2 && horizontalOffset <= 2 && verticalOffset >= -2 && verticalOffset <= 2 || isStillShowingGreen){
                 horizontalOffset=0;
                 verticalOffset=0;
             }
-            //filledCircle.setBounds(getNewBounds(deltaDegree));
             float dPixelVertical = Math.round(verticalOffset*degToPixFactor);
             float dPixel = Math.round(horizontalOffset*degToPixFactor);
             canvas.drawCircle(center.x-dPixel,center.y-dPixelVertical,radius,paint);
-            //filledCircle.draw(canvas);
         }
     }
-    /*
-    private Rect getNewBounds(int dDeg){
-        int dPixel = Math.round(dDeg*degToPixFactor);
-        int dPixelVertical = Math.round(getVerticalOffset(currentVerticalDegree)*degToPixFactor);
-        return new Rect(center.x-dPixel-radius,center.y-dPixelVertical-radius,center.x+radius-dPixel,center.y+radius-dPixelVertical);
-    }*/
 
     public float getVerticalOffset(float degree){
         float returnDegree;
@@ -184,11 +168,12 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     }
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        int width;
         Rect rectangle = new Rect();
         Display display = ((Activity)getContext()).getWindowManager().getDefaultDisplay();
         display.getRectSize(rectangle);
-        width = rectangle.width(); //pixlar tror vi
-        degToPixFactor = ((width)*40)/(360*3);
+        width = rectangle.width();
+        degToPixFactor = (width*40)/(360*3);
 
         drawThread = new DrawThread(getHolder(),this);
         startThread();
