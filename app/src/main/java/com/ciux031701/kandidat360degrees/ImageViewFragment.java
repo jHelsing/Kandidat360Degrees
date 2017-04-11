@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -216,6 +217,7 @@ public class ImageViewFragment extends Fragment{
 
         //Scroll to middle dependent on image size
         scrollView.scrollTo(200,0);
+        scrollView.setSmoothScrollingEnabled(true);
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -231,21 +233,17 @@ public class ImageViewFragment extends Fragment{
         arrowLeftButton = (ImageButton)root.findViewById(R.id.imageviewArrowLeft);
         arrowRightButton = (ImageButton)root.findViewById(R.id.imageviewArrowRight);
 
-        arrowLeftButton.setOnTouchListener(new View.OnTouchListener() {
+        arrowLeftButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_MOVE)
-                    scrollView.arrowScroll(View.FOCUS_LEFT);
-                return false;
+            public void onClick(View v) {
+                scrollView.smoothScrollBy(-1000,0);
             }
         });
 
-        arrowRightButton.setOnTouchListener(new View.OnTouchListener() {
+        arrowRightButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_MOVE)
-                    scrollView.arrowScroll(View.FOCUS_RIGHT);
-                return false;
+            public void onClick(View v) {
+                scrollView.smoothScrollBy(1000,0);
             }
         });
 
