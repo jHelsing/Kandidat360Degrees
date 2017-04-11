@@ -52,8 +52,10 @@ import java.util.Locale;
  */
 
 public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
-    public ProfileFlowAdapter(Context context, ArrayList<ProfilePanorama> pictures) {
+    private String username;
+    public ProfileFlowAdapter(Context context, ArrayList<ProfilePanorama> pictures, String username) {
         super(context, R.layout.picture_profile_layout,pictures);
+        this.username = username;
     }
 
     @Override
@@ -181,7 +183,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                 String panoramaID = selectedPanorama.getPanoramaID();
 
                 MainActivity mainActivity = (MainActivity) v.getContext();
-                mainActivity.showPanorama("profile", panoramaID);
+                mainActivity.showPanorama("profile", panoramaID, username, selectedPanorama.getFavCount() + "");
             }
         });
 

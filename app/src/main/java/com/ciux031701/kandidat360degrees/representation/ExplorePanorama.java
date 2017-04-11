@@ -18,8 +18,9 @@ public class ExplorePanorama implements Parcelable {
     private String date;
     private boolean isPublic;
     private boolean canView;
+    private int likes;
 
-    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date) {
+    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date, int likes) {
         this.imageID = imageID;
         this.uploader = uploader;
         this.date = date;
@@ -27,15 +28,17 @@ public class ExplorePanorama implements Parcelable {
         this.isPublic = isPublic;
         if (isPublic)
             canView = true;
+        this.likes = likes;
     }
 
-    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date, boolean canView) {
+    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date, boolean canView, int likes) {
         this.imageID = imageID;
         this.uploader = uploader;
         this.location = new LatLng(lat, lng);
         this.isPublic = isPublic;
         this.date = date;
         this.canView = canView;
+        this.likes = likes;
     }
 
     protected ExplorePanorama(Parcel in) {
@@ -43,6 +46,7 @@ public class ExplorePanorama implements Parcelable {
         location = (LatLng) in.readValue(LatLng.class.getClassLoader());
         uploader = in.readString();
         date = in.readString();
+        likes = in.readInt();
         isPublic = in.readByte() != 0x00;
         canView = in.readByte() != 0x00;
     }
@@ -75,6 +79,8 @@ public class ExplorePanorama implements Parcelable {
 
     public boolean getCanView() { return this.canView;}
 
+    public int getLikes() { return this.likes; }
+
     @Override
     public int describeContents() {
         return 0;
@@ -86,6 +92,7 @@ public class ExplorePanorama implements Parcelable {
         dest.writeValue(location);
         dest.writeString(uploader);
         dest.writeString(date);
+        dest.writeInt(likes);
         dest.writeByte((byte) (isPublic ? 0x01 : 0x00));
         dest.writeByte((byte) (canView ? 0x01 : 0x00));
     }
