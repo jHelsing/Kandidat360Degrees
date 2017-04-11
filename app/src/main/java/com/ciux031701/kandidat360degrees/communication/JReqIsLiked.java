@@ -8,7 +8,7 @@ public class JReqIsLiked extends JRequest {
 
     public JReqIsLiked(String imageID) {
         super();
-        PHP_NAME = "isfriend.php";
+        PHP_NAME = "isimageliked.php";
         URL = PHP_ROOT + PHP_NAME + "?" + "sessionid=" + Session.getId() + "&imageid=" + imageID;
     }
 
