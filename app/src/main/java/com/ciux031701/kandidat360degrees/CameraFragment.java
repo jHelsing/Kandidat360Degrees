@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,6 +18,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -33,8 +35,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.opencv.core.Mat;
+
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import com.ciux031701.kandidat360degrees.representation.NativePanorama;
 import org.opencv.android.Utils;
@@ -42,6 +48,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import java.io.File;
 import java.util.List;
 import static android.content.ContentValues.TAG;
+import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 /**
  * Created by boking on 2017-02-17.
@@ -181,7 +188,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             matrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
             System.out.println("JPEG rotated and created bitmap");
-
+            
             //Convert the image to Mat, to be able to use openCV
             Mat mat = new Mat(bitmap.getWidth(), bitmap.getHeight(), 16); //type of Mat needs to 16, CV_8UC3, to be able to use matToBitmap(..) later
             Utils.bitmapToMat(bitmap, mat);
@@ -241,6 +248,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             }
             Mat resultPanorama = new Mat();
             NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
+
+            /*
             //Save the image to internal memory ------------------ not working :(
             File path = new File(getActivity().getFilesDir() + "/panoramas/");
             path.mkdirs();
@@ -257,11 +266,29 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 Log.i(TAG, "SUCCESS writing image to internal storage");
             } else {
                 Log.i(TAG, "Fail writing image to internal storage");
-            }
+            }*/
+
             //Convert Mat to Bitmap so we can view the image in ImageViewFragment:
             Log.i(TAG, "Type of Mat: " + resultPanorama.type()); //type = 16 --> CV_8UC3, then it "works", is sometimes 0??
             resultPanoramaBmp = Bitmap.createBitmap(resultPanorama.cols(), resultPanorama.rows(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(resultPanorama, resultPanoramaBmp); //work with type CV_8UC3
+
+            //Save the bitmap to memory
+            File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+            if (pictureFile == null) {
+                Log.d(TAG,
+                        "Error creating media file, check storage permissions: ");// e.getMessage());
+                return;
+            }
+            try {
+                FileOutputStream fos = new FileOutputStream(pictureFile);
+                resultPanoramaBmp.compress(Bitmap.CompressFormat.PNG, 90, fos);
+                fos.close();
+            } catch (FileNotFoundException e) {
+                Log.d(TAG, "File not found: " + e.getMessage());
+            } catch (IOException e) {
+                Log.d(TAG, "Error accessing file: " + e.getMessage());
+            }
 
             listOfTakenImages.clear();
         } catch (Exception e) {
@@ -271,6 +298,32 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         closeProgressDialog();
     }
 
+    /** Create a File for saving an image */
+    private static File getOutputMediaFile(int type){
+
+        // This location works best if you want the created images to be shared
+        // between applications and persist after your app has been uninstalled.
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "360World");
+
+        // Create the storage directory if it does not exist
+        if (! mediaStorageDir.exists()){
+            if (! mediaStorageDir.mkdirs()){
+                Log.d("360World", "failed to create directory");
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new Date().toString();
+        File mediaFile;
+        if (type == MEDIA_TYPE_IMAGE){
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "IMG_"+ timeStamp + ".jpg");
+        }else{return null;}
+
+        return mediaFile;
+    }
 
     //To stop the camera preview during computations
     private void showProgressDialog() {
