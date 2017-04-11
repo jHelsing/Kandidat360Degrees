@@ -88,6 +88,10 @@ import java.util.List;
 
 public class ExploreFragment extends Fragment implements SearchView.OnQueryTextListener {
 
+    private static final String SELF = "self";
+    private static final String FRIEND = "friend";
+    private static final String PUBLIC = "public";
+
     private Geocoder geocoder;
     private MapView mMapView;
     private GoogleMap googleMap;
@@ -437,8 +441,43 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 googleMap = mMap;
                 setUpClusterer();
                 googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+                    Marker oldMarker;
                     @Override
-                    public View getInfoWindow(Marker marker) {
+                    public View getInfoWindow(final Marker marker) {
+                        if (marker.getTitle().equals("Your position"))
+                            return null;
+                        // Set the marker icon to selected
+                        if (marker.getSnippet().equals(SELF))
+                            marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon_selected));
+                        else if (marker.getSnippet().equals(PUBLIC))
+                            marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon_selected));
+                        else
+                            marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon_selected));
+
+                        // Restore the old marker to unselected
+                        if(oldMarker != null && !(marker.getTitle().equals(oldMarker.getTitle()))) {
+                            if (oldMarker.getSnippet().equals(SELF))
+                                oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon));
+                            else if (oldMarker.getSnippet().equals(PUBLIC))
+                                oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
+                            else
+                                oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon));
+                        }
+
+                        oldMarker = marker;
+
+                        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                            @Override
+                            public void onMapClick(LatLng latLng) {
+                                if (marker.getSnippet().equals(SELF))
+                                    marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon));
+                                else if (marker.getSnippet().equals(PUBLIC))
+                                    marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
+                                else
+                                    marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon));
+                            }
+                        });
+
                         return onMarkerClicked(marker);
                     }
 
@@ -574,12 +613,25 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         protected void onBeforeClusterItemRendered(MyItem item,
                                                    MarkerOptions markerOptions) {
             // TODO change which bitmap to display
-            if (item.getEp().getUploader().equals(Session.getUser()))
+            if (item.getEp().getUploader().equals(Session.getUser())) {
                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon));
-            else if (item.getEp().isPublic())
+                markerOptions.title(item.getEp().getImageID());
+                item.setTitle(item.getEp().getImageID());
+                item.setSnippet(SELF);
+                markerOptions.snippet(SELF);
+            } else if (item.getEp().isPublic()) {
                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
-            else
+                markerOptions.title(item.getEp().getImageID());
+                item.setTitle(item.getEp().getImageID());
+                item.setSnippet(PUBLIC);
+                markerOptions.snippet(PUBLIC);
+            } else {
                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon));
+                markerOptions.title(item.getEp().getImageID());
+                item.setTitle(item.getEp().getImageID());
+                item.setSnippet(FRIEND);
+                markerOptions.snippet(FRIEND);
+            }
         }
     }
 }
