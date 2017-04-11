@@ -11,10 +11,12 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
@@ -56,8 +58,15 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Date;
+
+import static android.content.ContentValues.TAG;
+import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 /**
  * Created by boking on 2017-02-14. Revised by Jonathan 2017-03-22. Modified by Amar on 2017-03-31.
@@ -234,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onHasResult(JSONObject result) {
                         boolean error;
-                        String message = null, username = null, uploaded = null, views = null, favs = null, isFriendString = null;
+                        String message = null, username = null, uploaded = null, views = null, favs = null, isFriend = null;
                         JSONArray images = new JSONArray();
                         try {
                             error = result.getBoolean("error");
@@ -243,23 +252,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             uploaded = result.getString("uploaded");
                             views = result.getString("views");
                             favs = result.getString("likes");
-                            isFriendString = result.getString("isFriend");
+                            isFriend = result.getString("isFriend");
                             images = result.getJSONArray("images");
                         } catch(JSONException je){
                             error = true;
                         }
 
                         if(!error) {
-                            boolean isFriend = false;
-                            if(!isFriendString.equals("null"))
-                                isFriend = true;
                             ArrayList<ProfilePanorama> imgs = new ArrayList<ProfilePanorama>();
                             for (int i=0; i < images.length(); i++){
                                 try {
                                     JSONArray imgArr = images.getJSONArray(i);
                                     Log.d("PROFILE", imgArr.toString());
                                     ProfilePanorama pp = JSONParser.parseToProfilePanorama(imgArr);
-                                    if (pp != null && (pp.isPublicImage() || isFriend))
+                                    if (pp != null)
                                         imgs.add(pp);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -272,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             b.putString("uploadCount",uploaded);
                             b.putString("viewsCount",views);
                             b.putString("favsCount",favs);
-                            b.putBoolean("isFriend", isFriend);
+                            b.putString("isFriend", isFriend);
                             b.putSerializable("images", imgs);
                             fragment.setArguments(b);
                             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
@@ -334,10 +340,57 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void showPanorama (final String origin, final String imageID, final String username, final String likes) {
+
+    /** Create a File for saving an image */
+    private static File getOutputMediaFile(int type){
+
+        // This location works best if you want the created images to be shared
+        // between applications and persist after your app has been uninstalled.
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "360World");
+
+        // Create the storage directory if it does not exist
+        if (! mediaStorageDir.exists()){
+            if (! mediaStorageDir.mkdirs()){
+                Log.d("360World", "failed to create directory");
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new Date().toString();
+        File mediaFile;
+        if (type == MEDIA_TYPE_IMAGE){
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "IMG_"+ timeStamp + ".jpg");
+        }else{return null;}
+
+        return mediaFile;
+    }
+
+    public void downloadPanoramaLocal(Bitmap image){
+        File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
+        if (pictureFile == null) {
+            Log.d(TAG,
+                    "Error creating media file, check storage permissions: ");// e.getMessage());
+            return;
+        }
+        try {
+            FileOutputStream fos = new FileOutputStream(pictureFile);
+            image.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            fos.close();
+        } catch (FileNotFoundException e) {
+            Log.d(TAG, "File not found: " + e.getMessage());
+        } catch (IOException e) {
+            Log.d(TAG, "Error accessing file: " + e.getMessage());
+        }
+    }
+
+    public void showPanorama (final String origin, final String imageID) {
         Intent intent =  new Intent(this, DownloadService.class);
         intent.putExtra("IMAGETYPE", ImageType.PANORAMA);
         intent.putExtra("IMAGEID", imageID);
+        intent.putExtra("TYPE", "DOWNLOAD");
         intent.setAction(DownloadService.NOTIFICATION + imageID + ".jpg");
         IntentFilter filter = new IntentFilter();
         filter.addAction(DownloadService.NOTIFICATION + imageID + ".jpg");
@@ -347,17 +400,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
                     Log.d("MainActivity", "Panorama image found and results from download are OK.");
 
+                    String path = context.getFilesDir() + "/panoramas/"
+                            + imageID + ".jpg";
+                    Drawable panoramaImage = Drawable.createFromPath(path);
+
+                    File file = new File(path);
+                    if (file.delete()) {
+                        Log.d("MainActivity", "Panorama image has been deleted");
+                    }
                     context.unregisterReceiver(this);
 
                     Bundle args = new Bundle();
                     args.putString("origin", origin);
                     args.putString("imageid", imageID);
-                    args.putString("username", username);
-                    args.putString("likes", likes);
+                    ArrayList<Drawable> arrayList = new ArrayList<Drawable>();
+                    arrayList.add(panoramaImage);
+                    args.putSerializable("panorama", arrayList);
                     ImageViewFragment fragment = new ImageViewFragment();
                     fragment.setArguments(args);
                     FragmentManager fragmentManager = getFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(origin).commit();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
                 }
             }
         }, filter);
