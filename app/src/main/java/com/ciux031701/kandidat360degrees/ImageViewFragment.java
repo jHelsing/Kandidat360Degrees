@@ -49,6 +49,8 @@ public class ImageViewFragment extends Fragment{
     private ImageView imageView1;
     private HorizontalScrollView scrollView;
     private ImageButton closeButton;
+    private ImageButton arrowLeftButton;
+    private ImageButton arrowRightButton;
     private ImageView doneButton;
     private DrawerLayout mDrawerLayout;
 
@@ -211,6 +213,7 @@ public class ImageViewFragment extends Fragment{
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
 
         closeButton = (ImageButton)root.findViewById(R.id.viewingCloseButton);
+
         //Scroll to middle dependent on image size
         scrollView.scrollTo(200,0);
         closeButton.setOnClickListener(new View.OnClickListener() {
@@ -225,6 +228,26 @@ public class ImageViewFragment extends Fragment{
             }
         });
 
+        arrowLeftButton = (ImageButton)root.findViewById(R.id.imageviewArrowLeft);
+        arrowRightButton = (ImageButton)root.findViewById(R.id.imageviewArrowRight);
+
+        arrowLeftButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_MOVE)
+                    scrollView.arrowScroll(View.FOCUS_LEFT);
+                return false;
+            }
+        });
+
+        arrowRightButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_MOVE)
+                    scrollView.arrowScroll(View.FOCUS_RIGHT);
+                return false;
+            }
+        });
 
         return root;
     }
