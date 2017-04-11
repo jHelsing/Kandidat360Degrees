@@ -34,7 +34,7 @@ public class ImageViewFragment extends Fragment{
 
     private ImageView imageView1;
     private HorizontalScrollView scrollView;
-    private ImageButton backButton;
+    private ImageButton closeButton;
     private ImageView doneButton;
     private DrawerLayout mDrawerLayout;
 
@@ -88,15 +88,15 @@ public class ImageViewFragment extends Fragment{
         scrollView = (HorizontalScrollView) root.findViewById(R.id.horizontalScrollView);
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
 
-        backButton = (ImageButton)root.findViewById(R.id.viewingBackButton);
+        closeButton = (ImageButton)root.findViewById(R.id.viewingCloseButton);
         //Scroll to middle dependent on image size
         scrollView.scrollTo(200,0);
-        backButton.setOnClickListener(new View.OnClickListener() {
+        closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 {
-                    FragmentManager fm = getActivity().getFragmentManager();
-                    fm.popBackStackImmediate("view", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    FragmentManager fragmentManager = getFragmentManager();
+                    fragmentManager.popBackStack();
                 }
 
 
