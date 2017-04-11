@@ -9,6 +9,7 @@ import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -19,10 +20,19 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.communication.FTPInfo;
 import com.ciux031701.kandidat360degrees.communication.JReqIsLiked;
+import com.ciux031701.kandidat360degrees.communication.JReqLikeImage;
+import com.ciux031701.kandidat360degrees.communication.JReqUnLikeImage;
+import com.ciux031701.kandidat360degrees.communication.JRequest;
+import com.ciux031701.kandidat360degrees.representation.JSONParser;
+import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.io.File;
@@ -46,6 +56,7 @@ public class ImageViewFragment extends Fragment{
     private String imageid;
     private Drawable image;
     private Bitmap panoramaImage;
+    private boolean liked;
 
 
 
@@ -61,9 +72,108 @@ public class ImageViewFragment extends Fragment{
             image = Drawable.createFromPath(file.getPath());
             imageView1.setImageDrawable(image);
             TextView usernameView = (TextView) root.findViewById(R.id.imageViewUsernameTextView);
-            TextView favView = (TextView) root.findViewById(R.id.imageviewFavouriteTextView);
+            final TextView favView = (TextView) root.findViewById(R.id.imageviewFavouriteTextView);
+            favView.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    Log.d("Panorama Viewer", "Noticed onTouch");
+                    final int DRAWABLE_RIGHT = 2;
+                    if(event.getAction() == MotionEvent.ACTION_UP) {
+                            /**
+                             * Makes the logged in user to like or unlike a specific image. It returns true if the image
+                             * managed to be liked or unliked.
+                             */
+                            Log.d("Panorama Viewer", "Found correct event");
+
+                            if(!liked){
+                                JReqLikeImage likeImageReq = new JReqLikeImage(imageid);
+                                likeImageReq.setJResultListener(new JRequest.JResultListener() {
+                                    @Override
+                                    public void onHasResult(JSONObject result) {
+                                        boolean error;
+                                        try {
+                                            error = result.getBoolean("error");
+                                        } catch (JSONException e) {
+                                            error = true;
+                                        }
+                                        if(!error){
+                                            Drawable fav = (Drawable) getResources().getDrawable(R.drawable.ic_favorite);
+                                            favView.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
+                                            liked = true;
+                                            String count = favView.getText().toString();
+                                            favView.setText((Integer.parseInt(count)+1) + "");
+                                        } else
+                                            Toast.makeText(getActivity(), "Something went wrong with the server, try again later.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                likeImageReq.sendRequest();
+                            } else {
+                                JReqUnLikeImage unLikeImageReq = new JReqUnLikeImage(imageid);
+                                unLikeImageReq.setJResultListener(new JRequest.JResultListener() {
+                                    @Override
+                                    public void onHasResult(JSONObject result) {
+                                        boolean error;
+                                        try {
+                                            error = result.getBoolean("error");
+                                        } catch (JSONException e) {
+                                            error = true;
+                                        }
+                                        if(!error){
+                                            Drawable fav = (Drawable) getResources().getDrawable(R.drawable.ic_favorite_no_clicked_white);
+                                            favView.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
+                                            liked = false;
+                                            String count = favView.getText().toString();
+                                            favView.setText((Integer.parseInt(count)-1) + "");
+                                        } else
+                                            Toast.makeText(getActivity(), "Something went wrong with the server, try again later.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                unLikeImageReq.sendRequest();
+                            }
+                            return true;
+
+                    }
+                    return true;
+                }
+            });
             usernameView.setText(getArguments().getString("username"));
             favView.setText(getArguments().getString("likes"));
+            JReqIsLiked request = new JReqIsLiked(imageid);
+            request.setJResultListener(new JRequest.JResultListener() {
+                @Override
+                public void onHasResult(JSONObject result) {
+                    boolean error;
+                    String message = null;
+                    try {
+                        error = result.getBoolean("error");
+                    } catch(JSONException je){
+                        error = true;
+                        Log.d("View Panorama", "Error in parsing result or result from server. Result is: " + result.toString());
+                        /*
+                        4 timmar
+                         */
+                    }
+
+                    if(!error) {
+                        try {
+                            JSONArray arr = result.getJSONArray("isliked");
+                            Log.d("View Panorama", "arr: " + arr);
+                            if(arr.length() == 0) {
+                                // Image not liked
+                               liked = false;
+                            } else {
+                                liked = true;
+                                favView.setCompoundDrawables(null, null, getResources().getDrawable(R.drawable.ic_favorite), null);
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            Log.d("View Panorama", "Failed parsing array");
+                        }
+                    }
+
+                }
+            });
+            request.sendRequest();
         } else {
             View v = root.findViewById(R.id.imageviewInformationLayout);
             v.setVisibility(View.GONE);
