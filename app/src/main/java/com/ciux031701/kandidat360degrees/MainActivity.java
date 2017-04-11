@@ -334,7 +334,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void showPanorama (final String origin, final String imageID) {
+    public void showPanorama (final String origin, final String imageID, final String username, final String likes) {
         Intent intent =  new Intent(this, DownloadService.class);
         intent.putExtra("IMAGETYPE", ImageType.PANORAMA);
         intent.putExtra("IMAGEID", imageID);
@@ -352,6 +352,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Bundle args = new Bundle();
                     args.putString("origin", origin);
                     args.putString("imageid", imageID);
+                    args.putString("username", username);
+                    args.putString("likes", likes);
                     ImageViewFragment fragment = new ImageViewFragment();
                     fragment.setArguments(args);
                     FragmentManager fragmentManager = getFragmentManager();

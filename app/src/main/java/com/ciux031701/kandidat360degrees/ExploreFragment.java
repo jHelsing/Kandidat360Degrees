@@ -447,18 +447,20 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                         if (marker.getTitle().equals("Your position"))
                             return null;
                         // Set the marker icon to selected
-                        if (marker.getSnippet().equals(SELF))
+                        ExplorePanorama ep = imagesToShow.get(Integer.parseInt(marker.getSnippet()));
+                        if (ep.getUploader().equals(Session.getUser()))
                             marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon_selected));
-                        else if (marker.getSnippet().equals(PUBLIC))
+                        else if (ep.isPublic())
                             marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon_selected));
                         else
                             marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon_selected));
 
                         // Restore the old marker to unselected
                         if(oldMarker != null && !(marker.getTitle().equals(oldMarker.getTitle()))) {
-                            if (oldMarker.getSnippet().equals(SELF))
+                            ExplorePanorama oldEp = imagesToShow.get(Integer.parseInt(oldMarker.getSnippet()));
+                            if (oldEp.getUploader().equals(Session.getUser()))
                                 oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon));
-                            else if (oldMarker.getSnippet().equals(PUBLIC))
+                            else if (oldEp.isPublic())
                                 oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
                             else
                                 oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon));
@@ -469,9 +471,10 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                         googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                             @Override
                             public void onMapClick(LatLng latLng) {
-                                if (marker.getSnippet().equals(SELF))
+                                ExplorePanorama ep = imagesToShow.get(Integer.parseInt(marker.getSnippet()));
+                                if (ep.getUploader().equals(Session.getUser()))
                                     marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon));
-                                else if (marker.getSnippet().equals(PUBLIC))
+                                else if (ep.isPublic())
                                     marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
                                 else
                                     marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon));
@@ -493,7 +496,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                     public void onInfoWindowClick(Marker marker) {
                         //Go to full screen view
                         MainActivity mainActivity = (MainActivity) getActivity();
-                        mainActivity.showPanorama("explore", marker.getTitle());
+                        ExplorePanorama ep = imagesToShow.get(Integer.parseInt(marker.getSnippet()));
+                        mainActivity.showPanorama("explore", marker.getTitle(), ep.getUploader(), ep.getLikes() + "");
                     }
                 });
 
@@ -578,6 +582,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             MyItem newImageToShow = new MyItem(ep.getLocation().latitude, ep.getLocation().longitude);
             newImageToShow.setTitle(ep.getImageID());
             newImageToShow.setEp(ep);
+            newImageToShow.setSnippet(i + "");
             mClusterManager.addItem(newImageToShow);
         }
     }
@@ -624,22 +629,10 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                                                    MarkerOptions markerOptions) {
             if (item.getEp().getUploader().equals(Session.getUser())) {
                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon));
-                markerOptions.title(item.getEp().getImageID());
-                item.setTitle(item.getEp().getImageID());
-                item.setSnippet(SELF);
-                markerOptions.snippet(SELF);
             } else if (item.getEp().isPublic()) {
                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
-                markerOptions.title(item.getEp().getImageID());
-                item.setTitle(item.getEp().getImageID());
-                item.setSnippet(PUBLIC);
-                markerOptions.snippet(PUBLIC);
             } else {
                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon));
-                markerOptions.title(item.getEp().getImageID());
-                item.setTitle(item.getEp().getImageID());
-                item.setSnippet(FRIEND);
-                markerOptions.snippet(FRIEND);
             }
         }
     }

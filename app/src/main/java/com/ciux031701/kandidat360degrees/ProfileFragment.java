@@ -192,7 +192,7 @@ public class ProfileFragment extends Fragment {
                             Log.d("FTP", "Preview image has not been deleted :" + panoramaID);
                     }
 
-                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
+                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures, username);
                     pictureListView.setAdapter(profileFlowAdapter);
                     pictureListView.setOnItemClickListener(new FlowItemClickListener());
                 }
@@ -380,7 +380,7 @@ public class ProfileFragment extends Fragment {
                         //TODO: get fullscreen image from DB
                         listMode=false;
                         MainActivity mainActivity = (MainActivity) getActivity();
-                        mainActivity.showPanorama("profile", marker.getTitle());
+                        mainActivity.showPanorama("profile", marker.getTitle(), username, marker.getSnippet());
                     }
                 });
 
@@ -392,7 +392,7 @@ public class ProfileFragment extends Fragment {
                     double latitude = Double.parseDouble(pictures.get(i).getLatitude());
                     double longitude = Double.parseDouble(pictures.get(i).getLongitude());
                     LatLng position = new LatLng(latitude, longitude);
-                    googleMap.addMarker(new MarkerOptions().position(position).title(pictures.get(i).getPanoramaID()).icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon)));
+                    googleMap.addMarker(new MarkerOptions().position(position).title(pictures.get(i).getPanoramaID()).icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon)).snippet(pictures.get(i).getFavCount()+""));
                 }
                 // For zooming automatically to the location of the marker
                 //CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(12).build();
@@ -452,7 +452,7 @@ public class ProfileFragment extends Fragment {
                             .getDrawable(R.drawable.disable_map_view_icon_profile));
                     mapView.setVisibility(View.GONE);
                     googleMap.clear();
-                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
+                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures, username);
                     pictureListView.setAdapter(profileFlowAdapter);
                 }
             }

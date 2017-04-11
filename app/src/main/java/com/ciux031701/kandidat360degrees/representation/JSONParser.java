@@ -61,9 +61,10 @@ public class JSONParser {
         String imageID = "";
         String date = "";
         boolean publicImage = false;
-        Double longitude = 0.0;
-        Double latitude = 0.0;
+        double longitude = 0.0;
+        double latitude = 0.0;
         String uploader = "";
+        int likes = 0;
         try {
             imageID = imageArray.getString(0);
             uploader = imageArray.getString(1);
@@ -73,10 +74,11 @@ public class JSONParser {
                 publicImage = true;
             longitude = Double.parseDouble(imageArray.getString(4));
             latitude = Double.parseDouble(imageArray.getString(5));
+            likes = Integer.parseInt(imageArray.getString(8));
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return new ExplorePanorama(imageID, uploader, latitude, longitude, publicImage, "lol");
+        return new ExplorePanorama(imageID, uploader, latitude, longitude, publicImage, date, likes);
     }
 }
