@@ -8,7 +8,7 @@
     android:orientation="vertical">
 
     <ImageButton
-        android:id="@+id/viewingBackButton"
+        android:id="@+id/viewingCloseButton"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignParentLeft="true"
