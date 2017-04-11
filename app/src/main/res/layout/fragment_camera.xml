@@ -76,17 +76,4 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="25dp" />
 
-    <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_height="wrap_content"
-        android:id="@+id/angleProgressBar"
-        android:max="360"
-        android:progress="0"
-        android:progressDrawable="@drawable/progressbar_capture"
-        android:layout_width="250dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
-        android:visibility="gone" />
-
-
 </RelativeLayout>
