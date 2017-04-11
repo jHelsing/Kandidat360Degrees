@@ -114,6 +114,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         holdVerticallyText = (TextView) root.findViewById(R.id.holdVerticallyText);
         holdVerticallyImage = (ImageView) root.findViewById(R.id.holdVerticallyImage);
         backButton = (ImageButton) root.findViewById(R.id.backButton);
+
         backButton.setBackgroundResource(R.drawable.temp_return);
         captureButton.setVisibility(View.GONE);
 
@@ -131,6 +132,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
             }
         });
+
 
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -188,7 +190,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             matrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
             System.out.println("JPEG rotated and created bitmap");
-            
+
             //Convert the image to Mat, to be able to use openCV
             Mat mat = new Mat(bitmap.getWidth(), bitmap.getHeight(), 16); //type of Mat needs to 16, CV_8UC3, to be able to use matToBitmap(..) later
             Utils.bitmapToMat(bitmap, mat);
@@ -273,22 +275,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             resultPanoramaBmp = Bitmap.createBitmap(resultPanorama.cols(), resultPanorama.rows(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(resultPanorama, resultPanoramaBmp); //work with type CV_8UC3
 
-            //Save the bitmap to memory
-            File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
-            if (pictureFile == null) {
-                Log.d(TAG,
-                        "Error creating media file, check storage permissions: ");// e.getMessage());
-                return;
-            }
-            try {
-                FileOutputStream fos = new FileOutputStream(pictureFile);
-                resultPanoramaBmp.compress(Bitmap.CompressFormat.PNG, 90, fos);
-                fos.close();
-            } catch (FileNotFoundException e) {
-                Log.d(TAG, "File not found: " + e.getMessage());
-            } catch (IOException e) {
-                Log.d(TAG, "Error accessing file: " + e.getMessage());
-            }
+            MainActivity mainActivity = (MainActivity) getActivity();
+            mainActivity.downloadPanoramaLocal(resultPanoramaBmp);
 
             listOfTakenImages.clear();
         } catch (Exception e) {
@@ -296,33 +284,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         }
         //end of openCV-parts
         closeProgressDialog();
-    }
-
-    /** Create a File for saving an image */
-    private static File getOutputMediaFile(int type){
-
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "360World");
-
-        // Create the storage directory if it does not exist
-        if (! mediaStorageDir.exists()){
-            if (! mediaStorageDir.mkdirs()){
-                Log.d("360World", "failed to create directory");
-                return null;
-            }
-        }
-
-        // Create a media file name
-        String timeStamp = new Date().toString();
-        File mediaFile;
-        if (type == MEDIA_TYPE_IMAGE){
-            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_"+ timeStamp + ".jpg");
-        }else{return null;}
-
-        return mediaFile;
     }
 
     //To stop the camera preview during computations
