@@ -18,6 +18,10 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
+
+import com.ciux031701.kandidat360degrees.communication.FTPInfo;
+
+import java.io.File;
 import java.util.ArrayList;
 import static android.content.ContentValues.TAG;
 
@@ -46,14 +50,16 @@ public class ImageViewFragment extends Fragment{
         View root = inflater.inflate(R.layout.fragment_imageview, container, false);
         origin = getArguments().getString("origin");
         imageid = getArguments().getString("imageid");
-        if(origin.equals("profile")) {
-            image = ((ArrayList<Drawable>) getArguments().getSerializable("panorama")).get(0);
+        imageView1 = (ImageView)root.findViewById(R.id.imageviewfirst);
+        if(origin.equals("profile") || origin.equals("explore")) {
+            File file = new File(getActivity().getFilesDir() + FTPInfo.PANORAMA_LOCAL_LOCATION + imageid + FTPInfo.FILETYPE);
+            image = Drawable.createFromPath(file.getPath());
             imageView1.setImageDrawable(image);
         }
 
 
         doneButton = (ImageButton)root.findViewById(R.id.sendToShareButton);
-        imageView1 = (ImageView)root.findViewById(R.id.imageviewfirst);
+
 
         if(origin.equals("camera")){
             panoramaImage = getArguments().getParcelable("image");

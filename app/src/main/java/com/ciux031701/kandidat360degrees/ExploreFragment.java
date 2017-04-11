@@ -487,6 +487,16 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                     }
                 });
 
+                // Open the panorama in the panorama viewer
+                googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                    @Override
+                    public void onInfoWindowClick(Marker marker) {
+                        //Go to full screen view
+                        MainActivity mainActivity = (MainActivity) getActivity();
+                        mainActivity.showPanorama("explore", marker.getTitle());
+                    }
+                });
+
                 ((MainActivity) getActivity()).loadMapStyling(googleMap);
 
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
@@ -612,7 +622,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         @Override
         protected void onBeforeClusterItemRendered(MyItem item,
                                                    MarkerOptions markerOptions) {
-            // TODO change which bitmap to display
             if (item.getEp().getUploader().equals(Session.getUser())) {
                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon));
                 markerOptions.title(item.getEp().getImageID());

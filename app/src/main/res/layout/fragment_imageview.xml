@@ -29,11 +29,12 @@
 
         <ImageView
             android:id="@+id/imageviewfirst"
-            android:layout_height="fill_parent"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/panorama_large2"
             android:layout_width="wrap_content"
-            android:adjustViewBounds="true" />
+            android:layout_height="fill_parent"
+            android:adjustViewBounds="true"
+            android:cropToPadding="true"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/panorama_large2" />
     </HorizontalScrollView>
 
     <ImageButton
