@@ -18,8 +18,12 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
+import android.widget.TextView;
 
 import com.ciux031701.kandidat360degrees.communication.FTPInfo;
+import com.ciux031701.kandidat360degrees.communication.JReqIsLiked;
+
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -51,10 +55,18 @@ public class ImageViewFragment extends Fragment{
         origin = getArguments().getString("origin");
         imageid = getArguments().getString("imageid");
         imageView1 = (ImageView)root.findViewById(R.id.imageviewfirst);
+
         if(origin.equals("profile") || origin.equals("explore")) {
             File file = new File(getActivity().getFilesDir() + FTPInfo.PANORAMA_LOCAL_LOCATION + imageid + FTPInfo.FILETYPE);
             image = Drawable.createFromPath(file.getPath());
             imageView1.setImageDrawable(image);
+            TextView usernameView = (TextView) root.findViewById(R.id.imageViewUsernameTextView);
+            TextView favView = (TextView) root.findViewById(R.id.imageviewFavouriteTextView);
+            usernameView.setText(getArguments().getString("username"));
+            favView.setText(getArguments().getString("likes"));
+        } else {
+            View v = root.findViewById(R.id.imageviewInformationLayout);
+            v.setVisibility(View.GONE);
         }
 
 
