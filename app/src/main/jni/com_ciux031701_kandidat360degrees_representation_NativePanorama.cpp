@@ -22,7 +22,7 @@ JNIEXPORT void JNICALL Java_com_ciux031701_kandidat360degrees_representation_Nat
             Mat newImage;
             //Convert to 3-channel Mat (for Stitcher module)
             cvtColor(currentImage,newImage,CV_BGRA2BGR);
-            //Reduce resolution for fast computation --> we may want to remove this part
+            //Reduce resolution for fast computation, however larger files
             float scale = 1000.0f / currentImage.rows;
             resize(newImage,newImage,Size(scale*currentImage.rows,scale*currentImage.cols));
             imageVector.push_back(newImage); //add last in the vector
@@ -31,7 +31,7 @@ JNIEXPORT void JNICALL Java_com_ciux031701_kandidat360degrees_representation_Nat
         Stitcher stitcher = Stitcher::createDefault();
         //Set parameters:
         //Warper
-        stitcher.setWarper(new CompressedRectilinearWarper(2.0f, 1.0f)); //May want to change this later when we actually do 360-degrees images
+        stitcher.setWarper(new CylindricalWarper()); //May want to change this later when we actually do 360-degrees images
                                                                          //but this one looks good when having around 3 images
         //Feature finder with ORB-algorithm
         stitcher.setFeaturesFinder(new cv::detail::OrbFeaturesFinder());
