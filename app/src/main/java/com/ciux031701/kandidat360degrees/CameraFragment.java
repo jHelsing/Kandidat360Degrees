@@ -275,8 +275,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             resultPanoramaBmp = Bitmap.createBitmap(resultPanorama.cols(), resultPanorama.rows(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(resultPanorama, resultPanoramaBmp); //work with type CV_8UC3
 
-            MainActivity mainActivity = (MainActivity) getActivity();
-            mainActivity.downloadPanoramaLocal(resultPanoramaBmp);
+            //MainActivity mainActivity = (MainActivity) getActivity();
+            //mainActivity.downloadPanoramaLocal(resultPanoramaBmp);
 
             listOfTakenImages.clear();
         } catch (Exception e) {
