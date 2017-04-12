@@ -118,7 +118,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
 
         aimCircle.draw(canvas);
         if(targetAcquired) {
-            horizontalOffset = currentDegree - targetDegree; //positive value - right of targetDegree
+            horizontalOffset = getHorizontalOffset(currentDegree); // currentdegree-targetdegree
             verticalOffset = getVerticalOffset(currentVerticalDegree);
 
             //Checks if the dot should snap to the center
@@ -128,13 +128,23 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
             }
             float dPixelVertical = Math.round(verticalOffset*degToPixFactor);
             float dPixel = Math.round(horizontalOffset*degToPixFactor);
+            System.out.println("drawing circle at: " + (center.x-dPixel) + ", " + (center.y-dPixelVertical) + ", horizontal offset: " + horizontalOffset + ", current: " + currentDegree);
             canvas.drawCircle(center.x-dPixel,center.y-dPixelVertical,radius,paint);
         }
     }
 
+    public float getHorizontalOffset(float degree){
+        float returnDegree;
+        if(degree>180){
+            returnDegree = (360-(degree-targetDegree))*-1;
+        }else{
+            returnDegree = degree-targetDegree;
+        }
+        return returnDegree;
+    }
+
     public float getVerticalOffset(float degree){
         float returnDegree;
-
         if(degree>180){
             //*-1 is how we define whats is up and down
             returnDegree = (360-degree)*-1;

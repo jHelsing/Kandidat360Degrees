@@ -84,7 +84,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private float startGyroDegree;
     private float orientation[];
 
-    private LinkedList previousAngles;
     private boolean isFirstSensorChanged;
     private boolean proximityCheckerInProgress;
 
@@ -93,7 +92,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         View root = inflater.inflate(R.layout.fragment_camera, container, false);
 
         mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
-        previousAngles = new LinkedList();
         proximityCheckerInProgress = false;
         isVertical = false;
         isFirstSensorChanged = true;
