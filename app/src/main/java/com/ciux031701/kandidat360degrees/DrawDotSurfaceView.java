@@ -172,7 +172,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         Rect rectangle = new Rect();
         Display display = ((Activity)getContext()).getWindowManager().getDefaultDisplay();
         display.getRectSize(rectangle);
-        width = rectangle.width();
+        width = 3*rectangle.width()/5; //60% of actual width
         degToPixFactor = (width*40)/(360*3);
 
         drawThread = new DrawThread(getHolder(),this);
