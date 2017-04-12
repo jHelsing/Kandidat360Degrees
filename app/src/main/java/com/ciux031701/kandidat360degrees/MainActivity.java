@@ -15,10 +15,12 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -88,6 +90,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     Bundle b;
     Bundle setArgs;
+
+    private static final int PICK_IMAGE = 100;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -319,13 +323,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void showUploadView() {
-        Class fragmentClass = UploadFragment.class;
-        try {
-            Fragment fragment = (Fragment) fragmentClass.newInstance();
-            FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-        } catch (Exception e) {
-            e.printStackTrace();
+        //open gallery
+        Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        startActivityForResult(gallery,PICK_IMAGE);
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent content){
+        super.onActivityResult(requestCode,resultCode,content);
+
+        if(resultCode==RESULT_OK && requestCode== PICK_IMAGE){
+            Uri imageUri = content.getData();
+            Class fragmentClass = UploadFragment.class;
+            try {
+                Fragment fragment = (Fragment) fragmentClass.newInstance();
+                Bundle bundle = new Bundle();
+                bundle.putParcelable("image", imageUri);
+                fragment.setArguments(bundle);
+                FragmentManager fragmentManager = getFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
