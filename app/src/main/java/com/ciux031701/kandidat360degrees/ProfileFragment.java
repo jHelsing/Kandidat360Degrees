@@ -2,7 +2,6 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -127,7 +126,7 @@ public class ProfileFragment extends Fragment {
         TextView infoWindowText = (TextView) v.findViewById(R.id.infoWindowText);
         ImageView infoWindowImage = (ImageView) v.findViewById(R.id.infoWindowImage);
         int i = 0;
-        while(!marker.getTitle().equals(pictures.get(i).getPanoramaID())) {
+        while(!marker.getTitle().equals(pictures.get(i).getImageID())) {
             i++;
         }
 
@@ -155,7 +154,7 @@ public class ProfileFragment extends Fragment {
         Intent intent =  new Intent(getActivity(), DownloadMultiplePreviewsService.class);
         String[] imageIDs = new String[pictures.size()];
         for (int i=0; i<pictures.size(); i++) {
-            imageIDs[i] = pictures.get(i).getPanoramaID();
+            imageIDs[i] = pictures.get(i).getImageID();
         }
         intent.putExtra("panoramaArray", imageIDs);
         intent.setAction(DownloadMultiplePreviewsService.NOTIFICATION);
@@ -376,10 +375,8 @@ public class ProfileFragment extends Fragment {
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
                 // For dropping a marker at a point on the Map
                 for (int i = 0; i < pictures.size(); i++){
-                    double latitude = Double.parseDouble(pictures.get(i).getLatitude());
-                    double longitude = Double.parseDouble(pictures.get(i).getLongitude());
-                    LatLng position = new LatLng(latitude, longitude);
-                    googleMap.addMarker(new MarkerOptions().position(position).title(pictures.get(i).getPanoramaID()).icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon)));
+                    LatLng position = pictures.get(i).getLocation();
+                    googleMap.addMarker(new MarkerOptions().position(position).title(pictures.get(i).getImageID()).icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon)));
                 }
                 // For zooming automatically to the location of the marker
                 //CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(12).build();

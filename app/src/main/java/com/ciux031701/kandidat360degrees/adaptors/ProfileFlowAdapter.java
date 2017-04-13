@@ -1,45 +1,30 @@
 package com.ciux031701.kandidat360degrees.adaptors;
 
-import android.app.Activity;
-import android.app.FragmentManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.database.DataSetObserver;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
-import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.ciux031701.kandidat360degrees.ImageViewFragment;
 import com.ciux031701.kandidat360degrees.MainActivity;
-import com.ciux031701.kandidat360degrees.ProfileFragment;
 import com.ciux031701.kandidat360degrees.R;
-import com.ciux031701.kandidat360degrees.communication.DownloadService;
-import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.communication.JReqLikeImage;
 import com.ciux031701.kandidat360degrees.communication.JReqUnLikeImage;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
+import com.google.android.gms.maps.model.LatLng;
 
-import org.apache.commons.net.pop3.POP3SClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.EOFException;
-import java.io.File;
 import java.io.IOException;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -72,10 +57,9 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
 
         //Show adress for the item
         Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
-        double latitude = Double.parseDouble(getItem(position).getLatitude());
-        double longitude = Double.parseDouble(getItem(position).getLongitude());
+        LatLng location = getItem(position).getLocation();
         try {
-            List<Address> address = geocoder.getFromLocation(latitude, longitude, 1);
+            List<Address> address = geocoder.getFromLocation(location.latitude, location.longitude, 1);
             String city;
             String country;
             if(address.size() != 0){
@@ -93,7 +77,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
         dateText.setText(getItem(position).getDate().substring(0,10));
 
         //Show favstext for the item
-        setfavCountText(getItem(position).getFavCount(), favCountText);
+        setfavCountText(getItem(position).getLikeCount(), favCountText);
 
         //show if liked for the item
         if(getItem(position).isFavorite()){
@@ -117,7 +101,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                          */
 
                         if(!getItem(position).isFavorite()){
-                            JReqLikeImage likeImageReq = new JReqLikeImage(getItem(position).getPanoramaID());
+                            JReqLikeImage likeImageReq = new JReqLikeImage(getItem(position).getImageID());
                             likeImageReq.setJResultListener(new JRequest.JResultListener() {
                                 @Override
                                 public void onHasResult(JSONObject result) {
@@ -131,15 +115,15 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                                         Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_clicked);
                                         favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
                                         getItem(position).setFavorite(true);
-                                        getItem(position).increaseFavCount();
-                                        setfavCountText(getItem(position).getFavCount(), favCountText);
+                                        getItem(position).incLikeCount();
+                                        setfavCountText(getItem(position).getLikeCount(), favCountText);
                                     } else
                                         Toast.makeText(getContext(), "Something went wrong with the server, try again later.", Toast.LENGTH_SHORT).show();
                                 }
                             });
                             likeImageReq.sendRequest();
                         } else {
-                            JReqUnLikeImage unLikeImageReq = new JReqUnLikeImage(getItem(position).getPanoramaID());
+                            JReqUnLikeImage unLikeImageReq = new JReqUnLikeImage(getItem(position).getImageID());
                             unLikeImageReq.setJResultListener(new JRequest.JResultListener() {
                                 @Override
                                 public void onHasResult(JSONObject result) {
@@ -153,8 +137,8 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                                         Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_no_click);
                                         favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
                                         getItem(position).setFavorite(false);
-                                        getItem(position).decreaseFavCount();
-                                        setfavCountText(getItem(position).getFavCount(), favCountText);
+                                        getItem(position).decLikeCount();
+                                        setfavCountText(getItem(position).getLikeCount(), favCountText);
                                     } else
                                         Toast.makeText(getContext(), "Something went wrong with the server, try again later.", Toast.LENGTH_SHORT).show();
                                 }
@@ -174,7 +158,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                 //TODO: Get the real size image for the selected panorama id
                 //TODO: like below from the DB and add that as parameter to the imageviewfragment
                 ProfilePanorama selectedPanorama = getItem(position);
-                String panoramaID = selectedPanorama.getPanoramaID();
+                String panoramaID = selectedPanorama.getImageID();
 
                 MainActivity mainActivity = (MainActivity) v.getContext();
                 mainActivity.showPanorama("profile", panoramaID);

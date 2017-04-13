@@ -5,6 +5,8 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
+import com.ciux031701.kandidat360degrees.representation.ThreeSixtyPanorama;
+
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
@@ -34,7 +36,8 @@ public class UploadService extends IntentService {
         // Create the correct path for the file to be downloaded, both on the server and locally
         String localFilePath = "";
         String serverFilePath = "";
-        switch ((ImageType)intent.getSerializableExtra("IMAGETYPE")) {
+        ImageType type = (ImageType)intent.getSerializableExtra("IMAGETYPE");
+        switch (type) {
             case PREVIEW:
                 localFilePath = FTPInfo.PREVIEW_LOCAL_LOCATION;
                 serverFilePath = FTPInfo.PREVIEW_SERVER_LOCATION;
@@ -53,11 +56,14 @@ public class UploadService extends IntentService {
         }
 
         // Create the name of the file from the ID of the image and the filetype (JPG)
-        String filename = intent.getIntExtra("IMAGEID", -1) + FTPInfo.FILETYPE;
+        String filename = intent.getStringExtra("IMAGEID") + FTPInfo.FILETYPE;
+
 
         // Create the output file, that is the local directory of the file that is going
         // to be uploaded to the server
-        File intputFile =  new File(getApplicationContext().getFilesDir() + localFilePath + filename);
+        //File intputFile =  new File(getApplicationContext().getFilesDir() + localFilePath + filename);
+
+        File intputFile = (File)intent.getSerializableExtra("FILE");
 
         if (!intputFile.exists()) {
             publishResults(Activity.RESULT_CANCELED);
@@ -126,6 +132,7 @@ public class UploadService extends IntentService {
      */
     private void publishResults(int result) {
         Intent intent = new Intent(NOTIFICATION);
+        intent.setAction("com.ciux031701.kandidat360degrees.communication.UploadService");
         intent.putExtra("RESULT", result);
         sendBroadcast(intent);
         this.stopSelf();
