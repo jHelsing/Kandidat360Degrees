@@ -78,7 +78,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private float startGyroDegree;
     private float orientation[];
 
-    private LinkedList previousAngles;
     private boolean isFirstSensorChanged;
     private boolean proximityCheckerInProgress;
 
@@ -87,7 +86,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         View root = inflater.inflate(R.layout.fragment_camera, container, false);
 
         mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
-        previousAngles = new LinkedList();
         proximityCheckerInProgress = false;
         isVertical = false;
         isFirstSensorChanged = true;
@@ -279,8 +277,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             resultPanoramaBmp = Bitmap.createBitmap(resultPanorama.cols(), resultPanorama.rows(), Bitmap.Config.ARGB_8888);
             Utils.matToBitmap(resultPanorama, resultPanoramaBmp); //work with type CV_8UC3
 
-            MainActivity mainActivity = (MainActivity) getActivity();
-            mainActivity.downloadPanoramaLocal(resultPanoramaBmp);
+            //MainActivity mainActivity = (MainActivity) getActivity();
+            //mainActivity.downloadPanoramaLocal(resultPanoramaBmp);
 
             listOfTakenImages.clear();
         } catch (Exception e) {
