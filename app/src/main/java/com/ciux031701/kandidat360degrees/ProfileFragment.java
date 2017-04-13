@@ -2,18 +2,13 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -31,7 +26,6 @@ import com.ciux031701.kandidat360degrees.communication.JReqRemoveFriend;
 import com.ciux031701.kandidat360degrees.communication.JReqSendFriendrequest;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.communication.Session;
-import com.ciux031701.kandidat360degrees.communication.UploadService;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -46,10 +40,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -78,8 +68,6 @@ public class ProfileFragment extends Fragment {
     private Bundle instanceState;
 
     private boolean isFriend;
-
-    public static final int GET_FROM_GALLERY = 3;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -138,7 +126,7 @@ public class ProfileFragment extends Fragment {
         TextView infoWindowText = (TextView) v.findViewById(R.id.infoWindowText);
         ImageView infoWindowImage = (ImageView) v.findViewById(R.id.infoWindowImage);
         int i = 0;
-        while(!marker.getTitle().equals(pictures.get(i).getPanoramaID())) {
+        while(!marker.getTitle().equals(pictures.get(i).getImageID())) {
             i++;
         }
 
@@ -166,7 +154,7 @@ public class ProfileFragment extends Fragment {
         Intent intent =  new Intent(getActivity(), DownloadMultiplePreviewsService.class);
         String[] imageIDs = new String[pictures.size()];
         for (int i=0; i<pictures.size(); i++) {
-            imageIDs[i] = pictures.get(i).getPanoramaID();
+            imageIDs[i] = pictures.get(i).getImageID();
         }
         intent.putExtra("panoramaArray", imageIDs);
         intent.setAction(DownloadMultiplePreviewsService.NOTIFICATION);
@@ -192,7 +180,7 @@ public class ProfileFragment extends Fragment {
                             Log.d("FTP", "Preview image has not been deleted :" + panoramaID);
                     }
 
-                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures, username);
+                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
                     pictureListView.setAdapter(profileFlowAdapter);
                     pictureListView.setOnItemClickListener(new FlowItemClickListener());
                 }
@@ -265,7 +253,12 @@ public class ProfileFragment extends Fragment {
         }
         favCountView.setText(favString);
 
-        isFriend = getArguments().getBoolean("isFriend");
+        try {
+            if(!getArguments().getString("isFriend").equals(null))
+                isFriend = true;
+        } catch (NumberFormatException e){
+            e.printStackTrace();
+        }
     }
 
     private void setUpProfileMenuButton() {
@@ -329,7 +322,11 @@ public class ProfileFragment extends Fragment {
                                 break;
                             case "Change profile picture":
                                 // TODO add support for uploading profile picture to server
-                                startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY);
+                                final FragmentTransaction ft = getFragmentManager().beginTransaction();
+                                ft.replace(R.id.content_frame, new SettingsFragment(), "Settings");
+                                ft.addToBackStack("Settings");
+                                ft.commitAllowingStateLoss();
+                                getFragmentManager().executePendingTransactions();
                                 break;
                         }
                         return false;
@@ -347,23 +344,12 @@ public class ProfileFragment extends Fragment {
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap mMap) {
+
                 googleMap = mMap;
                 googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
-                    Marker oldMarker;
                     @Override
-                    public View getInfoWindow(final Marker marker) {
+                    public View getInfoWindow(Marker marker) {
                         marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon_selected));
-                        if(oldMarker != null && !(marker.getTitle().equals(oldMarker.getTitle())))
-                            oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
-                        oldMarker = marker;
-
-                        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-                            @Override
-                            public void onMapClick(LatLng latLng) {
-                                marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
-                            }
-                        });
-
                         return onMarkerClicked(marker);
                     }
 
@@ -380,7 +366,7 @@ public class ProfileFragment extends Fragment {
                         //TODO: get fullscreen image from DB
                         listMode=false;
                         MainActivity mainActivity = (MainActivity) getActivity();
-                        mainActivity.showPanorama("profile", marker.getTitle(), username, marker.getSnippet());
+                        mainActivity.showPanorama("profile", marker.getTitle());
                     }
                 });
 
@@ -389,10 +375,8 @@ public class ProfileFragment extends Fragment {
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
                 // For dropping a marker at a point on the Map
                 for (int i = 0; i < pictures.size(); i++){
-                    double latitude = Double.parseDouble(pictures.get(i).getLatitude());
-                    double longitude = Double.parseDouble(pictures.get(i).getLongitude());
-                    LatLng position = new LatLng(latitude, longitude);
-                    googleMap.addMarker(new MarkerOptions().position(position).title(pictures.get(i).getPanoramaID()).icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon)).snippet(pictures.get(i).getFavCount()+""));
+                    LatLng position = pictures.get(i).getLocation();
+                    googleMap.addMarker(new MarkerOptions().position(position).title(pictures.get(i).getImageID()).icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon)));
                 }
                 // For zooming automatically to the location of the marker
                 //CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(12).build();
@@ -420,8 +404,7 @@ public class ProfileFragment extends Fragment {
                 }
             }
             context.unregisterReceiver(this);
-            if(pictures.size() != 0)
-                loadPreviews();
+            loadPreviews();
         }
     }
 
@@ -451,53 +434,10 @@ public class ProfileFragment extends Fragment {
                     viewSwitchButton.setImageDrawable(getResources()
                             .getDrawable(R.drawable.disable_map_view_icon_profile));
                     mapView.setVisibility(View.GONE);
-                    googleMap.clear();
-                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures, username);
+                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
                     pictureListView.setAdapter(profileFlowAdapter);
                 }
             }
         });
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        //Detects request codes
-        if(requestCode==GET_FROM_GALLERY && resultCode == Activity.RESULT_OK) {
-            Uri selectedImage = data.getData();
-            try {
-                final Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), selectedImage);
-                final File file = new File(getActivity().getFilesDir() + FTPInfo.PROFILE_LOCAL_LOCATION + Session.getUser() + FTPInfo.FILETYPE);
-                OutputStream outputStream = new FileOutputStream(file.getPath());
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
-
-                //Start the upload service
-                Intent intent =  new Intent(getActivity(), UploadService.class);
-                intent.putExtra("IMAGETYPE", ImageType.PROFILE);
-                intent.putExtra("IMAGEID", Session.getUser());
-                intent.setAction(UploadService.NOTIFICATION + Session.getUser() + FTPInfo.FILETYPE);
-                IntentFilter filter = new IntentFilter();
-                filter.addAction(UploadService.NOTIFICATION + Session.getUser() + FTPInfo.FILETYPE);
-                getActivity().registerReceiver(new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
-                            ((ImageView) root.findViewById(R.id.profileProfileImage)).setImageDrawable(new BitmapDrawable(getResources(), bitmap));
-                            if (file.delete()) {
-                                Log.d("Profile", "Profile image has been deleted after upload");
-                            }
-                        } else
-                            Toast.makeText(getActivity(), "Could not upload the profile picture, please try again later.",Toast.LENGTH_SHORT).show();
-                        getActivity().unregisterReceiver(this);
-                    }
-                }, filter);
-                getActivity().startService(intent);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 }

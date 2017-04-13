@@ -91,9 +91,8 @@ public class ImageViewFragment extends Fragment{
                 @Override
                 public void onClick(View view) {
                     mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-                    Bitmap tempPicture = BitmapFactory.decodeResource(getResources(), R.drawable.panorama_large2);
                     Bundle args = new Bundle();
-                    args.putParcelable("picture", tempPicture);
+                    args.putParcelable("picture", panoramaImage);
 
                     Fragment fragment = new ShareFragment();
                     FragmentManager fragmentManager = getFragmentManager();

@@ -78,6 +78,14 @@
         <service
             android:name=".communication.DownloadMultiplePreviewsService"
             android:exported="false"></service>
+        <receiver
+            android:name=".communication.ShareManager"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.ciux031701.kandidat360degrees.communication.UploadService"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
