@@ -5,6 +5,8 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.util.Log;
 
+import com.ciux031701.kandidat360degrees.representation.ThreeSixtyPanorama;
+
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 
@@ -34,7 +36,8 @@ public class UploadService extends IntentService {
         // Create the correct path for the file to be downloaded, both on the server and locally
         String localFilePath = "";
         String serverFilePath = "";
-        switch ((ImageType)intent.getSerializableExtra("IMAGETYPE")) {
+        ImageType type = (ImageType)intent.getSerializableExtra("IMAGETYPE");
+        switch (type) {
             case PREVIEW:
                 localFilePath = FTPInfo.PREVIEW_LOCAL_LOCATION;
                 serverFilePath = FTPInfo.PREVIEW_SERVER_LOCATION;
@@ -55,12 +58,15 @@ public class UploadService extends IntentService {
         // Create the name of the file from the ID of the image and the filetype (JPG)
         String filename = intent.getStringExtra("IMAGEID") + FTPInfo.FILETYPE;
 
+
         // Create the output file, that is the local directory of the file that is going
         // to be uploaded to the server
-        File inputFile =  new File(getApplicationContext().getFilesDir() + localFilePath + filename);
+        //File intputFile =  new File(getApplicationContext().getFilesDir() + localFilePath + filename);
 
-        if (!inputFile.exists()) {
-            publishResults(Activity.RESULT_CANCELED, filename);
+        File intputFile = (File)intent.getSerializableExtra("FILE");
+
+        if (!intputFile.exists()) {
+            publishResults(Activity.RESULT_CANCELED);
         }
         Log.d("FTP", "File exists and can upload");
         // Start FTP communication
@@ -81,7 +87,7 @@ public class UploadService extends IntentService {
                 Log.d("FTP", "Published results. Closing connection and stopping service.");
                 ftpClient.disconnect();
 
-                publishResults(Activity.RESULT_CANCELED, filename);
+                publishResults(Activity.RESULT_CANCELED);
             } else {
                 // Login successful
                 Log.d("FTP", "Phone logged-in to server: " + ftpClient.getReplyString());
@@ -99,9 +105,7 @@ public class UploadService extends IntentService {
             Log.d("FTP", "Changed Directory: " + ftpClient.getReplyString());
 
             // Start uploading the file from the local device and write to the FTP-server
-            FileInputStream inputStream = new FileInputStream(inputFile);
-
-            ftpClient.deleteFile(filename);
+            FileInputStream inputStream = new FileInputStream(intputFile);
             boolean result = ftpClient.storeFile(filename, inputStream);
             inputStream.close();
 
@@ -109,10 +113,10 @@ public class UploadService extends IntentService {
                 Log.d("FTP", "File uploaded correctly");
                 ftpClient.logout();
                 ftpClient.disconnect();
-                publishResults(Activity.RESULT_OK, filename);
+                publishResults(Activity.RESULT_OK);
             } else {
                 Log.d("FTP", "File didn't upload");
-                publishResults(Activity.RESULT_CANCELED, filename);
+                publishResults(Activity.RESULT_CANCELED);
             }
 
         } catch (SocketException e) {
@@ -126,8 +130,9 @@ public class UploadService extends IntentService {
      * Broadcasts the results from the file upload.
      * @param result - The result of the upload, -1 if sucessful, 0 if failure
      */
-    private void publishResults(int result, String filename) {
-        Intent intent = new Intent(NOTIFICATION + filename);
+    private void publishResults(int result) {
+        Intent intent = new Intent(NOTIFICATION);
+        intent.setAction("com.ciux031701.kandidat360degrees.communication.UploadService");
         intent.putExtra("RESULT", result);
         sendBroadcast(intent);
         this.stopSelf();

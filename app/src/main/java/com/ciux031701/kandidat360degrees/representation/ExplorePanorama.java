@@ -10,76 +10,34 @@ import com.google.android.gms.maps.model.LatLng;
  * Created by Jonathan on 2017-04-05.
  */
 
-public class ExplorePanorama implements Parcelable {
+public class ExplorePanorama extends ThreeSixtyPanorama implements Parcelable {
 
-    private String imageID;
-    private LatLng location;
-    private String uploader;
-    private String date;
-    private boolean isPublic;
     private boolean canView;
-    private int likes;
 
-    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date, int likes) {
-        this.imageID = imageID;
-        this.uploader = uploader;
-        this.date = date;
-        this.location = new LatLng(lat, lng);
-        this.isPublic = isPublic;
+    public ExplorePanorama(String imageid, String uploader, Double lat, Double lng, boolean isPublic, String date, String description, int views, int likes) {
+        super(imageid, uploader, date, views, likes, new LatLng(lat, lng), description, isPublic);
         if (isPublic)
             canView = true;
-        this.likes = likes;
     }
 
-    public ExplorePanorama(String imageID, String uploader, Double lat, Double lng, boolean isPublic, String date, boolean canView, int likes) {
-        this.imageID = imageID;
-        this.uploader = uploader;
-        this.location = new LatLng(lat, lng);
-        this.isPublic = isPublic;
-        this.date = date;
+    public ExplorePanorama(String imageid, String uploader, Double lat, Double lng, boolean isPublic, String date, String description, boolean canView, int views, int likes) {
+        super(imageid, uploader, date, views, likes, new LatLng(lat, lng), description, isPublic);
         this.canView = canView;
-        this.likes = likes;
     }
 
     protected ExplorePanorama(Parcel in) {
-        imageID = in.readString();
-        location = (LatLng) in.readValue(LatLng.class.getClassLoader());
-        uploader = in.readString();
-        date = in.readString();
-        likes = in.readInt();
-        isPublic = in.readByte() != 0x00;
+        super(in);
         canView = in.readByte() != 0x00;
-    }
-
-    public String getImageID() {
-        return imageID;
-    }
-
-    public LatLng getLocation() {
-        return location;
-    }
-
-    public String getUploader() {
-        return uploader;
-    }
-
-    public boolean isPublic() {
-        return isPublic;
     }
 
     public boolean isCanView() {
         return canView;
     }
 
-    public String getDate() { return date; }
 
     public void setCanView(boolean canView) {
         this.canView = canView;
     }
-
-    public boolean getCanView() { return this.canView;}
-
-    public int getLikes() { return this.likes; }
 
     @Override
     public int describeContents() {
@@ -88,12 +46,7 @@ public class ExplorePanorama implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(imageID);
-        dest.writeValue(location);
-        dest.writeString(uploader);
-        dest.writeString(date);
-        dest.writeInt(likes);
-        dest.writeByte((byte) (isPublic ? 0x01 : 0x00));
+        super.writeToParcel(dest, flags);
         dest.writeByte((byte) (canView ? 0x01 : 0x00));
     }
 

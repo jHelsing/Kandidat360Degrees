@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,7 +17,6 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -36,19 +34,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 import org.opencv.core.Mat;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
+
 import com.ciux031701.kandidat360degrees.representation.NativePanorama;
 import org.opencv.android.Utils;
-import org.opencv.imgcodecs.Imgcodecs;
-import java.io.File;
+
 import java.util.List;
 import static android.content.ContentValues.TAG;
-import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 
 /**
  * Created by boking on 2017-02-17.
@@ -239,7 +233,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         }
     };
 
-    private void saveAndMakePanorama() {
+    private boolean saveAndMakePanorama() {
         showProgressDialog();
         //openCV-parts:
         try {
@@ -270,6 +264,16 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 Log.i(TAG, "Fail writing image to internal storage");
             }*/
 
+            if(resultPanorama.empty()){
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getActivity(), "Something went wrong during stitching. Please try again.", Toast.LENGTH_LONG).show();
+                    }
+                });
+                closeProgressDialog();
+                return false;
+            }
             //Convert Mat to Bitmap so we can view the image in ImageViewFragment:
             Log.i(TAG, "Type of Mat: " + resultPanorama.type()); //type = 16 --> CV_8UC3, then it "works", is sometimes 0??
             resultPanoramaBmp = Bitmap.createBitmap(resultPanorama.cols(), resultPanorama.rows(), Bitmap.Config.ARGB_8888);
@@ -284,6 +288,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         }
         //end of openCV-parts
         closeProgressDialog();
+        return true;
     }
 
     //To stop the camera preview during computations
@@ -402,8 +407,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                                 takePicture();
 
                                 if (nbrOfPicturesTaken == nbrOfImages) {
-                                    saveAndMakePanorama();
-                                    sendPanoramaToImageView();
+                                    if(saveAndMakePanorama());
+                                        sendPanoramaToImageView();
                                 }
                             }else{
                                 mSurfaceViewDraw.setCircleColor(Color.RED);

@@ -4,15 +4,11 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -22,19 +18,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.adaptors.ShareAdapter;
 import com.ciux031701.kandidat360degrees.communication.Friends;
 import com.ciux031701.kandidat360degrees.communication.JReqShareImage;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
-import com.ciux031701.kandidat360degrees.representation.UserTuple;
+import com.ciux031701.kandidat360degrees.communication.ShareManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -126,41 +118,20 @@ public class ShareFragment extends Fragment {
     }
 
     private void addListenerToShareButton(Button shareButton) {
+        //TODO: Description?
         shareButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ShareAdapter adapter = (ShareAdapter)mRecyclerView.getAdapter();
                 String selectedNames = adapter.getSelectedString();
-                if(!selectedNames.isEmpty()) {
-                    JReqShareImage jReqShareImage = new JReqShareImage("111", selectedNames);
-                    jReqShareImage.setJResultListener(
-                            new JRequest.JResultListener() {
-                                @Override
-                                public void onHasResult(JSONObject result) {
-                                    try {
-                                        boolean error = result.getBoolean("error");
-                                        if(!error){
-                                            //arguments so that the explore view can show some kind of loading Toast "Sharing..."
-                                            Toast.makeText(getActivity(), "Sharing...",
-                                                    Toast.LENGTH_SHORT).show();
-                                            args = new Bundle();
-                                            args.putString("shared", "somekindofID");
-                                            Fragment fragment = new ExploreFragment();
-                                            FragmentManager fragmentManager = getActivity().getFragmentManager();
-                                            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                                            fragmentTransaction.replace(R.id.content_frame, fragment);
-                                            fragmentTransaction.addToBackStack(null);
-                                            fragmentTransaction.commit();
-                                        }
-                                    }
-                                    catch(JSONException je){
+                ShareManager.share(getActivity(), selectedNames, pictureInBitmap, "No description.", makePublic);
+                Fragment fragment = new ExploreFragment();
+                FragmentManager fragmentManager = getActivity().getFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                fragmentTransaction.replace(R.id.content_frame, fragment);
+                fragmentTransaction.addToBackStack(null);
+                fragmentTransaction.commit();
 
-                                    }
-                                }
-                            }
-                    );
-                    jReqShareImage.sendRequest();
-                }
             }
         });
     }
