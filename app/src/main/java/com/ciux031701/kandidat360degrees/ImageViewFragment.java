@@ -6,9 +6,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -74,7 +77,7 @@ public class ImageViewFragment extends Fragment{
             File file = new File(getActivity().getFilesDir() + FTPInfo.PANORAMA_LOCAL_LOCATION + imageid + FTPInfo.FILETYPE);
             image = Drawable.createFromPath(file.getPath());
             imageView1.setImageDrawable(image);
-            TextView usernameView = (TextView) root.findViewById(R.id.imageViewUsernameTextView);
+            final TextView usernameView = (TextView) root.findViewById(R.id.imageViewUsernameTextView);
             final TextView favView = (TextView) root.findViewById(R.id.imageviewFavouriteTextView);
             favView.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -139,7 +142,15 @@ public class ImageViewFragment extends Fragment{
                     return true;
                 }
             });
+            Typeface tf = Typeface.defaultFromStyle(Typeface.BOLD_ITALIC);
             usernameView.setText(getArguments().getString("username"));
+            usernameView.setTypeface(tf);
+            usernameView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ((MainActivity) getActivity()).showProfile(usernameView.getText().toString());
+                }
+            });
             favView.setText(getArguments().getString("likes"));
             JReqIsLiked request = new JReqIsLiked(imageid);
             request.setJResultListener(new JRequest.JResultListener() {
