@@ -26,8 +26,8 @@ import java.util.Date;
  */
 
 public class ThreeSixtyWorld extends Application {
-    public static final Bitmap.CompressFormat COMPRESS_FORMAT = Bitmap.CompressFormat.valueOf(FTPInfo.FILETYPE.replace('.',' ').trim());
-    public static final int COMPRESSION_QUALITY = 100;
+    public static final Bitmap.CompressFormat COMPRESS_FORMAT = Bitmap.CompressFormat.JPEG;
+    public static final int COMPRESSION_QUALITY = 100; //Ignored for CompressFormat.PNG
     private static Context context;
     public static final String ApplicationPreferences = "AppPrefs";
 
