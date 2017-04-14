@@ -46,6 +46,7 @@ import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.ciux031701.kandidat360degrees.representation.JSONParser;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.ciux031701.kandidat360degrees.representation.RoundImageView;
+import com.ciux031701.kandidat360degrees.representation.ThreeSixtyPanoramaCollection;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.GoogleMap;
@@ -247,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onHasResult(JSONObject result) {
                         boolean error;
-                        String message = null, username = null, uploaded = null, views = null, favs = null, isFriend = null;
+                        String message = null, username = null, uploaded = null, views = null, favs = null, isFriendString = null;
                         JSONArray images = new JSONArray();
                         try {
                             error = result.getBoolean("error");
@@ -256,20 +257,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             uploaded = result.getString("uploaded");
                             views = result.getString("views");
                             favs = result.getString("likes");
-                            isFriend = result.getString("isFriend");
+                            isFriendString = result.getString("isFriend");
                             images = result.getJSONArray("images");
                         } catch(JSONException je){
                             error = true;
                         }
 
                         if(!error) {
-                            ArrayList<ProfilePanorama> imgs = new ArrayList<ProfilePanorama>();
+                            boolean isFriend = false;
+                            if(!isFriendString.equals("null"))
+                                isFriend = true;
+                            ThreeSixtyPanoramaCollection imgs = new ThreeSixtyPanoramaCollection();
                             for (int i=0; i < images.length(); i++){
                                 try {
                                     JSONArray imgArr = images.getJSONArray(i);
                                     Log.d("PROFILE", imgArr.toString());
                                     ProfilePanorama pp = JSONParser.parseToProfilePanorama(imgArr);
-                                    if (pp != null)
+                                    if (pp != null && (pp.isPublic() || isFriend || username.equals(Session.getUser())))
                                         imgs.add(pp);
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -282,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             b.putString("uploadCount",uploaded);
                             b.putString("viewsCount",views);
                             b.putString("favsCount",favs);
-                            b.putString("isFriend", isFriend);
+                            b.putBoolean("isFriend", isFriend);
                             b.putSerializable("images", imgs);
                             fragment.setArguments(b);
                             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
@@ -404,11 +408,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    public void showPanorama (final String origin, final String imageID) {
+    public void showPanorama (final String origin, final String imageID, final String username, final String likes) {
         Intent intent =  new Intent(this, DownloadService.class);
         intent.putExtra("IMAGETYPE", ImageType.PANORAMA);
         intent.putExtra("IMAGEID", imageID);
-        intent.putExtra("TYPE", "DOWNLOAD");
         intent.setAction(DownloadService.NOTIFICATION + imageID + ".jpg");
         IntentFilter filter = new IntentFilter();
         filter.addAction(DownloadService.NOTIFICATION + imageID + ".jpg");
@@ -418,26 +421,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
                     Log.d("MainActivity", "Panorama image found and results from download are OK.");
 
-                    String path = context.getFilesDir() + "/panoramas/"
-                            + imageID + ".jpg";
-                    Drawable panoramaImage = Drawable.createFromPath(path);
-
-                    File file = new File(path);
-                    if (file.delete()) {
-                        Log.d("MainActivity", "Panorama image has been deleted");
-                    }
                     context.unregisterReceiver(this);
 
                     Bundle args = new Bundle();
                     args.putString("origin", origin);
                     args.putString("imageid", imageID);
-                    ArrayList<Drawable> arrayList = new ArrayList<Drawable>();
-                    arrayList.add(panoramaImage);
-                    args.putSerializable("panorama", arrayList);
+                    args.putString("username", username);
+                    args.putString("likes", likes);
                     ImageViewFragment fragment = new ImageViewFragment();
                     fragment.setArguments(args);
                     FragmentManager fragmentManager = getFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(origin).commit();
                 }
             }
         }, filter);

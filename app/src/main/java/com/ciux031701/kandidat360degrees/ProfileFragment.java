@@ -2,13 +2,18 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -26,7 +31,9 @@ import com.ciux031701.kandidat360degrees.communication.JReqRemoveFriend;
 import com.ciux031701.kandidat360degrees.communication.JReqSendFriendrequest;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.communication.Session;
+import com.ciux031701.kandidat360degrees.communication.UploadService;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
+import com.ciux031701.kandidat360degrees.representation.ThreeSixtyPanoramaCollection;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
@@ -40,6 +47,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -60,7 +71,7 @@ public class ProfileFragment extends Fragment {
 
     private ListView pictureListView;
     private ListAdapter profileFlowAdapter;
-    private ArrayList<ProfilePanorama> pictures;
+    private ThreeSixtyPanoramaCollection pictures;
     private int[] panoramaIDs;
 
     private boolean listMode;
@@ -97,10 +108,11 @@ public class ProfileFragment extends Fragment {
         setUpProfileMenuButton();
         setUpViewSwitchButton();
 
+
         //Get pictures, total likes nbr of friends or whatever we decide to display from db
         // We do not need to check this error since we are the ones who send the bundle and are
         // 100% sure of what it contains.
-        pictures = (ArrayList<ProfilePanorama>) getArguments().getSerializable("images");
+        pictures = (ThreeSixtyPanoramaCollection)getArguments().getSerializable("images");
         pictureListView = (ListView) root.findViewById(R.id.profilePictureListView);
 
         return root;
@@ -132,7 +144,8 @@ public class ProfileFragment extends Fragment {
 
         infoWindowText.setText(pictures.get(i).getDate().substring(0,10));
 
-        infoWindowImage.setImageDrawable(pictures.get(i).getPreview());
+        ProfilePanorama pp = (ProfilePanorama)pictures.get(i);
+        infoWindowImage.setImageDrawable(pp.getPreview());
 
         return v;
     }
@@ -172,7 +185,8 @@ public class ProfileFragment extends Fragment {
                         String panoramaID = imageIDs[i];
                         File localFile = new File(getActivity().getFilesDir() + FTPInfo.PREVIEW_LOCAL_LOCATION + panoramaID + FTPInfo.FILETYPE);
                         Drawable preview = Drawable.createFromPath(localFile.getPath());
-                        pictures.get(i).setPreview(preview);
+                        ProfilePanorama pp = (ProfilePanorama)pictures.get(i);
+                        pp.setPreview(preview);
 
                         if (localFile.delete())
                             Log.d("FTP", "Preview image has been deleted :" + panoramaID);
@@ -180,7 +194,7 @@ public class ProfileFragment extends Fragment {
                             Log.d("FTP", "Preview image has not been deleted :" + panoramaID);
                     }
 
-                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
+                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures, username);
                     pictureListView.setAdapter(profileFlowAdapter);
                     pictureListView.setOnItemClickListener(new FlowItemClickListener());
                 }
@@ -198,9 +212,9 @@ public class ProfileFragment extends Fragment {
         intent.putExtra("IMAGETYPE", ImageType.PROFILE);
         intent.putExtra("USERNAME", username);
         intent.putExtra("TYPE", "DOWNLOAD");
-        intent.setAction(DownloadService.NOTIFICATION + username + ".jpg");
+        intent.setAction(DownloadService.NOTIFICATION + username + FTPInfo.FILETYPE);
         IntentFilter filter = new IntentFilter();
-        filter.addAction(DownloadService.NOTIFICATION + username + ".jpg");
+        filter.addAction(DownloadService.NOTIFICATION + username + FTPInfo.FILETYPE);
         getActivity().registerReceiver(new ProfileImageBroadcastReceiver(), filter);
         getActivity().startService(intent);
     }
@@ -254,8 +268,7 @@ public class ProfileFragment extends Fragment {
         favCountView.setText(favString);
 
         try {
-            if(!getArguments().getString("isFriend").equals(null))
-                isFriend = true;
+            isFriend = getArguments().getBoolean("isFriend");
         } catch (NumberFormatException e){
             e.printStackTrace();
         }
@@ -366,7 +379,8 @@ public class ProfileFragment extends Fragment {
                         //TODO: get fullscreen image from DB
                         listMode=false;
                         MainActivity mainActivity = (MainActivity) getActivity();
-                        mainActivity.showPanorama("profile", marker.getTitle());
+                        String imageId = marker.getTitle();
+                        mainActivity.showPanorama("profile", imageId, username, pictures.get(imageId).getLikeCount() + "");
                     }
                 });
 
@@ -395,7 +409,7 @@ public class ProfileFragment extends Fragment {
             if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
                 Log.d("Profile", "Profile image found and results from download are OK.");
                 String path = context.getFilesDir() + "/profiles/"
-                        + username + ".jpg";
+                        + username + FTPInfo.FILETYPE;
                 Drawable profileImage = Drawable.createFromPath(path);
                 ((ImageView) root.findViewById(R.id.profileProfileImage)).setImageDrawable(profileImage);
                 File file = new File(path);
@@ -434,7 +448,7 @@ public class ProfileFragment extends Fragment {
                     viewSwitchButton.setImageDrawable(getResources()
                             .getDrawable(R.drawable.disable_map_view_icon_profile));
                     mapView.setVisibility(View.GONE);
-                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures);
+                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures, username);
                     pictureListView.setAdapter(profileFlowAdapter);
                 }
             }
