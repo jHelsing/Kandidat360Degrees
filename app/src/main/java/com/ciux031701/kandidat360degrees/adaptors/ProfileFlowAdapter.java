@@ -20,6 +20,8 @@ import com.ciux031701.kandidat360degrees.communication.JReqLikeImage;
 import com.ciux031701.kandidat360degrees.communication.JReqUnLikeImage;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
+import com.ciux031701.kandidat360degrees.representation.ThreeSixtyPanorama;
+import com.ciux031701.kandidat360degrees.representation.ThreeSixtyPanoramaCollection;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
@@ -36,10 +38,10 @@ import java.util.Locale;
  * Created by boking on 2017-02-21.
  */
 
-public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
+public class ProfileFlowAdapter extends ArrayAdapter<ThreeSixtyPanorama> {
     private String username;
-    public ProfileFlowAdapter(Context context, ArrayList<ProfilePanorama> pictures, String username) {
-        super(context, R.layout.picture_profile_layout,pictures);
+    public ProfileFlowAdapter(Context context, ThreeSixtyPanoramaCollection pictures, String username) {
+        super(context, R.layout.picture_profile_layout,pictures.getArrayList());
         this.username = username;
     }
 
@@ -55,7 +57,8 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
         TextView dateText = (TextView) customView.findViewById(R.id.dateText);
 
         //Show preview
-        imageView.setImageDrawable(getItem(position).getPreview());
+        ProfilePanorama pp = (ProfilePanorama)getItem(position);
+        imageView.setImageDrawable(pp.getPreview());
 
         //Show adress for the item
         Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
@@ -86,7 +89,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
         setfavCountText(getItem(position).getLikeCount(), favCountText);
 
         //show if liked for the item
-        if(getItem(position).isFavorite()){
+        if(pp.isFavorite()){
             Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_clicked);
             favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
         }
@@ -105,8 +108,8 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                          * Makes the logged in user to like or unlike a specific image. It returns true if the image
                          * managed to be liked or unliked.
                          */
-
-                        if(!getItem(position).isFavorite()){
+                        final ProfilePanorama pp = (ProfilePanorama)getItem(position);
+                        if(!pp.isFavorite()){
                             JReqLikeImage likeImageReq = new JReqLikeImage(getItem(position).getImageID());
                             likeImageReq.setJResultListener(new JRequest.JResultListener() {
                                 @Override
@@ -120,7 +123,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                                     if(!error){
                                         Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_clicked);
                                         favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
-                                        getItem(position).setFavorite(true);
+                                        pp.setFavorite(true);
                                         getItem(position).incLikeCount();
                                         setfavCountText(getItem(position).getLikeCount(), favCountText);
                                     } else
@@ -142,9 +145,9 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                                     if(!error){
                                         Drawable fav = (Drawable) customView.getResources().getDrawable(R.drawable.ic_favorite_no_click);
                                         favCountText.setCompoundDrawablesWithIntrinsicBounds(null, null, fav, null);
-                                        getItem(position).setFavorite(false);
-                                        getItem(position).decLikeCount();
-                                        setfavCountText(getItem(position).getLikeCount(), favCountText);
+                                        pp.setFavorite(false);
+                                        pp.decLikeCount();
+                                        setfavCountText(pp.getLikeCount(), favCountText);
                                     } else
                                         Toast.makeText(getContext(), "Something went wrong with the server, try again later.", Toast.LENGTH_SHORT).show();
                                 }
@@ -163,11 +166,11 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
             public void onClick(View v) {
                 //TODO: Get the real size image for the selected panorama id
                 //TODO: like below from the DB and add that as parameter to the imageviewfragment
-                ProfilePanorama selectedPanorama = getItem(position);
+                ProfilePanorama selectedPanorama = (ProfilePanorama)getItem(position);
                 String panoramaID = selectedPanorama.getImageID();
 
                 MainActivity mainActivity = (MainActivity) getContext();
-                mainActivity.showPanorama("profile", panoramaID, username, selectedPanorama.getFavCount() + "");
+                mainActivity.showPanorama("profile", panoramaID, username, selectedPanorama.getLikeCount() + "");
             }
         });
 

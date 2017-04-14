@@ -497,7 +497,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                         //Go to full screen view
                         MainActivity mainActivity = (MainActivity) getActivity();
                         ExplorePanorama ep = imagesToShow.get(Integer.parseInt(marker.getSnippet()));
-                        mainActivity.showPanorama("explore", marker.getTitle(), ep.getUploader(), ep.getLikes() + "");
+                        mainActivity.showPanorama("explore", marker.getTitle(), ep.getUploader(), ep.getLikeCount() + "");
                     }
                 });
 
