@@ -14,7 +14,7 @@ public class FTPInfo {
    public static final String PROFILE_LOCAL_LOCATION = "/profiles/";
    public static final String PANORAMA_LOCAL_LOCATION = "/panoramas/";
    public static final String PREVIEW_LOCAL_LOCATION = "/previews/";
-   public static final String FILETYPE = ".png";
+   public static final String FILETYPE = ".JPEG";
 
    public static final String PANORAMA_SERVER_LOCATION = "/var/www/360world/panoramas/";
    public static final String PROFILE_SERVER_LOCATION = "/var/www/360world/profiles/";

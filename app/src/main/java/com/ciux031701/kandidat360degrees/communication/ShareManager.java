@@ -30,11 +30,11 @@ public class ShareManager extends BroadcastReceiver{
     private static Context context;
     private static String uploadBitmap(Bitmap bmp){
         FileOutputStream fout = null;
-        File tmp = new File(ThreeSixtyWorld.getAppContext().getFilesDir() + "/tmp.png");
+        File tmp = new File(ThreeSixtyWorld.getAppContext().getFilesDir() + "/tmp" + FTPInfo.FILETYPE);
         try {
             tmp.createNewFile();
             fout = new FileOutputStream(tmp);
-            bmp.compress(Bitmap.CompressFormat.PNG, 0, fout);
+            bmp.compress(ThreeSixtyWorld.COMPRESS_FORMAT, ThreeSixtyWorld.COMPRESSION_QUALITY, fout);
             fout.close();
         }catch(IOException e){
             return UPLOAD_NOT_STARTED;
