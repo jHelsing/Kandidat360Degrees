@@ -399,7 +399,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         try {
             FileOutputStream fos = new FileOutputStream(pictureFile);
-            image.compress(Bitmap.CompressFormat.PNG, 90, fos);
+            image.compress(ThreeSixtyWorld.COMPRESS_FORMAT, ThreeSixtyWorld.COMPRESSION_QUALITY, fos);
             fos.close();
         } catch (FileNotFoundException e) {
             Log.d(TAG, "File not found: " + e.getMessage());
