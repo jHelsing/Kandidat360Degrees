@@ -306,9 +306,10 @@ public class ProfileFragment extends Fragment {
                                         } catch (JSONException e) {
                                             error = true;
                                         }
-                                        if(error) {
+                                        if(!error) {
+                                            Toast.makeText(getActivity(), "A friend request has been sent to " + username,Toast.LENGTH_SHORT).show();
+                                        } else
                                             Toast.makeText(getActivity(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
-                                        }
                                     }
                                 });
                                 jReqSendFriendRequest.sendRequest();
@@ -326,6 +327,7 @@ public class ProfileFragment extends Fragment {
                                         }
                                         if(!error){
                                             Friends.remove(Friends.get(username));
+                                            Toast.makeText(getActivity(), "Removed " + username + " as your friend",Toast.LENGTH_SHORT).show();
                                         }
                                         else
                                             Toast.makeText(getActivity(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
