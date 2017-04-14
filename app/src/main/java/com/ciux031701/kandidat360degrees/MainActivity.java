@@ -251,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         if(!error) {
                             boolean isFriend = false;
-                            if(!isFriendString.equals(null))
+                            if(!isFriendString.equals("null"))
                                 isFriend = true;
                             ArrayList<ProfilePanorama> imgs = new ArrayList<ProfilePanorama>();
                             for (int i=0; i < images.length(); i++){
