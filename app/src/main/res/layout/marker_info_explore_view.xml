@@ -14,17 +14,19 @@
             android:layout_width="150dp" />
 
         <TextView
+            android:id="@+id/exploreInfoViewUserNameView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginLeft="5dp"
+            android:layout_marginLeft="7dp"
             android:layout_marginRight="5dp"
-            android:id="@+id/exploreInfoViewUserNameView"
-            android:textColor="@android:color/white"
-            android:text="PLACEHOLDER USER"
+            android:layout_marginTop="5dp"
+            android:drawableLeft="@drawable/explore_username_icon"
+            android:drawablePadding="13dp"
+            android:drawableStart="@drawable/explore_username_icon"
             android:lines="1"
-            android:textAlignment="center" />
+            android:text="PLACEHOLDER USER"
+            android:textColor="@android:color/white" />
 
         <TextView
             android:text="PLACEHOLD DATE"

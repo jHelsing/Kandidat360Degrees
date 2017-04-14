@@ -182,7 +182,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ProfilePanorama> {
                 ProfilePanorama selectedPanorama = getItem(position);
                 String panoramaID = selectedPanorama.getPanoramaID();
 
-                MainActivity mainActivity = (MainActivity) v.getContext();
+                MainActivity mainActivity = (MainActivity) getContext();
                 mainActivity.showPanorama("profile", panoramaID, username, selectedPanorama.getFavCount() + "");
             }
         });
