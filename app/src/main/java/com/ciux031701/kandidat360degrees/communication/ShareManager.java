@@ -23,28 +23,33 @@ import java.io.IOException;
  */
 
 public class ShareManager extends BroadcastReceiver{
+    private static final double PREVIEW_IMAGE_SCALE_FACTOR = 0.2;
     private static final String UPLOAD_NOT_STARTED = "";
     private static ThreeSixtyPanorama imageInfo;
     private static String targetUsers;
     private static boolean locked;
     private static Context context;
     private static String uploadBitmap(Bitmap bmp){
+        Bitmap preview = createPreviewBitmap(bmp);
         FileOutputStream fout = null;
+        FileOutputStream fout_preview = null;
         File tmp = new File(ThreeSixtyWorld.getAppContext().getFilesDir() + "/tmp" + FTPInfo.FILETYPE);
+        File tmp_preview = new File(ThreeSixtyWorld.getAppContext().getFilesDir() + "/tmp_preview" + FTPInfo.FILETYPE);
         try {
             tmp.createNewFile();
+            tmp_preview.createNewFile();
             fout = new FileOutputStream(tmp);
+            fout_preview = new FileOutputStream(tmp_preview);
             bmp.compress(ThreeSixtyWorld.COMPRESS_FORMAT, ThreeSixtyWorld.COMPRESSION_QUALITY, fout);
+            preview.compress(ThreeSixtyWorld.COMPRESS_FORMAT, ThreeSixtyWorld.COMPRESSION_QUALITY, fout_preview);
             fout.close();
+            fout_preview.close();
         }catch(IOException e){
             return UPLOAD_NOT_STARTED;
         }
         String imageid = MD5.fromFile(tmp);
-        Intent uploadIntent = new Intent(ThreeSixtyWorld.getAppContext(), UploadService.class);
-        uploadIntent.putExtra("FILE", tmp);
-        uploadIntent.putExtra("IMAGETYPE", ImageType.PANORAMA);
-        uploadIntent.putExtra("IMAGEID", imageid);
-        ThreeSixtyWorld.getAppContext().startService(uploadIntent);
+        startUpload(tmp, imageid, ImageType.PANORAMA);
+        startUpload(tmp_preview, imageid, ImageType.PREVIEW);
         return imageid;
     }
     public static void share(Context ctx, String targets, Bitmap bmp, String description, boolean isPublic){
@@ -57,6 +62,21 @@ public class ShareManager extends BroadcastReceiver{
                 imageInfo = new ThreeSixtyPanorama(imageid, description, isPublic);
             }
         }
+    }
+
+    private static void startUpload(File file, String imageid, ImageType type){
+        Intent uploadIntent = new Intent(ThreeSixtyWorld.getAppContext(), UploadService.class);
+        uploadIntent.putExtra("FILE", file);
+        uploadIntent.putExtra("IMAGETYPE", type);
+        uploadIntent.putExtra("IMAGEID", imageid);
+        ThreeSixtyWorld.getAppContext().startService(uploadIntent);
+    }
+
+    private static Bitmap createPreviewBitmap(Bitmap bmp){
+        double width = bmp.getWidth() * PREVIEW_IMAGE_SCALE_FACTOR;
+        double height = bmp.getHeight() * PREVIEW_IMAGE_SCALE_FACTOR;
+        return Bitmap.createScaledBitmap(bmp, (int)width, (int)height, false);
+
     }
 
     private static void pushImage(ThreeSixtyPanorama imageInfo){
@@ -119,8 +139,10 @@ public class ShareManager extends BroadcastReceiver{
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        ImageType type = (ImageType)intent.getSerializableExtra("IMAGETYPE");
+        int result = intent.getIntExtra("RESULT", Activity.RESULT_CANCELED);
         //If bitmap upload was ok, try to push the info to the database.
-        if(intent.getIntExtra("RESULT", Activity.RESULT_CANCELED) == Activity.RESULT_OK){
+        if( result == Activity.RESULT_OK && type == ImageType.PANORAMA){
             pushImage(imageInfo);
         }
     }
