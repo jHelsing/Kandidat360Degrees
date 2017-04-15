@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -52,7 +54,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ThreeSixtyPanorama> {
         final View customView = inflater.inflate(R.layout.picture_profile_layout,parent,false);
 
         ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
-        TextView locationText = (TextView) customView.findViewById(R.id.locationText);
+        final TextView locationText = (TextView) customView.findViewById(R.id.locationText);
         final TextView favCountText = (TextView) customView.findViewById(R.id.favCounter);
         TextView dateText = (TextView) customView.findViewById(R.id.dateText);
 
@@ -61,26 +63,84 @@ public class ProfileFlowAdapter extends ArrayAdapter<ThreeSixtyPanorama> {
         imageView.setImageDrawable(pp.getPreview());
 
         //Show adress for the item
-        Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
-        LatLng location = getItem(position).getLocation();
-        try {
-            List<Address> address = geocoder.getFromLocation(location.latitude, location.longitude, 1);
-            String city;
-            String country;
-            if(address.size() != 0){
-                if(address.get(0).getLocality() != null) {
-                    city = address.get(0).getLocality();
-                } else {
-                    city = "Unknown City";
+        final Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+        final LatLng location = getItem(position).getLocation();
+
+        /* We have to create a Asyntask when we want to access something from geocoder, especially
+            when we do it several times to make it faster without affecting the UI so that it is slow.
+         */
+        AsyncTask asyncTask = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] params) {
+                List<Address> address = null;
+                try {
+                    address = geocoder.getFromLocation(location.latitude, location.longitude, 5);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                country = address.get(0).getCountryName();
-                locationText.setText(city + ", " + country);
-            } else {
-                locationText.setText("Unknown Location");
+                return address;
             }
-        } catch (IOException e){
-            e.printStackTrace();
-        }
+
+            @Override
+            protected void onPostExecute(Object result) {
+                List<Address> res = (List<Address>) result;
+                String city = "Unknown City";
+                String country = "";
+
+                // Check if geocoder has a match with the first coordinates given.
+                if(res.size() > 0) {
+                    // Radius of the circle that we are going to scan for cities.
+                    final double radius = 0.02;
+                    // Angle to scan for cities, which will go from 0 degrees to 360 degrees.
+                    int angle = 0;
+                    boolean isCity= false;
+                    boolean isLocation = false;
+                    /**
+                     * This loop will check if it finds a city between 0 degrees to 360 degrees. It will
+                     * only stop if a city is found or if it has gone 360 degrees (1 rev).
+                     */
+                    while (!isLocation || (angle < 360 && !isCity)) {
+                        for(int i = 0; i < res.size(); i++){
+                            if(res.get(i).getLocality() != null) {
+                                city = res.get(i).getLocality();
+                                country = res.get(i).getCountryName();
+                                isCity = true;
+                                break;
+                            }
+                        }
+                        // Check if we have found a city for optimization.
+                        if(isCity)
+                            break;
+                        try {
+                            // We look for other coordinates near the real position with the help of circle's equation.
+                            res = geocoder.getFromLocation(location.latitude + radius * Math.sin(angle)
+                                    , location.longitude + radius * Math.cos(angle), 5);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        // Check if geocoder has a match with the new coordinates.
+                        if(res.size() > 0)
+                            isLocation = true;
+                        // We look new coordinates for every 45 angle in the circle till we reach 1 rev.
+                        angle += 45;
+                    }
+
+                    /* If the angle is above or equal to 360 degrees, it means that we have gone 1 rev
+                       and there is no city at all in the search. Thats why we want to set AdminArea rather than
+                       nothing (if there is a AdminArea), otherwise "Unknown City".
+                     */
+                    if(angle >= 360){
+                        country = res.get(0).getCountryName();
+                        if(res.get(0).getAdminArea() != null)
+                            city = res.get(0).getAdminArea();
+                    }
+                    locationText.setText(city + ", " + country);
+                } else
+                    locationText.setText("Unknown Location");
+            }
+        };
+        //Start the asyncTask
+        asyncTask.execute();
 
         //Show date for the item
         dateText.setText(getItem(position).getDate().substring(0,10));
