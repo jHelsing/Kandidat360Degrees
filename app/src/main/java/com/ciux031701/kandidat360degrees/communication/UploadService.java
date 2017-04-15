@@ -66,7 +66,7 @@ public class UploadService extends IntentService {
         File intputFile = (File)intent.getSerializableExtra("FILE");
 
         if (!intputFile.exists()) {
-            publishResults(Activity.RESULT_CANCELED);
+            publishResults(Activity.RESULT_CANCELED, type);
         }
         Log.d("FTP", "File exists and can upload");
         // Start FTP communication
@@ -87,7 +87,7 @@ public class UploadService extends IntentService {
                 Log.d("FTP", "Published results. Closing connection and stopping service.");
                 ftpClient.disconnect();
 
-                publishResults(Activity.RESULT_CANCELED);
+                publishResults(Activity.RESULT_CANCELED, type);
             } else {
                 // Login successful
                 Log.d("FTP", "Phone logged-in to server: " + ftpClient.getReplyString());
@@ -113,10 +113,10 @@ public class UploadService extends IntentService {
                 Log.d("FTP", "File uploaded correctly");
                 ftpClient.logout();
                 ftpClient.disconnect();
-                publishResults(Activity.RESULT_OK);
+                publishResults(Activity.RESULT_OK, type);
             } else {
                 Log.d("FTP", "File didn't upload");
-                publishResults(Activity.RESULT_CANCELED);
+                publishResults(Activity.RESULT_CANCELED, type);
             }
 
         } catch (SocketException e) {
@@ -130,10 +130,11 @@ public class UploadService extends IntentService {
      * Broadcasts the results from the file upload.
      * @param result - The result of the upload, -1 if sucessful, 0 if failure
      */
-    private void publishResults(int result) {
+    private void publishResults(int result, ImageType type) {
         Intent intent = new Intent(NOTIFICATION);
         intent.setAction("com.ciux031701.kandidat360degrees.communication.UploadService");
         intent.putExtra("RESULT", result);
+        intent.putExtra("IMAGETYPE", type);
         sendBroadcast(intent);
         this.stopSelf();
     }
