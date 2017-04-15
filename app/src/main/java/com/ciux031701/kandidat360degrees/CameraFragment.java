@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+import com.ciux031701.kandidat360degrees.imageprocessing.ImageProcessor;
 import com.ciux031701.kandidat360degrees.representation.NativePanorama;
 import org.opencv.android.Utils;
 
@@ -242,6 +243,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             }
             Mat resultPanorama = new Mat();
             NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
+            Mat cropped;
+            cropped = ImageProcessor.cropBlack(resultPanorama);
 
             /*
             //Save the image to internal memory ------------------ not working :(
@@ -262,7 +265,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 Log.i(TAG, "Fail writing image to internal storage");
             }*/
 
-            if(resultPanorama.empty()){
+            if(cropped.empty()){
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -273,9 +276,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 return false;
             }
             //Convert Mat to Bitmap so we can view the image in ImageViewFragment:
-            Log.i(TAG, "Type of Mat: " + resultPanorama.type()); //type = 16 --> CV_8UC3, then it "works", is sometimes 0??
-            resultPanoramaBmp = Bitmap.createBitmap(resultPanorama.cols(), resultPanorama.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(resultPanorama, resultPanoramaBmp); //work with type CV_8UC3
+            Log.i(TAG, "Type of Mat: " + cropped.type()); //type = 16 --> CV_8UC3, then it "works", is sometimes 0??
+            resultPanoramaBmp = Bitmap.createBitmap(cropped.cols(), cropped.rows(), Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(cropped, resultPanoramaBmp); //work with type CV_8UC3
 
             //MainActivity mainActivity = (MainActivity) getActivity();
             //mainActivity.downloadPanoramaLocal(resultPanoramaBmp);
