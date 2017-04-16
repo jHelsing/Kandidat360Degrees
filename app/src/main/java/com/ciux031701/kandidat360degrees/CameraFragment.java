@@ -44,6 +44,7 @@ import com.ciux031701.kandidat360degrees.imageprocessing.ImageProcessor;
 import com.ciux031701.kandidat360degrees.representation.CaptureState;
 import com.ciux031701.kandidat360degrees.representation.NativePanorama;
 import org.opencv.android.Utils;
+import org.opencv.core.Rect;
 
 import java.util.List;
 import static android.content.ContentValues.TAG;
@@ -241,12 +242,14 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         try {
             int nbrOfImages = listOfTakenImages.size();
             long[] imageAddresses = new long[nbrOfImages];
+            //Images for crop have some shades of black replaced with another color in order to make it easier to find
+            //a good crop rectangle. Without this, if you photograph something black, it might get cropped away.
+            listOfTakenImages = ImageProcessor.replaceBlackInList(listOfTakenImages);
             for (int i = 0; i < nbrOfImages; i++) {
                 imageAddresses[i] = listOfTakenImages.get(i).getNativeObjAddr();
             }
             Mat resultPanorama = new Mat();
             NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
-
             if (resultPanorama.empty()) {
                 //Try one more time.
                 NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
@@ -257,7 +260,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     return false;
                 }
             }
-            Mat cropped = ImageProcessor.cropBlack(resultPanorama);
+            Rect cropRect = ImageProcessor.getBlackCroppedRect(resultPanorama);
+            Mat cropped = resultPanorama.submat(cropRect);
             if (cropped.empty()) {
                 ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image cropping.");
                 recreateFragment();
@@ -483,6 +487,10 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 sensorManager.unregisterListener(this, magnetometer);
                 sensorManager.unregisterListener(this, rotationVector);
                 mSurfaceViewDraw.stopThread();
+                break;
+            case IDLE:
+                nbrOfPicturesTaken = 0;
+                break;
 
         }
     }
