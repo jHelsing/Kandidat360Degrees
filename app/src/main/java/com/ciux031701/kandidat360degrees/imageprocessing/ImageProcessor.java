@@ -35,24 +35,30 @@ public class ImageProcessor {
         Point points[] = approx.toArray();
 
         if(points.length != 4) {
-            ThreeSixtyWorld.showToast(ThreeSixtyWorld.getAppContext(), "Something went wrong during cropping.");
             return new Mat();
         }
         else
         {
-            double x = (points[0].x > points[1].x) ? points[0].x : points[1].x;
-            double y = (points[0].y > points[3].y) ? points[0].y : points[3].y;
-            double x_e = (points[3].x > points[2].x) ? points[2].x : points[3].x;
-            double y_e = (points[1].y > points[2].y) ? points[2].y : points[1].y;
+            double x1 = (points[0].x > points[1].x) ? points[0].x : points[1].x;
+            double y1 = (points[0].y > points[3].y) ? points[0].y : points[3].y;
+            double x_e1 = (points[3].x > points[2].x) ? points[2].x : points[3].x;
+            double y_e1 = (points[1].y > points[2].y) ? points[2].y : points[1].y;
 
-            int width = (int)(x_e - x);
-            int height = (int)(y_e - y);
+            int x = (x1 < x_e1) ? (int)x1 : (int)x_e1;
+            int x_e = (x1 < x_e1) ? (int)x_e1 : (int)x1;
+            int y = (y1 < y_e1) ? (int)y1 : (int)y_e1;
+            int y_e = (y1 < y_e1) ? (int)y_e1 : (int)y1;
 
-            return src.submat((int)y, height, (int)x, width);
+            int width = (x_e - x);
+            int height = (y_e - y);
+
+
+
+            return src.submat(y, height, x, width);
         }
     }
 
-    public static int maxSizeIndex(ArrayList<MatOfPoint> list){
+    private static int maxSizeIndex(ArrayList<MatOfPoint> list){
         int maxIndex = 0;
         for(int i = 0; i < list.size(); i++){
             MatOfPoint mop = list.get(i);
@@ -64,4 +70,6 @@ public class ImageProcessor {
         }
         return maxIndex;
     }
+
+
 }
