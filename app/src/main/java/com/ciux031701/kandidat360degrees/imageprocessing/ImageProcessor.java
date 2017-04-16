@@ -3,12 +3,14 @@ package com.ciux031701.kandidat360degrees.imageprocessing;
 import com.ciux031701.kandidat360degrees.ThreeSixtyWorld;
 import com.ciux031701.kandidat360degrees.representation.ThreeSixtyPanorama;
 
+import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.imgproc.*;
 
 import java.util.ArrayList;
@@ -18,7 +20,7 @@ import java.util.ArrayList;
  */
 
 public class ImageProcessor {
-    public static Mat cropBlack(Mat src) {
+    public static Rect getBlackCroppedRect(Mat src) {
         Mat gray = new Mat();
         Mat tresh = new Mat();
         Imgproc.cvtColor(src, gray, Imgproc.COLOR_BGR2GRAY);
@@ -35,7 +37,7 @@ public class ImageProcessor {
         Point points[] = approx.toArray();
 
         if(points.length != 4) {
-            return new Mat();
+            return new Rect();
         }
         else
         {
@@ -54,7 +56,7 @@ public class ImageProcessor {
 
 
 
-            return src.submat(y, height, x, width);
+            return new Rect(x, y, width, height);
         }
     }
 
@@ -69,6 +71,26 @@ public class ImageProcessor {
                 maxIndex = i;
         }
         return maxIndex;
+    }
+
+    public static Mat replaceBlack(Mat mat){
+        Mat copy = new Mat();
+        mat.copyTo(copy);
+        Mat mask = new Mat();
+        Scalar lower = new Scalar(0.0, 0.0, 0.0, 0.0);
+        Scalar upper = new Scalar(5.0, 5.0, 5.0, 0.0);
+        Scalar c = new Scalar(6.0, 6.0, 6.0, 0.0);
+        Core.inRange(copy, lower, upper, mask);
+        copy.setTo(c, mask);
+        return copy;
+    }
+
+    public static ArrayList<Mat> replaceBlackInList(ArrayList<Mat> list){
+        ArrayList<Mat> out = new ArrayList();
+        for(int i = 0; i < list.size(); i++){
+            out.add(replaceBlack(list.get(i)));
+        }
+        return out;
     }
 
 
