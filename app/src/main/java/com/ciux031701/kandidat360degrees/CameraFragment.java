@@ -2,6 +2,7 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -18,6 +19,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -39,6 +41,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 import com.ciux031701.kandidat360degrees.imageprocessing.ImageProcessor;
+import com.ciux031701.kandidat360degrees.representation.CaptureState;
 import com.ciux031701.kandidat360degrees.representation.NativePanorama;
 import org.opencv.android.Utils;
 
@@ -50,7 +53,7 @@ import static android.content.ContentValues.TAG;
  */
 
 public class CameraFragment extends Fragment implements SensorEventListener {
-
+    private CaptureState cState;
     private TextView holdVerticallyText;
     private ImageButton backButton;
     private ImageView holdVerticallyImage;
@@ -65,8 +68,6 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private float[] mRotationMatrix;
 
     private boolean isVertical;
-    private boolean captureInProgress;
-    private boolean isSafeToTakePicture = true; //is it safe to capture a picture?
     private int nbrOfPicturesTaken = 0; //nbr of currently taken pictures
 
     private ProgressDialog progressDialog;
@@ -82,15 +83,14 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private boolean isFirstSensorChanged;
     private boolean proximityCheckerInProgress;
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_camera, container, false);
-
         mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
         proximityCheckerInProgress = false;
         isVertical = false;
         isFirstSensorChanged = true;
-        captureInProgress = false;
 
         lastDegree = 0;
         //For the sensors:
@@ -114,6 +114,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         orientation = new float[3];
         mRotationMatrix = new float[9];
 
+        setState(CaptureState.IDLE);
+
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -130,11 +132,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         captureButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(captureInProgress){
-                    saveAndMakePanorama();
-                    sendPanoramaToImageView();
+                if(getState() == CaptureState.NEXT){
+                    if(saveAndMakePanorama())
+                        sendPanoramaToImageView();
                 }else {
-                    captureInProgress = true;
+                    setState(CaptureState.NEXT);
                     captureButton.setImageResource(R.drawable.temp_check_black);
                     backButton.setVisibility(View.GONE);
                     takePicture();
@@ -194,7 +196,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             mSurfaceViewDraw.setTargetAcquired(true);
             //Start preview of the camera & set safe to take pictures to true
             mCam.startPreview();
-            isSafeToTakePicture = true;
+            setState(CaptureState.NEXT);
         }
     };
 
@@ -233,6 +235,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     };
 
     private boolean saveAndMakePanorama() {
+        setState(CaptureState.PROCESSING);
         showProgressDialog();
         //openCV-parts:
         try {
@@ -243,38 +246,24 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             }
             Mat resultPanorama = new Mat();
             NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
-            Mat cropped;
-            cropped = ImageProcessor.cropBlack(resultPanorama);
 
-            /*
-            //Save the image to internal memory ------------------ not working :(
-            File path = new File(getActivity().getFilesDir() + "/panoramas/");
-            path.mkdirs();
-            File file = new File(path, "image.png");
-            final String fileName = file.getPath();
-            boolean success = Imgcodecs.imwrite(fileName, resultPanorama);
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(getActivity(), "File saved at (internal): " + fileName, Toast.LENGTH_LONG).show();
+            if (resultPanorama.empty()) {
+                //Try one more time.
+                NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
+                //If still empty, recreate the fragment.
+                if (resultPanorama.empty()) {
+                    ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image stitching.");
+                    recreateFragment();
+                    return false;
                 }
-            });
-            if (success) {
-                Log.i(TAG, "SUCCESS writing image to internal storage");
-            } else {
-                Log.i(TAG, "Fail writing image to internal storage");
-            }*/
-
-            if(cropped.empty()){
-                getActivity().runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Toast.makeText(getActivity(), "Something went wrong during stitching. Please try again.", Toast.LENGTH_LONG).show();
-                    }
-                });
-                closeProgressDialog();
+            }
+            Mat cropped = ImageProcessor.cropBlack(resultPanorama);
+            if (cropped.empty()) {
+                ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image cropping.");
+                recreateFragment();
                 return false;
             }
+
             //Convert Mat to Bitmap so we can view the image in ImageViewFragment:
             Log.i(TAG, "Type of Mat: " + cropped.type()); //type = 16 --> CV_8UC3, then it "works", is sometimes 0??
             resultPanoramaBmp = Bitmap.createBitmap(cropped.cols(), cropped.rows(), Bitmap.Config.ARGB_8888);
@@ -290,6 +279,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         //end of openCV-parts
         closeProgressDialog();
         return true;
+
     }
 
     //To stop the camera preview during computations
@@ -319,6 +309,14 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         });
     }
 
+    private void recreateFragment(){
+        CameraFragment cameraFragment = new CameraFragment();
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.content_frame, cameraFragment);
+        ft.addToBackStack(null);
+        ft.commit();
+    }
+
     @Override
     public void onPause() {
         super.onPause();
@@ -342,88 +340,86 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     //Sensors:
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR && (getState() == CaptureState.IDLE || getState() == CaptureState.NEXT)) {
+                // Convert the rotation-vector to a 4x4 matrix.
+                SensorManager.getRotationMatrixFromVector(mRotationMatrix, sensorEvent.values);
+                SensorManager.remapCoordinateSystem(mRotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Z, mRotationMatrix);
+                SensorManager.getOrientation(mRotationMatrix, orientation);
 
-        if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
-        {
-            // Convert the rotation-vector to a 4x4 matrix.
-            SensorManager.getRotationMatrixFromVector(mRotationMatrix,sensorEvent.values);
-            SensorManager.remapCoordinateSystem(mRotationMatrix,SensorManager.AXIS_X, SensorManager.AXIS_Z,mRotationMatrix);
-            SensorManager.getOrientation(mRotationMatrix, orientation);
+                // Optionally convert the result from radians to degrees
+                orientation[0] = (float) Math.toDegrees(orientation[0]);
+                orientation[1] = (float) Math.toDegrees(orientation[1]);
+                orientation[2] = (float) Math.toDegrees(orientation[2]);
 
-            // Optionally convert the result from radians to degrees
-            orientation[0] = (float) Math.toDegrees(orientation[0]);
-            orientation[1] = (float) Math.toDegrees(orientation[1]);
-            orientation[2] = (float) Math.toDegrees(orientation[2]);
-
-            //The device is considered vertical if the pitch is in the range -12-12
-            if (orientation[1] > -12 && orientation[1] <12) {
-                if (!isVertical) {
-                    isVertical = true;
-                    holdVerticallyImage.setVisibility(View.GONE);
-                    holdVerticallyText.setVisibility(View.GONE);
-                    captureButton.setVisibility(View.VISIBLE);
-                    mSurfaceView.setVisibility(View.VISIBLE);
-                    mSurfaceViewDraw.setVisibility(View.VISIBLE);
-                }
-
-            } else {
-                if (isVertical) {
-                    isVertical = false;
-                    holdVerticallyImage.setVisibility(View.VISIBLE);
-                    holdVerticallyText.setVisibility(View.VISIBLE);
-                    captureButton.setVisibility(View.GONE);
-                    mSurfaceView.setVisibility(View.GONE);
-                    mSurfaceViewDraw.setVisibility(View.GONE);
-                }
-            }
-
-            //Save current degree if taking a pano and holding phone vertically
-            if(captureInProgress&&isVertical){
-                currentDegrees = fromOrientationToDegrees(orientation[0]);
-                if(isFirstSensorChanged){
-                    isFirstSensorChanged=false;
-                    startGyroDegree=currentDegrees;
-                }
-
-                //If the difference between target and currentangle are <= 2 (both horizontal and vertical)
-                // and we dont have a proximity timer started, start one
-                float diff = Math.abs(fromDegreeToProgress(currentDegrees)-mSurfaceViewDraw.getTargetDegree());
-                if(!proximityCheckerInProgress && diff <= 2 &&
-                        mSurfaceViewDraw.getVerticalOffset(fromOrientationToDegrees(orientation[1])) <= 2 &&
-                        mSurfaceViewDraw.getVerticalOffset(fromOrientationToDegrees(orientation[1])) >= -2){
-
-                    if(!mSurfaceViewDraw.isStillShowingGreen()){
-                        mSurfaceViewDraw.setCircleColor(Color.YELLOW);
+                //The device is considered vertical if the pitch is in the range -12-12
+                if (orientation[1] > -12 && orientation[1] < 12) {
+                    if (!isVertical) {
+                        isVertical = true;
+                        holdVerticallyImage.setVisibility(View.GONE);
+                        holdVerticallyText.setVisibility(View.GONE);
+                        captureButton.setVisibility(View.VISIBLE);
+                        mSurfaceView.setVisibility(View.VISIBLE);
+                        mSurfaceViewDraw.setVisibility(View.VISIBLE);
                     }
 
-                    proximityCheckerInProgress=true;
-                    final Handler handler = new Handler();
-
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            //is the current angle close enough to the target angle still?
-                            if (fromDegreeToProgress(currentDegrees) > (mSurfaceViewDraw.getTargetDegree()-2) && fromDegreeToProgress(currentDegrees) < (mSurfaceViewDraw.getTargetDegree()+2)){
-                                mSurfaceViewDraw.setCircleColor(Color.GREEN);
-                                takePicture();
-
-                                if (nbrOfPicturesTaken == nbrOfImages) {
-                                    if(saveAndMakePanorama());
-                                        sendPanoramaToImageView();
-                                }
-                            }else{
-                                mSurfaceViewDraw.setCircleColor(Color.RED);
-                            }
-                            proximityCheckerInProgress=false;
-                        }
-                    }, 1000);//1000 milliseconds check
+                } else {
+                    if (isVertical) {
+                        isVertical = false;
+                        holdVerticallyImage.setVisibility(View.VISIBLE);
+                        holdVerticallyText.setVisibility(View.VISIBLE);
+                        captureButton.setVisibility(View.GONE);
+                        mSurfaceView.setVisibility(View.GONE);
+                        mSurfaceViewDraw.setVisibility(View.GONE);
+                    }
                 }
 
-                lastDegree = currentDegrees;
-                mSurfaceViewDraw.setCurrentDegree(fromDegreeToProgress(currentDegrees));
-                mSurfaceViewDraw.setCurrentVerticalDegree(fromOrientationToDegrees(orientation[1]));
+                //Save current degree if taking a pano and holding phone vertically
+                if (getState() == CaptureState.NEXT && isVertical) {
+                    currentDegrees = fromOrientationToDegrees(orientation[0]);
+                    if (isFirstSensorChanged) {
+                        isFirstSensorChanged = false;
+                        startGyroDegree = currentDegrees;
+                    }
+
+                    //If the difference between target and currentangle are <= 2 (both horizontal and vertical)
+                    // and we dont have a proximity timer started, start one
+                    float diff = Math.abs(fromDegreeToProgress(currentDegrees) - mSurfaceViewDraw.getTargetDegree());
+                    if (!proximityCheckerInProgress && diff <= 2 &&
+                            mSurfaceViewDraw.getVerticalOffset(fromOrientationToDegrees(orientation[1])) <= 2 &&
+                            mSurfaceViewDraw.getVerticalOffset(fromOrientationToDegrees(orientation[1])) >= -2) {
+
+                        if (!mSurfaceViewDraw.isStillShowingGreen()) {
+                            mSurfaceViewDraw.setCircleColor(Color.YELLOW);
+                        }
+
+                        proximityCheckerInProgress = true;
+                        final Handler handler = new Handler();
+
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                //is the current angle close enough to the target angle still?
+                                if (fromDegreeToProgress(currentDegrees) > (mSurfaceViewDraw.getTargetDegree() - 2) && fromDegreeToProgress(currentDegrees) < (mSurfaceViewDraw.getTargetDegree() + 2)) {
+                                    mSurfaceViewDraw.setCircleColor(Color.GREEN);
+                                    takePicture();
+
+                                    if (nbrOfPicturesTaken == nbrOfImages) {
+                                        if (saveAndMakePanorama()) ;
+                                        sendPanoramaToImageView();
+                                    }
+                                } else {
+                                    mSurfaceViewDraw.setCircleColor(Color.RED);
+                                }
+                                proximityCheckerInProgress = false;
+                            }
+                        }, 1000);//1000 milliseconds check
+                    }
+
+                    lastDegree = currentDegrees;
+                    mSurfaceViewDraw.setCurrentDegree(fromDegreeToProgress(currentDegrees));
+                    mSurfaceViewDraw.setCurrentVerticalDegree(fromOrientationToDegrees(orientation[1]));
+                }
             }
-        }
     }
 
     private void sendPanoramaToImageView(){
@@ -437,9 +433,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     }
 
     private void takePicture(){
-        if (mCam != null && isSafeToTakePicture) {
+        if (mCam != null && getState() == CaptureState.NEXT) {
 
-            isSafeToTakePicture = false;
+            setState(CaptureState.CAPTURING);
             mCam.takePicture(null, null, jpegCallback);
             nbrOfPicturesTaken++;
         }
@@ -472,5 +468,25 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             }
         }
         return bestSize;
+    }
+
+    private void setState(CaptureState cState){
+        this.cState = cState;
+
+        switch(cState){
+            case PROCESSING:
+                SensorManager sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+                Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                Sensor magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+                Sensor rotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+                sensorManager.unregisterListener(this, accelerometer);
+                sensorManager.unregisterListener(this, magnetometer);
+                sensorManager.unregisterListener(this, rotationVector);
+                mSurfaceViewDraw.stopThread();
+
+        }
+    }
+    private CaptureState getState(){
+        return cState;
     }
 }
