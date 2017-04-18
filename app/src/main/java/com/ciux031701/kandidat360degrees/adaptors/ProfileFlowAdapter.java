@@ -5,6 +5,8 @@ import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,6 +45,7 @@ import java.util.Locale;
 
 public class ProfileFlowAdapter extends ArrayAdapter<ThreeSixtyPanorama> {
     private String username;
+
     public ProfileFlowAdapter(Context context, ThreeSixtyPanoramaCollection pictures, String username) {
         super(context, R.layout.picture_profile_layout,pictures.getArrayList());
         this.username = username;
@@ -58,6 +62,7 @@ public class ProfileFlowAdapter extends ArrayAdapter<ThreeSixtyPanorama> {
         final TextView favCountText = (TextView) customView.findViewById(R.id.favCounter);
         TextView dateText = (TextView) customView.findViewById(R.id.dateText);
 
+       final ProgressBar progressBar = (ProgressBar) customView.findViewById(R.id.profileFlowProgressBar);
         //Show preview
         ProfilePanorama pp = (ProfilePanorama)getItem(position);
         imageView.setImageDrawable(pp.getPreview());
@@ -224,6 +229,8 @@ public class ProfileFlowAdapter extends ArrayAdapter<ThreeSixtyPanorama> {
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                progressBar.setVisibility(View.VISIBLE);
+
                 //TODO: Get the real size image for the selected panorama id
                 //TODO: like below from the DB and add that as parameter to the imageviewfragment
                 ProfilePanorama selectedPanorama = (ProfilePanorama)getItem(position);
