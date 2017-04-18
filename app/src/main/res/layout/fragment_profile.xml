@@ -120,16 +120,29 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@android:color/darker_gray" />
+
     </LinearLayout>
 
-    <ListView
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ProgressBar
+            android:id="@+id/profileProgressBar"
+            style="?android:attr/progressBarStyle"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/profilePictureListView"
-            android:divider="@color/colorBackground"
-            android:dividerHeight="0dp"
-            android:fadeScrollbars="false"
-            android:fastScrollEnabled="false"/>
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"/>
+
+        <ListView
+                android:id="@+id/profilePictureListView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@color/colorBackground"
+                android:dividerHeight="0dp"
+                android:fadeScrollbars="false"
+                android:fastScrollEnabled="false" />
+    </RelativeLayout>
 
     <com.google.android.gms.maps.MapView
         android:id="@+id/profileMapView"
