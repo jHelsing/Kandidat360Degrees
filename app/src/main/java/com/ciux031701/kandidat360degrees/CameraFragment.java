@@ -19,6 +19,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -68,6 +69,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     float lastDegree;
     private float[] mRotationMatrix;
 
+    PowerManager.WakeLock wl;
     private boolean isVertical;
     private int nbrOfPicturesTaken = 0; //nbr of currently taken pictures
 
@@ -115,6 +117,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         orientation = new float[3];
         mRotationMatrix = new float[9];
 
+        PowerManager pm = (PowerManager) ThreeSixtyWorld.getAppContext().getSystemService(Context.POWER_SERVICE);
+        wl = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakeLock");
         setState(CaptureState.IDLE);
 
         backButton.setOnClickListener(new View.OnClickListener() {
@@ -182,6 +186,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = false;
             options.inPreferredConfig = Bitmap.Config.RGB_565;
+            options.inSampleSize = 3;
             options.inDither = true;
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
@@ -248,7 +253,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             long[] imageAddresses = new long[nbrOfImages];
             //Images for crop have some shades of black replaced with another color in order to make it easier to find
             //a good crop rectangle. Without this, if you photograph something black, it might get cropped away.
-            listOfTakenImages = ImageProcessor.replaceBlackInList(listOfTakenImages);
+            //listOfTakenImages = ImageProcessor.replaceBlackInList(listOfTakenImages);
             for (int i = 0; i < nbrOfImages; i++) {
                 imageAddresses[i] = listOfTakenImages.get(i).getNativeObjAddr();
             }
@@ -264,8 +269,9 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                     return false;
                 }
             }
-            Rect cropRect = ImageProcessor.getBlackCroppedRect(resultPanorama);
-            Mat cropped = resultPanorama.submat(cropRect);
+            //Rect cropRect = ImageProcessor.getBlackCroppedRect(resultPanorama);
+            //Mat cropped = resultPanorama.submat(cropRect);
+            Mat cropped = resultPanorama;
             if (cropped.empty()) {
                 ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image cropping.");
                 recreateFragment();
@@ -483,6 +489,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
         switch(cState){
             case PROCESSING:
+                wl.release();
                 SensorManager sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
                 Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
                 Sensor magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -494,11 +501,18 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                 break;
             case IDLE:
                 nbrOfPicturesTaken = 0;
+
+                wl.acquire();
                 break;
 
         }
     }
     private CaptureState getState(){
         return cState;
+    }
+
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
     }
 }
