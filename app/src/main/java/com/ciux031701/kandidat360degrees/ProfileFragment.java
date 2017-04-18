@@ -13,6 +13,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -68,6 +70,7 @@ public class ProfileFragment extends Fragment {
     private GoogleMap googleMap;
     private View root;
     private ImageButton profileMenuButton;
+    private ProgressBar profileProgressBar;
 
     private ListView pictureListView;
     private ListAdapter profileFlowAdapter;
@@ -91,6 +94,7 @@ public class ProfileFragment extends Fragment {
         ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
         ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        profileProgressBar = (ProgressBar) root.findViewById(R.id.profileProgressBar);
         TextView toolbarTitle = (TextView) root.findViewById(R.id.toolbarTitle);
         toolbarTitle.setText(getText(R.string.profile));
         mDrawerLayout = (DrawerLayout) getActivity().findViewById(R.id.drawer_layout);
@@ -114,6 +118,9 @@ public class ProfileFragment extends Fragment {
         // 100% sure of what it contains.
         pictures = (ThreeSixtyPanoramaCollection)getArguments().getSerializable("images");
         pictureListView = (ListView) root.findViewById(R.id.profilePictureListView);
+
+        pictureListView.setVisibility(View.GONE);
+        profileProgressBar.setVisibility(View.VISIBLE);
 
         return root;
     }
@@ -160,48 +167,66 @@ public class ProfileFragment extends Fragment {
         fetchMap();
     }
 
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            pictureListView.setVisibility(View.VISIBLE);
+            profileProgressBar.setVisibility(View.GONE);
+        }
+    };
+
     /**
      * Starts to fetch all previews of the user from the server.
      */
     private void loadPreviews() {
-        Intent intent =  new Intent(getActivity(), DownloadMultiplePreviewsService.class);
-        String[] imageIDs = new String[pictures.size()];
-        for (int i=0; i<pictures.size(); i++) {
-            imageIDs[i] = pictures.get(i).getImageID();
-        }
-        intent.putExtra("panoramaArray", imageIDs);
-        intent.setAction(DownloadMultiplePreviewsService.NOTIFICATION);
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(DownloadMultiplePreviewsService.NOTIFICATION);
-        getActivity().registerReceiver(new BroadcastReceiver() {
+        //start a new thread to process job
+        new Thread(new Runnable() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d("Profile", "OnReceive");
-                if (intent.getIntExtra("result", -100)  == Activity.RESULT_OK) {
-                    Log.d("Profile", "Previews found and results from download are OK.");
-                    String[] imageIDs = intent.getStringArrayExtra("panoramaArray");
+            public void run() {
 
-                    for(int i=0; i<imageIDs.length; i++) {
-                        String panoramaID = imageIDs[i];
-                        File localFile = new File(getActivity().getFilesDir() + FTPInfo.PREVIEW_LOCAL_LOCATION + panoramaID + FTPInfo.FILETYPE);
-                        Drawable preview = Drawable.createFromPath(localFile.getPath());
-                        ProfilePanorama pp = (ProfilePanorama)pictures.get(i);
-                        pp.setPreview(preview);
-
-                        if (localFile.delete())
-                            Log.d("FTP", "Preview image has been deleted :" + panoramaID);
-                        else
-                            Log.d("FTP", "Preview image has not been deleted :" + panoramaID);
-                    }
-
-                    profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures, username);
-                    pictureListView.setAdapter(profileFlowAdapter);
-                    pictureListView.setOnItemClickListener(new FlowItemClickListener());
+                Intent intent =  new Intent(getActivity(), DownloadMultiplePreviewsService.class);
+                String[] imageIDs = new String[pictures.size()];
+                for (int i=0; i<pictures.size(); i++) {
+                    imageIDs[i] = pictures.get(i).getImageID();
                 }
-                getActivity().unregisterReceiver(this);
+                intent.putExtra("panoramaArray", imageIDs);
+                intent.setAction(DownloadMultiplePreviewsService.NOTIFICATION);
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(DownloadMultiplePreviewsService.NOTIFICATION);
+                getActivity().registerReceiver(new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        Log.d("Profile", "OnReceive");
+                        if (intent.getIntExtra("result", -100)  == Activity.RESULT_OK) {
+                            Log.d("Profile", "Previews found and results from download are OK.");
+                            String[] imageIDs = intent.getStringArrayExtra("panoramaArray");
+
+                            for(int i=0; i<imageIDs.length; i++) {
+                                String panoramaID = imageIDs[i];
+                                File localFile = new File(getActivity().getFilesDir() + FTPInfo.PREVIEW_LOCAL_LOCATION + panoramaID + FTPInfo.FILETYPE);
+                                Drawable preview = Drawable.createFromPath(localFile.getPath());
+                                ProfilePanorama pp = (ProfilePanorama)pictures.get(i);
+                                pp.setPreview(preview);
+
+                                if (localFile.delete())
+                                    Log.d("FTP", "Preview image has been deleted :" + panoramaID);
+                                else
+                                    Log.d("FTP", "Preview image has not been deleted :" + panoramaID);
+                            }
+
+                            profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures, username);
+                            pictureListView.setAdapter(profileFlowAdapter);
+                            pictureListView.setOnItemClickListener(new FlowItemClickListener());
+                            handler.sendEmptyMessage(0);
+                        }
+                        getActivity().unregisterReceiver(this);
+                    }
+                }, filter);
+                getActivity().startService(intent);
+
             }
-        }, filter);
-        getActivity().startService(intent);
+        }).start();
+
     }
 
     /**
