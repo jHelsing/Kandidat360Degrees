@@ -262,6 +262,30 @@ public class ImageViewFragment extends Fragment{
             }
         });
 
+        downloadProgressBar = (ProgressBar) root.findViewById(R.id.downloadProgressBar);
+        downloadProgressBar.setVisibility(View.GONE);
+
+        downloadButton = (ImageButton) root.findViewById(R.id.downloadButton);
+        downloadButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                downloadButton.setVisibility(View.GONE);
+                downloadProgressBar.setVisibility(View.VISIBLE);
+
+                //start a new thread to process job
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        MainActivity mainActivity = (MainActivity) getActivity();
+                        mainActivity.downloadPanoramaLocal(panoramaImage);
+                        //Done like this since no other thread
+                        //can modify the view other than the main
+                        handler.sendEmptyMessage(0);
+                    }
+                }).start();
+            }
+        });
+
         return root;
     }
 
