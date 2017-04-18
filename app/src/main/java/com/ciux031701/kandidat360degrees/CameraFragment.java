@@ -179,7 +179,11 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     private final Camera.PictureCallback jpegCallback = new Camera.PictureCallback() {
         public void onPictureTaken(byte[] data, Camera camera) {
             //byte[] --> bitmap
-            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = false;
+            options.inPreferredConfig = Bitmap.Config.RGB_565;
+            options.inDither = true;
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
             //Rotate the picture to fit portrait mode
             Matrix matrix = new Matrix();
