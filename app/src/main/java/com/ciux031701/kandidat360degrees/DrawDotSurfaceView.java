@@ -128,7 +128,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
             }
             float dPixelVertical = Math.round(verticalOffset*degToPixFactor);
             float dPixel = Math.round(horizontalOffset*degToPixFactor);
-            System.out.println("drawing circle at: " + (center.x-dPixel) + ", " + (center.y-dPixelVertical) + ", horizontal offset: " + horizontalOffset + ", current: " + currentDegree);
+            System.out.println("horizontal offset: " + horizontalOffset + ", current: " + currentDegree + ", target: " + targetDegree);
             canvas.drawCircle(center.x-dPixel,center.y-dPixelVertical,radius,paint);
         }
     }
@@ -136,7 +136,11 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
     public float getHorizontalOffset(float degree){
         float returnDegree;
         if(degree>180){
-            returnDegree = (360-(degree-targetDegree))*-1;
+            if(targetDegree>=180){
+                returnDegree = (targetDegree-degree)*-1;
+            }else {
+                returnDegree = (360 - (degree - targetDegree)) * -1;
+            }
         }else{
             returnDegree = degree-targetDegree;
         }
