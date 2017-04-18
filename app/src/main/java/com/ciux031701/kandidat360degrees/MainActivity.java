@@ -18,7 +18,9 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -409,32 +411,43 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void showPanorama (final String origin, final String imageID, final String username, final String likes) {
-        Intent intent =  new Intent(this, DownloadService.class);
-        intent.putExtra("IMAGETYPE", ImageType.PANORAMA);
-        intent.putExtra("IMAGEID", imageID);
-        intent.setAction(DownloadService.NOTIFICATION + imageID + ".jpg");
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(DownloadService.NOTIFICATION + imageID + ".jpg");
-        registerReceiver(new BroadcastReceiver() {
+
+        //start a new thread to process job
+        new Thread(new Runnable() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
-                    Log.d("MainActivity", "Panorama image found and results from download are OK.");
+            public void run() {
 
-                    context.unregisterReceiver(this);
+                Intent intent =  new Intent(getBaseContext(), DownloadService.class);
+                intent.putExtra("IMAGETYPE", ImageType.PANORAMA);
+                intent.putExtra("IMAGEID", imageID);
+                intent.setAction(DownloadService.NOTIFICATION + imageID + ".jpg");
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(DownloadService.NOTIFICATION + imageID + ".jpg");
+                registerReceiver(new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
+                            Log.d("MainActivity", "Panorama image found and results from download are OK.");
 
-                    Bundle args = new Bundle();
-                    args.putString("origin", origin);
-                    args.putString("imageid", imageID);
-                    args.putString("username", username);
-                    args.putString("likes", likes);
-                    ImageViewFragment fragment = new ImageViewFragment();
-                    fragment.setArguments(args);
-                    FragmentManager fragmentManager = getFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(origin).commit();
-                }
+                            context.unregisterReceiver(this);
+
+                            Bundle args = new Bundle();
+                            args.putString("origin", origin);
+                            args.putString("imageid", imageID);
+                            args.putString("username", username);
+                            args.putString("likes", likes);
+                            ImageViewFragment fragment = new ImageViewFragment();
+                            fragment.setArguments(args);
+                            FragmentManager fragmentManager = getFragmentManager();
+                            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(origin).commit();
+
+                        }
+                    }
+                }, filter);
+                startService(intent);
             }
-        }, filter);
-        startService(intent);
+        }).start();
+
+
     }
 }
