@@ -77,6 +77,8 @@ public class ProfileFragment extends Fragment {
     private ThreeSixtyPanoramaCollection pictures;
     private int[] panoramaIDs;
 
+    private static final int GET_FROM_GALLERY = 3;
+
     private boolean listMode;
     private boolean first;
     private Bundle instanceState;
@@ -361,12 +363,7 @@ public class ProfileFragment extends Fragment {
                                 jReqRemoveFriend.sendRequest();
                                 break;
                             case "Change profile picture":
-                                // TODO add support for uploading profile picture to server
-                                final FragmentTransaction ft = getFragmentManager().beginTransaction();
-                                ft.replace(R.id.content_frame, new SettingsFragment(), "Settings");
-                                ft.addToBackStack("Settings");
-                                ft.commitAllowingStateLoss();
-                                getFragmentManager().executePendingTransactions();
+                                startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY);
                                 break;
                         }
                         return false;
@@ -387,9 +384,21 @@ public class ProfileFragment extends Fragment {
 
                 googleMap = mMap;
                 googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+                    Marker oldMarker;
                     @Override
-                    public View getInfoWindow(Marker marker) {
+                    public View getInfoWindow(final Marker marker) {
                         marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon_selected));
+                        if(oldMarker != null && !(marker.getTitle().equals(oldMarker.getTitle())))
+                            oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
+                        oldMarker = marker;
+
+                        googleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                            @Override
+                            public void onMapClick(LatLng latLng) {
+                                marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
+                            }
+                        });
+
                         return onMarkerClicked(marker);
                     }
 
@@ -475,6 +484,7 @@ public class ProfileFragment extends Fragment {
                     viewSwitchButton.setImageDrawable(getResources()
                             .getDrawable(R.drawable.disable_map_view_icon_profile));
                     mapView.setVisibility(View.GONE);
+                    googleMap.clear();
                     profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures, username);
                     pictureListView.setAdapter(profileFlowAdapter);
                 }
