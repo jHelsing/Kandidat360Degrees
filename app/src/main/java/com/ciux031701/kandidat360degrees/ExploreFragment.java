@@ -5,6 +5,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +36,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -79,6 +81,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,6 +102,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     private DrawerLayout mDrawerLayout;
     private SearchView searchView;
     private ListView searchListView;
+    private EditText searchEditText;
 
     private MenuItem earthButton;
 
@@ -298,8 +302,22 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 searchText.setHintTextColor(Color.WHITE);
             }
         }
-        ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text))
-                .setTextColor(Color.BLACK);
+        searchEditText = ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text));
+        searchEditText.setTextColor(Color.BLACK);
+
+        Field f = null;
+        try {
+            f =TextView.class.getDeclaredField("mCursorDrawableRes");
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        f.setAccessible(true);
+        try {
+            f.set(searchEditText, R.drawable.cursor);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
         ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text))
                 .setHintTextColor(Color.LTGRAY);
         searchView.setBackgroundColor(Color.WHITE);
