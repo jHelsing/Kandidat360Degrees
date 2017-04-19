@@ -83,15 +83,8 @@ public class UploadFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 previewProgressBar.setVisibility(View.VISIBLE);
-                Bundle args = new Bundle();
-                args.putString("origin", "upload");
-                args.putParcelable("image", imageBitmap);
-                ImageViewFragment fragment = new ImageViewFragment();
-                fragment.setArguments(args);
-                FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("upload").commit();
-
-
+                MainActivity mainActivity = (MainActivity) getActivity();
+                mainActivity.showPanoramaBitmap("upload",imageBitmap);
             }
         });
 

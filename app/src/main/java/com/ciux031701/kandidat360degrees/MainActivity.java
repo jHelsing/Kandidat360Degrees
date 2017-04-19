@@ -1,7 +1,5 @@
 package com.ciux031701.kandidat360degrees;
 
-import android.*;
-import android.Manifest;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
@@ -9,29 +7,17 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
-import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.Message;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -39,23 +25,16 @@ import android.widget.Toast;
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.communication.JReqDestroySession;
-import com.ciux031701.kandidat360degrees.communication.JReqLikeImage;
 import com.ciux031701.kandidat360degrees.communication.JReqProfile;
-import com.ciux031701.kandidat360degrees.communication.JReqUnLikeImage;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
-import com.ciux031701.kandidat360degrees.communication.JRequester;
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
 import com.ciux031701.kandidat360degrees.representation.JSONParser;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.ciux031701.kandidat360degrees.representation.RoundImageView;
 import com.ciux031701.kandidat360degrees.representation.ThreeSixtyPanoramaCollection;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.ciux031701.kandidat360degrees.communication.Session;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
 
 import org.json.JSONArray;
@@ -66,8 +45,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.Date;
 
 import static android.content.ContentValues.TAG;
@@ -101,12 +78,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Intent intent = getIntent();
         //Retrieves username parameter from login
-        b = getIntent().getExtras();
+        b = intent.getExtras();
         String userName = ""; // or other values
         if (b != null)
             userName = b.getString("username");
-
 
         mListOptions = getResources().getStringArray(R.array.list_options);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -135,6 +112,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         showExploreView();
+
+        //Handles when the app is started with an image
+        String action = intent.getAction();
+        String type = intent.getType();
+        if (Intent.ACTION_VIEW.equals(action) && type != null) {
+            if (type.startsWith("image/")) {
+                try {
+                    handleViewImage(intent);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    void handleViewImage(Intent intent) throws IOException {
+        Uri imageUri = intent.getData();
+        if (imageUri != null) {
+            showPanoramaBitmap("upload",MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri));
+        }
     }
 
     @Override
@@ -450,4 +447,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
     }
+
+    public void showPanoramaBitmap (final String origin, final Bitmap bitmapImage) {
+        Bundle args = new Bundle();
+        args.putString("origin", origin);
+        args.putParcelable("image", bitmapImage);
+        ImageViewFragment fragment = new ImageViewFragment();
+        fragment.setArguments(args);
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(origin).commit();
+    }
+
 }
