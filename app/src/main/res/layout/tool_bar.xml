@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v7.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_gravity="right"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@color/colorPrimary"
+    app:collapseIcon="@drawable/temp_return"
     android:elevation="4dp">
     <ImageButton
         android:id="@+id/toolbarMenuButton"
@@ -11,8 +13,8 @@
         android:layout_gravity="left"
         android:scaleType="fitXY"
         android:background="@null"
-        android:layout_height="24dp"
-        android:layout_width="24dp" />
+        android:layout_height="26dp"
+        android:layout_width="30dp" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
