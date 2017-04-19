@@ -437,13 +437,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
     }
 
     private void sendPanoramaToImageView(){
-        Bundle args = new Bundle();
-        args.putString("origin", "camera");
-        args.putParcelable("image", resultPanoramaBmp);
-        ImageViewFragment fragment = new ImageViewFragment();
-        fragment.setArguments(args);
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("camera").commit();
+        MainActivity mainActivity = (MainActivity) getActivity();
+        mainActivity.showPanoramaBitmap("camera", resultPanoramaBmp);
     }
 
     private void takePicture(){
