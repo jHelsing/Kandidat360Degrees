@@ -3,11 +3,15 @@ package com.ciux031701.kandidat360degrees;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -21,10 +25,12 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.adaptors.ImageAdapter;
+import com.ciux031701.kandidat360degrees.communication.ImageType;
 
 import java.io.IOException;
 
@@ -42,6 +48,7 @@ public class UploadFragment extends Fragment {
     private ImageView imagePreview;
     private Button okButton;
     private Bitmap imageBitmap;
+    ProgressBar previewProgressBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -50,6 +57,8 @@ public class UploadFragment extends Fragment {
         imageUri = getArguments().getParcelable("image");
         imagePreview = (ImageView) root.findViewById(R.id.uploadImageView);
         imagePreview.setImageURI(imageUri);
+
+        previewProgressBar = (ProgressBar)root.findViewById(R.id.previewProgressBar);
 
         try {
             imageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), imageUri);
@@ -73,13 +82,16 @@ public class UploadFragment extends Fragment {
         imagePreview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                previewProgressBar.setVisibility(View.VISIBLE);
                 Bundle args = new Bundle();
-                args.putString("origin", "camera"); //change origin
+                args.putString("origin", "upload");
                 args.putParcelable("image", imageBitmap);
                 ImageViewFragment fragment = new ImageViewFragment();
                 fragment.setArguments(args);
                 FragmentManager fragmentManager = getFragmentManager();
                 fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("upload").commit();
+
+
             }
         });
 
@@ -96,28 +108,6 @@ public class UploadFragment extends Fragment {
                 mDrawerLayout.openDrawer(Gravity.LEFT);
             }
         });
-/*
-        //The gridview:
-        GridView gridview = (GridView) root.findViewById(R.id.gridview);
-        final ImageAdapter adapter = new ImageAdapter(getActivity());
-        gridview.setAdapter(adapter);
-
-        gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-                //Go to ShareFragment:
-                Fragment fragment = new ShareFragment();
-                Bitmap tempPicture = BitmapFactory.decodeResource(getResources(), (Integer)adapter.getItem(position));
-                Bundle args = new Bundle();
-                args.putParcelable("picture", tempPicture);
-                fragment.setArguments(args);
-                FragmentManager fragmentManager = getActivity().getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
-            }
-        });*/
-
 
         return root;
     }

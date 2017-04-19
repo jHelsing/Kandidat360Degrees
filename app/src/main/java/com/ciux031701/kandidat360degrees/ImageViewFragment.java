@@ -78,6 +78,7 @@ public class ImageViewFragment extends Fragment{
         imageid = getArguments().getString("imageid");
         imageView1 = (ImageView)root.findViewById(R.id.imageviewfirst);
 
+
         if(origin.equals("profile") || origin.equals("explore")) {
             File file = new File(getActivity().getFilesDir() + FTPInfo.PANORAMA_LOCAL_LOCATION + imageid + FTPInfo.FILETYPE);
             image = Drawable.createFromPath(file.getPath());
@@ -156,6 +157,7 @@ public class ImageViewFragment extends Fragment{
                     ((MainActivity) getActivity()).showProfile(usernameView.getText().toString());
                 }
             });
+
             favView.setText(getArguments().getString("likes"));
             JReqIsLiked request = new JReqIsLiked(imageid);
             request.setJResultListener(new JRequest.JResultListener() {
@@ -168,9 +170,9 @@ public class ImageViewFragment extends Fragment{
                     } catch(JSONException je){
                         error = true;
                         Log.d("View Panorama", "Error in parsing result or result from server. Result is: " + result.toString());
-                        /*
-                        4 timmar
-                         */
+                    /*
+                    4 timmar
+                     */
                     }
 
                     if(!error) {
@@ -179,7 +181,7 @@ public class ImageViewFragment extends Fragment{
                             Log.d("View Panorama", "arr: " + arr);
                             if(arr.length() == 0) {
                                 // Image not liked
-                               liked = false;
+                                liked = false;
                             } else {
                                 liked = true;
                                 favView.setCompoundDrawables(null, null, getResources().getDrawable(R.drawable.ic_favorite), null);
@@ -202,7 +204,7 @@ public class ImageViewFragment extends Fragment{
         doneButton = (ImageButton)root.findViewById(R.id.sendToShareButton);
 
 
-        if(origin.equals("camera")){
+        if(origin.equals("camera")||origin.equals("upload")){
             panoramaImage = getArguments().getParcelable("image");
             imageView1.setImageBitmap(panoramaImage);
             if (panoramaImage == null){

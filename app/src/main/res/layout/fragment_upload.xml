@@ -16,12 +16,26 @@
         android:layout_marginTop="20dp"
         android:text="Image:" />
 
-    <ImageView
-        android:id="@+id/uploadImageView"
-        android:layout_width="match_parent"
-        android:layout_height="100dp"
-        android:scaleType="fitXY"
-        app:srcCompat="@drawable/example_panorama" />
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/uploadImageView"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/example_panorama" />
+
+        <ProgressBar
+            android:id="@+id/previewProgressBar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:visibility="gone"/>
+    </RelativeLayout>
 
     <Button
         android:id="@+id/uploadOkButton"
