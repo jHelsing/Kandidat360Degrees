@@ -7,6 +7,7 @@ package com.ciux031701.kandidat360degrees.representation;
 public enum CaptureState {
     IDLE, //State before user has started taking photos.
     NEXT, //State of waiting for alignment with the dot for the next photo.
+    ACQUIRING_FOCUS,
     CAPTURING, //State of capturing a photo.
     PROCESSING //State of stitching and other processing.
 }

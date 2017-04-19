@@ -34,18 +34,22 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import java.nio.ByteBuffer;
 
 import org.opencv.core.Mat;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
+import com.ciux031701.kandidat360degrees.imageprocessing.ImageProcessor;
+import com.ciux031701.kandidat360degrees.imageprocessing.JniMatHolder;
 import com.ciux031701.kandidat360degrees.representation.CaptureState;
 import com.ciux031701.kandidat360degrees.representation.NativePanorama;
 import org.opencv.android.Utils;
+import org.opencv.core.Rect;
 
 import java.util.List;
-
 import static android.content.ContentValues.TAG;
 
 /**
@@ -75,7 +79,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
     private Bitmap resultPanoramaBmp;
 
     private DrawerLayout mDrawerLayout;
-    private ArrayList<Mat> listOfTakenImages = new ArrayList<>();
+    private ArrayList<ByteBuffer> matHandles = new ArrayList<>();
     private int nbrOfImages = 20;
 
     private float startGyroDegree;
@@ -186,23 +190,29 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
             //byte[] --> bitmap
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = false;
-            options.inPreferredConfig = Bitmap.Config.RGB_565;
-            options.inSampleSize = 3;
-            options.inDither = true;
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            options.inSampleSize = 2;
             Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
             //Rotate the picture to fit portrait mode
             Matrix matrix = new Matrix();
             matrix.postRotate(90);
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, false);
-            System.out.println("JPEG rotated and created bitmap");
-
             //Convert the image to Mat, to be able to use openCV
             Mat mat = new Mat(bitmap.getWidth(), bitmap.getHeight(), 16); //type of Mat needs to 16, CV_8UC3, to be able to use matToBitmap(..) later
             Utils.bitmapToMat(bitmap, mat);
-            listOfTakenImages.add(mat);
+            bitmap.recycle();
+            final JniMatHolder matHolder = new JniMatHolder(mat);
+            matHandles.add(matHolder.getHandle());
+            System.out.println("JPEG rotated and created bitmap");
 
-            float targetDegree = fromDegreeToProgress(startGyroDegree + listOfTakenImages.size() * (360 / nbrOfImages));
+            //Convert the image to Mat, to be able to use openCV
+
+
+            //listOfTakenImages.add(mat);
+
+            //float targetDegree = fromDegreeToProgress(startGyroDegree + listOfTakenImages.size() * (360 / nbrOfImages));
+            float targetDegree = fromDegreeToProgress(startGyroDegree + matHandles.size() * (360 / nbrOfImages));
             mSurfaceViewDraw.setTargetDegree(targetDegree);
             mSurfaceViewDraw.setTargetAcquired(true);
             //Start preview of the camera & set safe to take pictures to true
@@ -231,7 +241,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
             if (myBestSize != null) {
                 //Set the preview size
                 myParameters.setPreviewSize(myBestSize.width, myBestSize.height);
-                myParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                myParameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
                 //Set the parameters to the camera
                 mCam.setParameters(myParameters);
                 //Rotate to portrait mode (90 degrees)
@@ -263,19 +273,11 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                int nbrOfImages = listOfTakenImages.size();
-                long[] imageAddresses = new long[nbrOfImages];
-                //Images for crop have some shades of black replaced with another color in order to make it easier to find
-                //a good crop rectangle. Without this, if you photograph something black, it might get cropped away.
-                //listOfTakenImages = ImageProcessor.replaceBlackInList(listOfTakenImages);
-                for (int i = 0; i < nbrOfImages; i++) {
-                    imageAddresses[i] = listOfTakenImages.get(i).getNativeObjAddr();
-                }
                 Mat resultPanorama = new Mat();
-                NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
+                NativePanorama.processPanoramaFromHandles(matHandles, resultPanorama.getNativeObjAddr());
                 if (resultPanorama.empty()) {
                     //Try one more time.
-                    NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
+                    NativePanorama.processPanoramaFromHandles(matHandles, resultPanorama.getNativeObjAddr());
                     //If still empty, recreate the fragment.
                     if (resultPanorama.empty()) {
                         ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image stitching.");
@@ -283,9 +285,9 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                         return false;
                     }
                 }
-                //Rect cropRect = ImageProcessor.getBlackCroppedRect(resultPanorama);
-                //Mat cropped = resultPanorama.submat(cropRect);
-                Mat cropped = resultPanorama;
+                Rect cropRect = ImageProcessor.getBlackCroppedRect(resultPanorama);
+                Mat cropped = resultPanorama.submat(cropRect);
+                //Mat cropped = resultPanorama;
                 if (cropped.empty()) {
                     ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image cropping.");
                     recreateFragment();
@@ -300,7 +302,6 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                 //MainActivity mainActivity = (MainActivity) getActivity();
                 //mainActivity.downloadPanoramaLocal(resultPanoramaBmp);
 
-                listOfTakenImages.clear();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -443,7 +444,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                                 }
                                 proximityCheckerInProgress = false;
                             }
-                        }, 1000);//1000 milliseconds check
+                        }, 20);//1000 milliseconds check
                     }
 
                     lastDegree = currentDegrees;
@@ -460,10 +461,25 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
 
     private void takePicture(){
         if (mCam != null && getState() == CaptureState.NEXT) {
+            setState(CaptureState.ACQUIRING_FOCUS);
+            mCam.autoFocus(new Camera.AutoFocusCallback() {
 
-            setState(CaptureState.CAPTURING);
-            mCam.takePicture(null, null, jpegCallback);
-            nbrOfPicturesTaken++;
+                @Override
+                public void onAutoFocus(boolean success, Camera camera) {
+                    //if(success) {
+                        setState(CaptureState.CAPTURING);
+                        mCam.takePicture(null, null, jpegCallback);
+                        nbrOfPicturesTaken++;
+                        mCam.autoFocus(null);
+                    //}
+                    //else{
+                        //if(nbrOfPicturesTaken == 0)
+                            //setState(CaptureState.IDLE);
+                        //else
+                            //setState(CaptureState.NEXT);
+                    //}
+                }
+            });
         }
     }
     public float fromOrientationToDegrees(double orientation){
