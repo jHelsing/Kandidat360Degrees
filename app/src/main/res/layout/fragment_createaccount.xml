@@ -56,7 +56,8 @@
         android:layout_marginTop="@dimen/create_acc_vertical_margin"
         android:elevation="0dp"
         android:ems="10"
-        android:hint="@string/username" />
+        android:hint="@string/username"
+        android:textCursorDrawable="@drawable/cursor"/>
 
     <TextView
             android:text="@string/min_5_chars"
@@ -74,7 +75,8 @@
             android:id="@+id/createAccEmailField" android:hint="@string/email"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
+            android:layout_marginTop="@dimen/create_acc_vertical_margin"
+            android:textCursorDrawable="@drawable/cursor"/>
 
     <TextView
         android:text="Email text"
@@ -96,7 +98,8 @@
             android:id="@+id/createAccPassword1Field" android:hint="@string/password"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
+            android:layout_marginTop="@dimen/create_acc_vertical_margin"
+            android:textCursorDrawable="@drawable/cursor"/>
 
     <TextView
         android:id="@+id/createAccPasswordInfoView"
@@ -115,7 +118,8 @@
             android:id="@+id/createAccPassword2Field" android:hint="@string/retype_password"
             android:layout_marginLeft="@dimen/activity_horizontal_margin"
             android:layout_marginRight="@dimen/activity_horizontal_margin"
-            android:layout_marginTop="@dimen/create_acc_vertical_margin"/>
+            android:layout_marginTop="@dimen/create_acc_vertical_margin"
+            android:textCursorDrawable="@drawable/cursor"/>
 
     <Button
         android:id="@+id/createAccCreateAccButton"
