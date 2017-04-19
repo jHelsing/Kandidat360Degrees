@@ -8,22 +8,21 @@
     android:background="#000000"
     android:orientation="vertical">
 
-    <HorizontalScrollView
-        android:id="@+id/horizontalScrollView"
+    <RelativeLayout
+        android:id="@+id/imageLayout"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:fadingEdge="none"
-        android:scrollbars="none">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
 
-        <ImageView
-            android:id="@+id/imageviewfirst"
-            android:layout_width="wrap_content"
-            android:layout_height="fill_parent"
-            android:adjustViewBounds="true"
-            android:cropToPadding="true"
-            android:scaleType="fitCenter"
-            app:srcCompat="@drawable/panorama_large2" />
-    </HorizontalScrollView>
+        <SurfaceView
+            android:id="@+id/imageViewSurface"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:foregroundGravity="center" />
+
+    </RelativeLayout>
 
     <ProgressBar
         android:id="@+id/downloadProgressBar"

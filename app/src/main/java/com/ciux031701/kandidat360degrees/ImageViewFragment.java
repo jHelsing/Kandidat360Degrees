@@ -4,9 +4,12 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -16,16 +19,17 @@ import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,10 +55,8 @@ import static android.content.ContentValues.TAG;
  * Created by boking on 2017-03-14.
  */
 
-public class ImageViewFragment extends Fragment{
+public class ImageViewFragment extends Fragment implements SurfaceHolder.Callback {
 
-    private ImageView imageView1;
-    private HorizontalScrollView scrollView;
     private ImageButton closeButton;
     private ImageButton arrowLeftButton;
     private ImageButton arrowRightButton;
@@ -69,20 +71,63 @@ public class ImageViewFragment extends Fragment{
     private Bitmap panoramaImage;
     private boolean liked;
 
-
+    private SurfaceHolder surfaceHolder;
+    private SurfaceView surfaceView;
+    Display display;
+    Point size;
+    private float top;
+    private float left;
+    Point currentPoint = new Point();
+    Point touchPoint = new Point();
+    private float lastLeft;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_imageview, container, false);
         origin = getArguments().getString("origin");
         imageid = getArguments().getString("imageid");
-        imageView1 = (ImageView)root.findViewById(R.id.imageviewfirst);
+        lastLeft=0;
+        surfaceView = (SurfaceView)root.findViewById(R.id.imageViewSurface);
+        surfaceHolder = surfaceView.getHolder();
+        surfaceHolder.addCallback(this);
 
+        surfaceView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                    touchPoint.x = (int) event.getX();
+                    touchPoint.y = (int) event.getY();
+                }else if (event.getAction() == android.view.MotionEvent.ACTION_MOVE) {
+                    if(currentPoint.x<event.getX()){
+                        //left=(event.getX()-currentPoint.x);
+                        left=event.getX();
+                    }else{
+                        //left=(event.getX()-currentPoint.x);
+                        left=event.getX();
+                    }
+
+
+                    Canvas canvas = surfaceHolder.lockCanvas();
+                    drawMyStuff(canvas);
+                    surfaceHolder.unlockCanvasAndPost(canvas);
+                }else if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+                    lastLeft=event.getX();
+                    currentPoint.x = (int)event.getX();
+                    currentPoint.y = (int)event.getY();
+                }
+                System.out.println("touchx: " + touchPoint.x + ", current: "+ event.getX() + ", lastLeft: " + lastLeft + ", left: " + left);
+                return true;
+            }
+        });
+        display = getActivity().getWindowManager().getDefaultDisplay();
+        size = new Point();
+        display.getSize(size);
 
         if(origin.equals("profile") || origin.equals("explore")) {
             File file = new File(getActivity().getFilesDir() + FTPInfo.PANORAMA_LOCAL_LOCATION + imageid + FTPInfo.FILETYPE);
             image = Drawable.createFromPath(file.getPath());
-            imageView1.setImageDrawable(image);
+            panoramaImage =  ((BitmapDrawable)image).getBitmap();
             final TextView usernameView = (TextView) root.findViewById(R.id.imageViewUsernameTextView);
             final TextView favView = (TextView) root.findViewById(R.id.imageviewFavouriteTextView);
             favView.setOnTouchListener(new View.OnTouchListener() {
@@ -206,7 +251,6 @@ public class ImageViewFragment extends Fragment{
 
         if(origin.equals("camera")||origin.equals("upload")){
             panoramaImage = getArguments().getParcelable("image");
-            imageView1.setImageBitmap(panoramaImage);
             if (panoramaImage == null){
                 Log.i(TAG,"Panorama image is null");
             }
@@ -227,14 +271,10 @@ public class ImageViewFragment extends Fragment{
         }else{//Only show the picture
             doneButton.setVisibility(View.GONE);
         }
-        scrollView = (HorizontalScrollView) root.findViewById(R.id.horizontalScrollView);
         mDrawerLayout = (DrawerLayout)getActivity().findViewById(R.id.drawer_layout);
 
         closeButton = (ImageButton)root.findViewById(R.id.viewingCloseButton);
 
-        //Scroll to middle dependent on image size
-        scrollView.scrollTo(200,0);
-        scrollView.setSmoothScrollingEnabled(true);
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -253,14 +293,12 @@ public class ImageViewFragment extends Fragment{
         arrowLeftButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                scrollView.smoothScrollBy(-1000,0);
             }
         });
 
         arrowRightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                scrollView.smoothScrollBy(1000,0);
             }
         });
 
@@ -291,6 +329,28 @@ public class ImageViewFragment extends Fragment{
         return root;
     }
 
+    private void tryDrawing(SurfaceHolder holder) {
+        Canvas canvas = holder.lockCanvas();
+        if (canvas == null) {
+            Log.e(TAG, "Cannot draw onto the canvas as it's null");
+        } else {
+            drawMyStuff(canvas);
+            holder.unlockCanvasAndPost(canvas);
+        }
+    }
+
+    private void drawMyStuff(final Canvas canvas) {
+        float modLeft = left % size.x;
+        canvas.drawBitmap(panoramaImage, modLeft, top, null);
+
+        if (left < 0) {
+            canvas.drawBitmap(panoramaImage, modLeft + size.x, top, null);
+        } else {
+            canvas.drawBitmap(panoramaImage, modLeft - size.x, top, null);
+        }
+    }
+
+
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -298,4 +358,21 @@ public class ImageViewFragment extends Fragment{
             downloadProgressBar.setVisibility(View.GONE);
         }
     };
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        left = 0;
+        top = 0;
+        surfaceView.setWillNotDraw(false);
+        tryDrawing(holder);
+    }
+
+    @Override
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        tryDrawing(holder);
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder holder) {
+    }
 }
