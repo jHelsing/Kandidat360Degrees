@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="140px"
-    android:id="@+id/itemLayout">
+    android:id="@+id/itemLayout"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:orientation="horizontal">
+
     <ImageView
+        android:id="@+id/itemImageView"
         android:layout_width="100px"
         android:layout_height="match_parent"
+        android:layout_marginLeft="10dp"
         android:background="@null"
-        android:id="@+id/itemImageView"
-        android:padding="5dp"
-        android:layout_marginLeft="10dp" />
+        android:padding="5dp" />
 
     <TextView
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/itemTextView"
-    android:text="AmazingText"
-        android:textColor="@android:color/white"
+        android:id="@+id/itemTextView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_marginLeft="20dp"
-        android:gravity="center_vertical|center_horizontal" />
+        android:gravity="center_vertical|center_horizontal"
+        android:text="AmazingText"
+        android:textColor="@android:color/white" />
 </LinearLayout>
