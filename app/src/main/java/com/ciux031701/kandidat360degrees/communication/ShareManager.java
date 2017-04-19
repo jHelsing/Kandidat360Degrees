@@ -106,7 +106,7 @@ public class ShareManager extends BroadcastReceiver{
     private static boolean isLocked(){
         return locked;
     }
-    
+
     private static void handlePushSuccess(){
         //Image is in database, let's try to share it.
         if(!targetUsers.isEmpty()) {
@@ -132,7 +132,7 @@ public class ShareManager extends BroadcastReceiver{
             jReqShareImage.sendRequest();
         }
     }
-    
+
     private static void handleError(){
         ThreeSixtyWorld.showToast(context, "Something went wrong while attempting to share image.");
     }
