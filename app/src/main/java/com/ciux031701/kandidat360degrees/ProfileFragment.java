@@ -508,6 +508,7 @@ public class ProfileFragment extends Fragment {
                 //Start the upload service
                 Intent intent =  new Intent(getActivity(), UploadService.class);
                 intent.putExtra("IMAGETYPE", ImageType.PROFILE);
+                intent.putExtra("FILE", file);
                 intent.putExtra("IMAGEID", Session.getUser());
                 intent.setAction(UploadService.NOTIFICATION + Session.getUser() + FTPInfo.FILETYPE);
                 IntentFilter filter = new IntentFilter();
