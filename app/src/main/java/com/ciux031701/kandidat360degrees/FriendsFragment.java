@@ -36,6 +36,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 /**
@@ -54,6 +55,7 @@ public class FriendsFragment extends Fragment implements SearchView.OnQueryTextL
     private RecyclerView mRecyclerView;
     private boolean firstView = false;
     private ArrayList<UserTuple> searchResult;
+    private EditText searchEditText;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -123,6 +125,22 @@ public class FriendsFragment extends Fragment implements SearchView.OnQueryTextL
                 searchText.setHintTextColor(Color.WHITE);
             }
         }
+        searchEditText = ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text));
+        searchEditText.setTextColor(Color.BLACK);
+
+        Field f = null;
+        try {
+            f =TextView.class.getDeclaredField("mCursorDrawableRes");
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        f.setAccessible(true);
+        try {
+            f.set(searchEditText, R.drawable.cursor);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
         ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setTextColor(Color.BLACK);
         ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text)).setHintTextColor(Color.LTGRAY);
         searchView.setBackgroundColor(Color.WHITE);
