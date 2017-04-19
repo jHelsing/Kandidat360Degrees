@@ -17,6 +17,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -48,13 +49,16 @@ import org.opencv.android.Utils;
 import org.opencv.core.Rect;
 
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+
 import static android.content.ContentValues.TAG;
 
 /**
  * Created by boking on 2017-02-17.
  */
 
-public class CameraFragment extends Fragment implements SensorEventListener {
+public class CameraFragment extends Fragment implements SensorEventListener, StitchingAsyncResponse {
     private CaptureState cState;
     private TextView holdVerticallyText;
     private ImageButton backButton;
@@ -85,6 +89,8 @@ public class CameraFragment extends Fragment implements SensorEventListener {
 
     private boolean isFirstSensorChanged;
     private boolean proximityCheckerInProgress;
+
+    private boolean panoramaCreated = false;
 
 
     @Override
@@ -138,8 +144,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
             @Override
             public void onClick(View view) {
                 if(getState() == CaptureState.NEXT){
-                    if(saveAndMakePanorama())
-                        sendPanoramaToImageView();
+                    saveAndMakePanorama();
                 }else {
                     setState(CaptureState.NEXT);
                     captureButton.setImageResource(R.drawable.temp_check_black);
@@ -244,84 +249,90 @@ public class CameraFragment extends Fragment implements SensorEventListener {
         }
     };
 
-    private boolean saveAndMakePanorama() {
+    private void saveAndMakePanorama() {
         setState(CaptureState.PROCESSING);
-        showProgressDialog();
-        //openCV-parts:
-        try {
-            int nbrOfImages = listOfTakenImages.size();
-            long[] imageAddresses = new long[nbrOfImages];
-            //Images for crop have some shades of black replaced with another color in order to make it easier to find
-            //a good crop rectangle. Without this, if you photograph something black, it might get cropped away.
-            //listOfTakenImages = ImageProcessor.replaceBlackInList(listOfTakenImages);
-            for (int i = 0; i < nbrOfImages; i++) {
-                imageAddresses[i] = listOfTakenImages.get(i).getNativeObjAddr();
-            }
-            Mat resultPanorama = new Mat();
-            NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
-            if (resultPanorama.empty()) {
-                //Try one more time.
+        StitchingTask task = new StitchingTask();
+        task.delegate = this;
+        task.execute();
+    }
+
+    @Override
+    public void processFinish(boolean output) {
+        panoramaCreated = output; //this is the result from StitchingTask - true if could stitch to an image, false otherwise
+    }
+
+    private class StitchingTask extends AsyncTask<Void,Void,Boolean> {
+        public StitchingAsyncResponse delegate = null;
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            try {
+                int nbrOfImages = listOfTakenImages.size();
+                long[] imageAddresses = new long[nbrOfImages];
+                //Images for crop have some shades of black replaced with another color in order to make it easier to find
+                //a good crop rectangle. Without this, if you photograph something black, it might get cropped away.
+                //listOfTakenImages = ImageProcessor.replaceBlackInList(listOfTakenImages);
+                for (int i = 0; i < nbrOfImages; i++) {
+                    imageAddresses[i] = listOfTakenImages.get(i).getNativeObjAddr();
+                }
+                Mat resultPanorama = new Mat();
                 NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
-                //If still empty, recreate the fragment.
                 if (resultPanorama.empty()) {
-                    ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image stitching.");
+                    //Try one more time.
+                    NativePanorama.processPanorama(imageAddresses, resultPanorama.getNativeObjAddr());
+                    //If still empty, recreate the fragment.
+                    if (resultPanorama.empty()) {
+                        ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image stitching.");
+                        recreateFragment();
+                        return false;
+                    }
+                }
+                //Rect cropRect = ImageProcessor.getBlackCroppedRect(resultPanorama);
+                //Mat cropped = resultPanorama.submat(cropRect);
+                Mat cropped = resultPanorama;
+                if (cropped.empty()) {
+                    ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image cropping.");
                     recreateFragment();
                     return false;
                 }
+
+                //Convert Mat to Bitmap so we can view the image in ImageViewFragment:
+                Log.i(TAG, "Type of Mat: " + cropped.type()); //type = 16 --> CV_8UC3, then it "works", is sometimes 0??
+                resultPanoramaBmp = Bitmap.createBitmap(cropped.cols(), cropped.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(cropped, resultPanoramaBmp); //work with type CV_8UC3
+
+                //MainActivity mainActivity = (MainActivity) getActivity();
+                //mainActivity.downloadPanoramaLocal(resultPanoramaBmp);
+
+                listOfTakenImages.clear();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            //Rect cropRect = ImageProcessor.getBlackCroppedRect(resultPanorama);
-            //Mat cropped = resultPanorama.submat(cropRect);
-            Mat cropped = resultPanorama;
-            if (cropped.empty()) {
-                ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image cropping.");
-                recreateFragment();
-                return false;
-            }
-
-            //Convert Mat to Bitmap so we can view the image in ImageViewFragment:
-            Log.i(TAG, "Type of Mat: " + cropped.type()); //type = 16 --> CV_8UC3, then it "works", is sometimes 0??
-            resultPanoramaBmp = Bitmap.createBitmap(cropped.cols(), cropped.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(cropped, resultPanoramaBmp); //work with type CV_8UC3
-
-            //MainActivity mainActivity = (MainActivity) getActivity();
-            //mainActivity.downloadPanoramaLocal(resultPanoramaBmp);
-
-            listOfTakenImages.clear();
-        } catch (Exception e) {
-            e.printStackTrace();
+            return true;
         }
-        //end of openCV-parts
-        closeProgressDialog();
-        return true;
 
-    }
-
-    //To stop the camera preview during computations
-    private void showProgressDialog() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mCam != null) {
-                    mCam.stopPreview();
-                }
-                progressDialog = ProgressDialog.show(getActivity(), "", "Creating panorama", true);
-                progressDialog.setCancelable(false);
+        @Override
+        protected void onPreExecute() {
+            if (mCam != null) {
+                mCam.stopPreview();
             }
-        });
+            progressDialog = new ProgressDialog(getActivity());
+            progressDialog.setMessage("Creating panorama...");
+            progressDialog.setCancelable(false);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.show();
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            progressDialog.dismiss();
+            delegate.processFinish(result);
+            if (result) {
+                sendPanoramaToImageView();
+            }
+        }
     }
 
-    //To start camera preview when computations are done
-    private void closeProgressDialog() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mCam != null) {
-                    mCam.startPreview();
-                }
-                progressDialog.dismiss();
-            }
-        });
-    }
 
     private void recreateFragment(){
         CameraFragment cameraFragment = new CameraFragment();
@@ -418,8 +429,7 @@ public class CameraFragment extends Fragment implements SensorEventListener {
                                     takePicture();
 
                                     if (nbrOfPicturesTaken == nbrOfImages) {
-                                        if (saveAndMakePanorama()) ;
-                                        sendPanoramaToImageView();
+                                        saveAndMakePanorama();
                                     }
                                 } else {
                                     mSurfaceViewDraw.setCircleColor(Color.RED);
