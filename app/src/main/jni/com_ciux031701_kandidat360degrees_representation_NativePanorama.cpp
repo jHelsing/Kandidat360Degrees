@@ -76,6 +76,17 @@ JNIEXPORT void JNICALL Java_com_ciux031701_kandidat360degrees_representation_Nat
     LOGD("heap allocated: %d", getNativeHeapAllocatedSize(env));
     Mat & result = *(Mat*) outputAddress;
     Stitcher stitcher = Stitcher::createDefault(true);
+    //Set parameters:
+    //Warper
+    stitcher.setWarper(new CylindricalWarper());
+
+    //Feature finder with ORB-algorithm
+    stitcher.setFeaturesFinder(new cv::detail::OrbFeaturesFinder());
+
+    //Exposure compensator (should test more if this or BlockGainCompensator (default) is the best)
+    stitcher.setExposureCompensator(makePtr<detail::GainCompensator>());
+
+    //OBS: should only use homography model for all parameters (panorama mode)
     stitcher.stitch(newVector,result);
     LOGD("STITCHING RESULTS:");
     LOGD("width = %d", result.cols);
