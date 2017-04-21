@@ -351,14 +351,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void showSettingsView() {
-        Class fragmentClass = SettingsFragment.class;
-        try {
-            Fragment fragment = (Fragment) fragmentClass.newInstance();
-            FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Toast.makeText(this, "Settings not implemented",Toast.LENGTH_LONG).show();
     }
 
 
