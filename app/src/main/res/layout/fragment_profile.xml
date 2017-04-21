@@ -142,13 +142,12 @@
                 android:dividerHeight="0dp"
                 android:fadeScrollbars="false"
                 android:fastScrollEnabled="false" />
+        <com.google.android.gms.maps.MapView
+            android:id="@+id/profileMapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
+
     </RelativeLayout>
-
-    <com.google.android.gms.maps.MapView
-        android:id="@+id/profileMapView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"/>
-
 
 </LinearLayout>
