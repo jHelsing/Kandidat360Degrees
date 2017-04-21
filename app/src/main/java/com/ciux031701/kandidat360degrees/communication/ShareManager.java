@@ -42,6 +42,8 @@ public class ShareManager extends BroadcastReceiver{
             fout_preview = new FileOutputStream(tmp_preview);
             bmp.compress(ThreeSixtyWorld.COMPRESS_FORMAT, ThreeSixtyWorld.COMPRESSION_QUALITY, fout);
             preview.compress(ThreeSixtyWorld.COMPRESS_FORMAT, ThreeSixtyWorld.COMPRESSION_QUALITY, fout_preview);
+            bmp.recycle();
+            preview.recycle();
             fout.close();
             fout_preview.close();
         }catch(IOException e){

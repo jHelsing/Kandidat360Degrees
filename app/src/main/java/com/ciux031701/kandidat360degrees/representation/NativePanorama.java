@@ -8,6 +8,8 @@ import java.util.ArrayList;
  */
 
 public class NativePanorama {
-    public native static void processPanorama(long[] imageAddressArray,long outputAddress);
-    public native static void processPanoramaFromHandles(ArrayList<ByteBuffer> handles, long outputAddress);
+    static{
+        System.loadLibrary("MyLib");
+    }
+    public native static ByteBuffer processPanoramaFromHandles(ArrayList<ByteBuffer> handles);
 }
