@@ -301,6 +301,26 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // Check if we are viewing the list or the map
+        if(listMode) {
+            // We are viewing the list, therefore clear the list
+            ((ProfileFlowAdapter) profileFlowAdapter).clear();
+        } else {
+            // We are viewing the map, therefore clear the map
+            googleMap.clear();
+        }
+    }
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
     private void setUpProfileMenuButton() {
         profileMenuButton = (ImageButton) root.findViewById(R.id.profileSettingsButton);
         profileMenuButton.setOnClickListener(new View.OnClickListener() {
