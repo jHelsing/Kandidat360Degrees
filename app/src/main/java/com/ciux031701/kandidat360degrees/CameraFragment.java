@@ -35,16 +35,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import java.nio.ByteBuffer;
-
 import org.opencv.core.Mat;
-
 import java.io.IOException;
 import java.util.ArrayList;
-
 import com.ciux031701.kandidat360degrees.imageprocessing.JniMatHolder;
 import com.ciux031701.kandidat360degrees.representation.CaptureState;
 import com.ciux031701.kandidat360degrees.representation.NativePanorama;
 import org.opencv.android.Utils;
+
 
 import java.util.List;
 import static android.content.ContentValues.TAG;
@@ -205,7 +203,6 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
 
             //Convert the image to Mat, to be able to use openCV
 
-
             //listOfTakenImages.add(mat);
 
             //float targetDegree = fromDegreeToProgress(startGyroDegree + listOfTakenImages.size() * (360 / nbrOfImages));
@@ -312,13 +309,11 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
             if (mCam != null) {
                 mCam.stopPreview();
             }
-
             progressDialog = new ProgressDialog(getActivity());
             progressDialog.setMessage("Creating panorama...");
             progressDialog.setCancelable(false);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDialog.show();
-
         }
 
         @Override
@@ -531,7 +526,6 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                 break;
             case IDLE:
                 nbrOfPicturesTaken = 0;
-
                 acquireWakeLock();
                 break;
 
@@ -555,4 +549,5 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
         if(wl.isHeld())
             wl.release();
     }
+
 }

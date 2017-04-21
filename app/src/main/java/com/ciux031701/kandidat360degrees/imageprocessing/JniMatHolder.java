@@ -24,6 +24,7 @@ public class JniMatHolder {
             throw new RuntimeException("JniMatHolder: Mat is empty.");
         handle = jniStoreMatData(mat);
     }
+
     public JniMatHolder(ByteBuffer handle){
         this.handle = handle;
     }
@@ -31,6 +32,7 @@ public class JniMatHolder {
         Mat out =  jniGetMatFromStoredData(handle);
         jniFreeMatData(handle);
         return out;
+
     }
     public ByteBuffer getHandle(){
         return handle;

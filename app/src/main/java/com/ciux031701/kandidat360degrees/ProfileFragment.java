@@ -308,7 +308,9 @@ public class ProfileFragment extends Fragment {
         // Check if we are viewing the list or the map
         if(listMode) {
             // We are viewing the list, therefore clear the list
-            ((ProfileFlowAdapter) profileFlowAdapter).clear();
+            pictureListView.setAdapter(null);
+            pictureListView.invalidate();
+            profileFlowAdapter = null;
         } else {
             // We are viewing the map, therefore clear the map
             googleMap.clear();
