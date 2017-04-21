@@ -189,7 +189,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
             options.inJustDecodeBounds = false;
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
             options.inSampleSize = 2;
-            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 
             //Rotate the picture to fit portrait mode
             Matrix matrix = new Matrix();
