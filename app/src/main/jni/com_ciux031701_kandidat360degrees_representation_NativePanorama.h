@@ -12,8 +12,7 @@ extern "C" {
  * Method:    processPanorama
  * Signature: ([JJ)V
  */
-JNIEXPORT void JNICALL Java_com_ciux031701_kandidat360degrees_representation_NativePanorama_processPanorama(JNIEnv *, jclass, jlongArray, jlong);
-JNIEXPORT void JNICALL Java_com_ciux031701_kandidat360degrees_representation_NativePanorama_processPanoramaFromHandles(JNIEnv *, jobject, jobject, jlong);
+JNIEXPORT jobject JNICALL Java_com_ciux031701_kandidat360degrees_representation_NativePanorama_processPanoramaFromHandles(JNIEnv *, jobject, jobject);
 
 #ifdef __cplusplus
 }

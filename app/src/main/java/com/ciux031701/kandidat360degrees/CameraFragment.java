@@ -40,14 +40,11 @@ import org.opencv.core.Mat;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
-import com.ciux031701.kandidat360degrees.imageprocessing.ImageProcessor;
 import com.ciux031701.kandidat360degrees.imageprocessing.JniMatHolder;
 import com.ciux031701.kandidat360degrees.representation.CaptureState;
 import com.ciux031701.kandidat360degrees.representation.NativePanorama;
 import org.opencv.android.Utils;
-import org.opencv.core.Rect;
 
 import java.util.List;
 import static android.content.ContentValues.TAG;
@@ -192,7 +189,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
             options.inJustDecodeBounds = false;
             options.inPreferredConfig = Bitmap.Config.ARGB_8888;
             options.inSampleSize = 2;
-            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+            Bitmap bitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
 
             //Rotate the picture to fit portrait mode
             Matrix matrix = new Matrix();
@@ -273,11 +270,12 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
         @Override
         protected Boolean doInBackground(Void... params) {
             try {
-                Mat resultPanorama = new Mat();
-                NativePanorama.processPanoramaFromHandles(matHandles, resultPanorama.getNativeObjAddr());
+                ByteBuffer handle = NativePanorama.processPanoramaFromHandles(matHandles);
+                JniMatHolder matHolder = new JniMatHolder(handle);
+                Mat resultPanorama = matHolder.getMatAndFreeData();
                 if (resultPanorama.empty()) {
                     //Try one more time.
-                    NativePanorama.processPanoramaFromHandles(matHandles, resultPanorama.getNativeObjAddr());
+                    NativePanorama.processPanoramaFromHandles(matHandles);
                     //If still empty, recreate the fragment.
                     if (resultPanorama.empty()) {
                         ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image stitching.");
@@ -285,8 +283,9 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                         return false;
                     }
                 }
-                Rect cropRect = ImageProcessor.getBlackCroppedRect(resultPanorama);
-                Mat cropped = resultPanorama.submat(cropRect);
+                //Rect cropRect = ImageProcessor.getBlackCroppedRect(resultPanorama);
+                //Mat cropped = resultPanorama.submat(cropRect);
+                Mat cropped = resultPanorama;
                 //Mat cropped = resultPanorama;
                 if (cropped.empty()) {
                     ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image cropping.");
@@ -313,11 +312,13 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
             if (mCam != null) {
                 mCam.stopPreview();
             }
+
             progressDialog = new ProgressDialog(getActivity());
             progressDialog.setMessage("Creating panorama...");
             progressDialog.setCancelable(false);
             progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             progressDialog.show();
+
         }
 
         @Override
@@ -342,6 +343,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
     @Override
     public void onPause() {
         super.onPause();
+        releaseWakeLock();
         if (mCam != null) {
             mCam.stopPreview();
             mCam.release();
@@ -517,7 +519,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
 
         switch(cState){
             case PROCESSING:
-                wl.release();
+                releaseWakeLock();
                 SensorManager sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
                 Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
                 Sensor magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -530,7 +532,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
             case IDLE:
                 nbrOfPicturesTaken = 0;
 
-                wl.acquire();
+                acquireWakeLock();
                 break;
 
         }
@@ -542,5 +544,15 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
     @Override
     public void onDestroy(){
         super.onDestroy();
+    }
+
+    private void acquireWakeLock(){
+        if(!wl.isHeld())
+            wl.acquire();
+    }
+
+    private void releaseWakeLock(){
+        if(wl.isHeld())
+            wl.release();
     }
 }
