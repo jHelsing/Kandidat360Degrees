@@ -3,11 +3,9 @@ package com.ciux031701.kandidat360degrees;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Point;
-import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -15,12 +13,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.widget.DrawerLayout;
-import android.text.SpannableString;
-import android.text.style.UnderlineSpan;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
-import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -38,16 +32,13 @@ import com.ciux031701.kandidat360degrees.communication.JReqIsLiked;
 import com.ciux031701.kandidat360degrees.communication.JReqLikeImage;
 import com.ciux031701.kandidat360degrees.communication.JReqUnLikeImage;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
-import com.ciux031701.kandidat360degrees.representation.JSONParser;
-import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.File;
-import java.util.ArrayList;
+
 import static android.content.ContentValues.TAG;
 
 
@@ -77,16 +68,21 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
     Point size;
     private float top;
     private float left;
-    Point currentPoint = new Point();
     Point touchPoint = new Point();
-    private float lastLeft;
+    private float lastDiff;
+    private boolean isTouchingScreen;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_imageview, container, false);
         origin = getArguments().getString("origin");
         imageid = getArguments().getString("imageid");
-        lastLeft=0;
+        lastDiff =0;
+        isTouchingScreen = false;
+        display = getActivity().getWindowManager().getDefaultDisplay();
+        size = new Point();
+        display.getSize(size);
+
         surfaceView = (SurfaceView)root.findViewById(R.id.imageViewSurface);
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
@@ -96,33 +92,28 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
             public boolean onTouch(View v, MotionEvent event) {
 
                 if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                    isTouchingScreen=true;
                     touchPoint.x = (int) event.getX();
                     touchPoint.y = (int) event.getY();
                 }else if (event.getAction() == android.view.MotionEvent.ACTION_MOVE) {
-                    if(currentPoint.x<event.getX()){
-                        //left=(event.getX()-currentPoint.x);
-                        left=event.getX();
-                    }else{
-                        //left=(event.getX()-currentPoint.x);
-                        left=event.getX();
-                    }
 
+                    float diff = (touchPoint.x - event.getX())/15;
+                    left = ((lastDiff+diff)*-1)% size.x;
+                    lastDiff = (lastDiff+diff)% size.x;
+
+                    //maybe one way to implement zoom later but needs tweaking
+                    //surfaceView.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(surfaceView.getWidth(), surfaceView.getHeight()+(int)diff));
 
                     Canvas canvas = surfaceHolder.lockCanvas();
                     drawMyStuff(canvas);
                     surfaceHolder.unlockCanvasAndPost(canvas);
                 }else if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
-                    lastLeft=event.getX();
-                    currentPoint.x = (int)event.getX();
-                    currentPoint.y = (int)event.getY();
+                    isTouchingScreen=false;
                 }
-                System.out.println("touchx: " + touchPoint.x + ", current: "+ event.getX() + ", lastLeft: " + lastLeft + ", left: " + left);
+
                 return true;
             }
         });
-        display = getActivity().getWindowManager().getDefaultDisplay();
-        size = new Point();
-        display.getSize(size);
 
         if(origin.equals("profile") || origin.equals("explore")) {
             File file = new File(getActivity().getFilesDir() + FTPInfo.PANORAMA_LOCAL_LOCATION + imageid + FTPInfo.FILETYPE);
@@ -245,9 +236,7 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
             v.setVisibility(View.GONE);
         }
 
-
         doneButton = (ImageButton)root.findViewById(R.id.sendToShareButton);
-
 
         if(origin.equals("camera")||origin.equals("upload")){
             panoramaImage = getArguments().getParcelable("image");
@@ -282,8 +271,6 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
                     FragmentManager fragmentManager = getFragmentManager();
                     fragmentManager.popBackStack();
                 }
-
-
             }
         });
 
@@ -293,12 +280,17 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
         arrowLeftButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                left+=150;
+                lastDiff = (lastDiff-150)% size.x;
+                tryDrawing(surfaceHolder);
             }
         });
-
         arrowRightButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                left-=150;
+                lastDiff = (lastDiff+150)% size.x;
+                tryDrawing(surfaceHolder);
             }
         });
 
@@ -341,12 +333,23 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
 
     private void drawMyStuff(final Canvas canvas) {
         float modLeft = left % size.x;
-        canvas.drawBitmap(panoramaImage, modLeft, top, null);
+
+        //scale the image to fit the screen
+        //TODO: allow surfaceview to take full parents height. If image height is larger than screen height,
+        //TODO: it should be scaled to fit the height of the screen, and then keep aspect ratio
+        //TODO: if the image is smaller than the width (in pixels), dont allow scrolling.
+
+        Bitmap scaled = Bitmap.createScaledBitmap(panoramaImage, surfaceView.getWidth(), surfaceView.getHeight(), true);
+
+        canvas.drawBitmap(scaled, modLeft, top, null);
+        //canvas.drawBitmap(panoramaImage,new Rect((int)modLeft,(int)top,size.x,size.y),new Rect((int)modLeft,(int)top,size.x,size.y),null);
 
         if (left < 0) {
-            canvas.drawBitmap(panoramaImage, modLeft + size.x, top, null);
+            canvas.drawBitmap(scaled, modLeft + size.x, top, null);
+            //canvas.drawBitmap(panoramaImage,new Rect((int)modLeft + size.x,(int)top,size.x + size.x,size.y),new Rect((int)modLeft + size.x,(int)top,size.x + size.x,size.y),null);
         } else {
-            canvas.drawBitmap(panoramaImage, modLeft - size.x, top, null);
+            canvas.drawBitmap(scaled, modLeft - size.x, top, null);
+            //canvas.drawBitmap(panoramaImage,new Rect((int)modLeft - size.x,(int)top,size.x - size.x,size.y),new Rect((int)modLeft - size.x,(int)top,size.x - size.x,size.y),null);
         }
     }
 
