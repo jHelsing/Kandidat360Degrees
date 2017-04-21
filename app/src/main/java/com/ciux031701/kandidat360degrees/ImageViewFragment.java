@@ -4,6 +4,8 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -12,6 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Display;
@@ -71,6 +74,8 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
     Point touchPoint = new Point();
     private float lastDiff;
     private boolean isTouchingScreen;
+    private Bitmap scaledBitmap;
+    private boolean imageLargerThanScreen;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -97,16 +102,15 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
                     touchPoint.y = (int) event.getY();
                 }else if (event.getAction() == android.view.MotionEvent.ACTION_MOVE) {
 
-                    float diff = (touchPoint.x - event.getX())/15;
-                    left = ((lastDiff+diff)*-1)% size.x;
-                    lastDiff = (lastDiff+diff)% size.x;
+                    if(imageLargerThanScreen) {
+                        float diff = (touchPoint.x - event.getX()) / 15;
+                        left = ((lastDiff + diff) * -1) % panoramaImage.getWidth();
+                        lastDiff = (lastDiff + diff) % panoramaImage.getWidth();
 
-                    //maybe one way to implement zoom later but needs tweaking
-                    //surfaceView.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(surfaceView.getWidth(), surfaceView.getHeight()+(int)diff));
-
-                    Canvas canvas = surfaceHolder.lockCanvas();
-                    drawMyStuff(canvas);
-                    surfaceHolder.unlockCanvasAndPost(canvas);
+                        Canvas canvas = surfaceHolder.lockCanvas();
+                        drawMyStuff(canvas);
+                        surfaceHolder.unlockCanvasAndPost(canvas);
+                    }
                 }else if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
                     isTouchingScreen=false;
                 }
@@ -281,7 +285,7 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
             @Override
             public void onClick(View v) {
                 left+=150;
-                lastDiff = (lastDiff-150)% size.x;
+                lastDiff = (lastDiff-150)% panoramaImage.getWidth();
                 tryDrawing(surfaceHolder);
             }
         });
@@ -289,7 +293,7 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
             @Override
             public void onClick(View v) {
                 left-=150;
-                lastDiff = (lastDiff+150)% size.x;
+                lastDiff = (lastDiff+150)% panoramaImage.getWidth();
                 tryDrawing(surfaceHolder);
             }
         });
@@ -318,6 +322,14 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
             }
         });
 
+        if(panoramaImage.getWidth()<=size.x){
+            imageLargerThanScreen=false;
+            arrowLeftButton.setVisibility(View.GONE);
+            arrowRightButton.setVisibility(View.GONE);
+        }else{
+            imageLargerThanScreen=true;
+        }
+
         return root;
     }
 
@@ -332,24 +344,19 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
     }
 
     private void drawMyStuff(final Canvas canvas) {
-        float modLeft = left % size.x;
+        float modLeft = left % panoramaImage.getWidth();
 
-        //scale the image to fit the screen
-        //TODO: allow surfaceview to take full parents height. If image height is larger than screen height,
-        //TODO: it should be scaled to fit the height of the screen, and then keep aspect ratio
-        //TODO: if the image is smaller than the width (in pixels), dont allow scrolling.
+        if(!imageLargerThanScreen){
+            canvas.drawBitmap(panoramaImage, (size.x-panoramaImage.getWidth())/2, top+((size.y/2)-(panoramaImage.getHeight()/2)), null);
+        }else {
+            //Bitmap scaled = Bitmap.createScaledBitmap(panoramaImage, surfaceView.getWidth(), surfaceView.getHeight(), true);
+            canvas.drawBitmap(panoramaImage, modLeft, top + ((size.y / 2) - (panoramaImage.getHeight() / 2)), null);
 
-        Bitmap scaled = Bitmap.createScaledBitmap(panoramaImage, surfaceView.getWidth(), surfaceView.getHeight(), true);
-
-        canvas.drawBitmap(scaled, modLeft, top, null);
-        //canvas.drawBitmap(panoramaImage,new Rect((int)modLeft,(int)top,size.x,size.y),new Rect((int)modLeft,(int)top,size.x,size.y),null);
-
-        if (left < 0) {
-            canvas.drawBitmap(scaled, modLeft + size.x, top, null);
-            //canvas.drawBitmap(panoramaImage,new Rect((int)modLeft + size.x,(int)top,size.x + size.x,size.y),new Rect((int)modLeft + size.x,(int)top,size.x + size.x,size.y),null);
-        } else {
-            canvas.drawBitmap(scaled, modLeft - size.x, top, null);
-            //canvas.drawBitmap(panoramaImage,new Rect((int)modLeft - size.x,(int)top,size.x - size.x,size.y),new Rect((int)modLeft - size.x,(int)top,size.x - size.x,size.y),null);
+            if (left < 0) {
+                canvas.drawBitmap(panoramaImage, modLeft + panoramaImage.getWidth(), top + ((size.y / 2) - (panoramaImage.getHeight() / 2)), null);//canvas.drawBitmap(panoramaImage,new Rect((int)modLeft + size.x,(int)top,size.x + size.x,size.y),new Rect((int)modLeft + size.x,(int)top,size.x + size.x,size.y),null);
+            } else {
+                canvas.drawBitmap(panoramaImage, modLeft - panoramaImage.getWidth(), top + ((size.y / 2) - (panoramaImage.getHeight() / 2)), null);//canvas.drawBitmap(panoramaImage,new Rect((int)modLeft - size.x,(int)top,size.x - size.x,size.y),new Rect((int)modLeft - size.x,(int)top,size.x - size.x,size.y),null);
+            }
         }
     }
 
