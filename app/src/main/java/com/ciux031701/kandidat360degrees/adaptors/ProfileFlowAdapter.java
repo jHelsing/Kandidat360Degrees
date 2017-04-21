@@ -265,10 +265,4 @@ public class ProfileFlowAdapter extends ArrayAdapter<ThreeSixtyPanorama> {
         favCountText.setText(favString);
     }
 
-    @Override
-    public void clear() {
-        super.clear();
-        notifyDataSetChanged();
-    }
-
 }
