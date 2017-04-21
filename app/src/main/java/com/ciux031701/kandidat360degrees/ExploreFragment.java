@@ -614,8 +614,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         position.position(gothenburg);
         position.title("Your position");
         position.snippet("Default position");
-        position.icon(BitmapDescriptorFactory
-                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
+        position.icon(BitmapDescriptorFactory.fromResource(R.drawable.user_position_icon));
         googleMap.addMarker(position);
 
         clusterRefresh();
