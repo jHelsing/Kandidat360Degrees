@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.ciux031701.kandidat360degrees.ThreeSixtyWorld;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
@@ -17,11 +18,11 @@ import java.io.Serializable;
  * @author Jonathan
  * @version 1.0
  */
-public class ProfilePanorama extends ThreeSixtyPanorama implements Parcelable {
+public class ProfilePanorama extends ThreeSixtyPanorama implements Parcelable{
 
 
     private boolean favorite;
-    private Drawable preview;
+    private Bitmap preview;
 
 
     public ProfilePanorama(String imageid, String uploader, int views, boolean favorite, String date,
@@ -37,9 +38,9 @@ public class ProfilePanorama extends ThreeSixtyPanorama implements Parcelable {
     }
 
     public Drawable getPreview() {
-        return preview;
+        return new BitmapDrawable(ThreeSixtyWorld.getAppContext().getResources(), preview);
     }
-    public void setPreview(Drawable preview) {
+    public void setPreview(Bitmap preview) {
         this.preview = preview;
     }
     public void setFavorite(boolean favorite){ this.favorite = favorite; }
@@ -49,6 +50,7 @@ public class ProfilePanorama extends ThreeSixtyPanorama implements Parcelable {
     protected ProfilePanorama(Parcel in) {
         super(in);
         favorite = in.readByte() != 0x00;
+        preview = in.readParcelable(getClass().getClassLoader());
     }
 
     @Override
@@ -60,6 +62,7 @@ public class ProfilePanorama extends ThreeSixtyPanorama implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         super.writeToParcel(dest, flags);
         dest.writeByte((byte) (favorite ? 0x01 : 0x00));
+        dest.writeValue(preview);
     }
 
     @SuppressWarnings("unused")

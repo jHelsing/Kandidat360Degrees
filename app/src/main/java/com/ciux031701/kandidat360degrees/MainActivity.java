@@ -286,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             b.putString("viewsCount",views);
                             b.putString("favsCount",favs);
                             b.putBoolean("isFriend", isFriend);
-                            b.putSerializable("images", imgs);
+                            b.putParcelable("images", imgs);
                             fragment.setArguments(b);
                             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
                         } else {

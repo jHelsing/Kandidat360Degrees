@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -118,7 +119,7 @@ public class ProfileFragment extends Fragment {
         //Get pictures, total likes nbr of friends or whatever we decide to display from db
         // We do not need to check this error since we are the ones who send the bundle and are
         // 100% sure of what it contains.
-        pictures = (ThreeSixtyPanoramaCollection)getArguments().getSerializable("images");
+        pictures = getArguments().getParcelable("images");
         pictureListView = (ListView) root.findViewById(R.id.profilePictureListView);
 
         pictureListView.setVisibility(View.GONE);
@@ -206,7 +207,8 @@ public class ProfileFragment extends Fragment {
                             for(int i=0; i<imageIDs.length; i++) {
                                 String panoramaID = imageIDs[i];
                                 File localFile = new File(getActivity().getFilesDir() + FTPInfo.PREVIEW_LOCAL_LOCATION + panoramaID + FTPInfo.FILETYPE);
-                                Drawable preview = Drawable.createFromPath(localFile.getPath());
+                                BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+                                Bitmap preview = BitmapFactory.decodeFile(localFile.getAbsolutePath(),bmOptions);
                                 ProfilePanorama pp = (ProfilePanorama)pictures.get(i);
                                 pp.setPreview(preview);
 
@@ -306,14 +308,13 @@ public class ProfileFragment extends Fragment {
         super.onPause();
 
         // Check if we are viewing the list or the map
-        if(listMode) {
-            // We are viewing the list, therefore clear the list
+         if(listMode) {
             pictureListView.setAdapter(null);
             pictureListView.invalidate();
             profileFlowAdapter = null;
-        } else {
+         } else {
             // We are viewing the map, therefore clear the map
-            googleMap.clear();
+          googleMap.clear();
         }
     }
 
