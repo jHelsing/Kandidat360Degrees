@@ -318,6 +318,22 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Check if we are viewing the list or the map
+        if(listMode) {
+            profileFlowAdapter = new ProfileFlowAdapter(getActivity(), pictures, username);;
+            pictureListView.setAdapter(profileFlowAdapter);
+            pictureListView.invalidate();
+        } else {
+            // We are viewing the map, therefore clear the map
+            fetchMap();
+        }
+    }
+
+
 
     @Override
     public void onDestroy() {
