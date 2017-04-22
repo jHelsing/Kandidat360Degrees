@@ -1,6 +1,9 @@
 package com.ciux031701.kandidat360degrees.communication;
 
+import android.widget.Adapter;
+
 import com.ciux031701.kandidat360degrees.ThreeSixtyWorld;
+import com.ciux031701.kandidat360degrees.adaptors.FriendsAdapter;
 import com.ciux031701.kandidat360degrees.representation.FriendsAdapterItem;
 import com.ciux031701.kandidat360degrees.representation.UserTuple;
 
@@ -19,6 +22,7 @@ import java.util.Hashtable;
 public class Friends {
     private static Hashtable<String, ArrayList<UserTuple>> sections;
     private static ArrayList<FriendsAdapterItem> showing;
+    private static FriendsAdapter friendsAdapter;
 
     public static void init(){
         sections = new Hashtable<String, ArrayList<UserTuple>>();
@@ -28,6 +32,10 @@ public class Friends {
             sections.put(letter, new ArrayList<UserTuple>());
         }
         fetch();
+    }
+
+    public static void setFriendsAdapter(FriendsAdapter adapter) {
+        friendsAdapter = adapter;
     }
     public static void fetch(){
         JReqFriends jReqFriends = new JReqFriends();
@@ -44,8 +52,13 @@ public class Friends {
                             if (!error) {
                                 friends = result.getJSONArray("friends");
                                 for (int i = 0; i < friends.length(); i++)
-                                    add(new UserTuple(friends.getJSONObject(i).getString("name"), ThreeSixtyWorld.getAppContext()));
-
+                                    if(get(friends.getJSONObject(i).getString("name")) == null)
+                                        add(new UserTuple(friends.getJSONObject(i).getString("name"), ThreeSixtyWorld.getAppContext()));
+                                if(friendsAdapter != null) {
+                                    friendsAdapter.clearDataSet();
+                                    friendsAdapter.addDataSet();
+                                    friendsAdapter.notifyDataSetChanged();
+                                }
                             }
                         } catch (JSONException je) {
 
@@ -76,8 +89,10 @@ public class Friends {
 
 
     public static void add(UserTuple item){
-        getSection(item).add(item);
-        refresh();
+        if(get(item.getUserName()) == null){
+            getSection(item).add(item);
+            refresh();
+        }
     }
 
     public static void remove(UserTuple item){

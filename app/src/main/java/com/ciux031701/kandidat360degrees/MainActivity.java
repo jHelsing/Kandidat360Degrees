@@ -23,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
+import com.ciux031701.kandidat360degrees.communication.Friends;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.communication.JReqDestroySession;
 import com.ciux031701.kandidat360degrees.communication.JReqProfile;
@@ -247,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onHasResult(JSONObject result) {
                         boolean error;
-                        String message = null, username = null, uploaded = null, views = null, favs = null, isFriendString = null;
+                        String message = null, username = null, uploaded = null, views = null, favs = null, isFriendString = null, isPendingReqString = null;
                         JSONArray images = new JSONArray();
                         try {
                             error = result.getBoolean("error");
@@ -257,6 +258,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             views = result.getString("views");
                             favs = result.getString("likes");
                             isFriendString = result.getString("isFriend");
+                            isPendingReqString = result.getString("isPendingReq");
                             images = result.getJSONArray("images");
                             Log.d("Hejaa", result.toString());
                         } catch(JSONException je){
@@ -264,9 +266,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
 
                         if(!error) {
+                            boolean isPendingReq = false;
                             boolean isFriend = false;
                             if(isFriendString.equals("true"))
                                 isFriend = true;
+                            if(isPendingReqString.equals("true"))
+                                isPendingReq = true;
                             ThreeSixtyPanoramaCollection imgs = new ThreeSixtyPanoramaCollection();
                             for (int i=0; i < images.length(); i++){
                                 try {
@@ -287,6 +292,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             b.putString("viewsCount",views);
                             b.putString("favsCount",favs);
                             b.putBoolean("isFriend", isFriend);
+                            b.putBoolean("isPendingReq", isPendingReq);
                             b.putParcelable("images", imgs);
                             fragment.setArguments(b);
                             fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
@@ -307,6 +313,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void showFriendsView() {
+        Friends.fetch();
         FriendsFragment fragment = new FriendsFragment();
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("friends").commit();

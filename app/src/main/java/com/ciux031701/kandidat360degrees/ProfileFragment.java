@@ -30,6 +30,7 @@ import com.ciux031701.kandidat360degrees.communication.DownloadService;
 import com.ciux031701.kandidat360degrees.communication.FTPInfo;
 import com.ciux031701.kandidat360degrees.communication.Friends;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
+import com.ciux031701.kandidat360degrees.communication.JReqCancelFriendrequest;
 import com.ciux031701.kandidat360degrees.communication.JReqRemoveFriend;
 import com.ciux031701.kandidat360degrees.communication.JReqSendFriendrequest;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
@@ -37,6 +38,7 @@ import com.ciux031701.kandidat360degrees.communication.Session;
 import com.ciux031701.kandidat360degrees.communication.UploadService;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.ciux031701.kandidat360degrees.representation.ThreeSixtyPanoramaCollection;
+import com.ciux031701.kandidat360degrees.representation.UserTuple;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
@@ -85,6 +87,7 @@ public class ProfileFragment extends Fragment {
     private Bundle instanceState;
 
     private boolean isFriend;
+    private boolean isPendingReq;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -301,6 +304,12 @@ public class ProfileFragment extends Fragment {
         } catch (NumberFormatException e){
             e.printStackTrace();
         }
+
+        try {
+            isPendingReq = getArguments().getBoolean("isPendingReq");
+        } catch (NumberFormatException e){
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -351,17 +360,24 @@ public class ProfileFragment extends Fragment {
                 if (Session.getUser().equalsIgnoreCase(username)) {
                     menu.add(R.string.upload_profile_picture);
                 } else {
-                    if(isFriend)
-                        menu.add("Remove Friend");
-                    else
-                        menu.add("Add Friend");
+                    if(isFriend){
+                        menu.add("Remove friend");
+                        Friends.fetch();
+                    }
+                    else {
+                        if(isPendingReq) {
+                            menu.add("Cancel friend request");
+                        }
+                        else
+                            menu.add("Add friend");
+                    }
                 }
                 popupMenu.show();
                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getTitle().toString()) {
-                            case "Add Friend":
+                            case "Add friend":
                                 JReqSendFriendrequest jReqSendFriendRequest = new JReqSendFriendrequest(username);
                                 jReqSendFriendRequest.setJResultListener(new JRequest.JResultListener() {
                                     @Override
@@ -374,13 +390,14 @@ public class ProfileFragment extends Fragment {
                                         }
                                         if(!error) {
                                             Toast.makeText(getActivity(), "A friend request has been sent to " + username,Toast.LENGTH_SHORT).show();
+                                            isPendingReq = true;
                                         } else
                                             Toast.makeText(getActivity(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
                                     }
                                 });
                                 jReqSendFriendRequest.sendRequest();
                                 break;
-                            case "Remove Friend":
+                            case "Remove friend":
                                 JReqRemoveFriend jReqRemoveFriend = new JReqRemoveFriend(username);
                                 jReqRemoveFriend.setJResultListener(new JRequest.JResultListener() {
                                     @Override
@@ -403,6 +420,26 @@ public class ProfileFragment extends Fragment {
                                 break;
                             case "Change profile picture":
                                 startActivityForResult(new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI), GET_FROM_GALLERY);
+                                break;
+                            case "Cancel friend request":
+                                JReqCancelFriendrequest jReqCancelFriendrequest = new JReqCancelFriendrequest(username);
+                                jReqCancelFriendrequest.setJResultListener(new JRequest.JResultListener() {
+                                    @Override
+                                    public void onHasResult(JSONObject result) {
+                                        boolean error;
+                                        try {
+                                            error = result.getBoolean("error");
+                                        } catch (JSONException e) {
+                                            error = true;
+                                        }
+                                        if(!error) {
+                                            Toast.makeText(getActivity(), "The friend request to " + username + " has been canceled",Toast.LENGTH_SHORT).show();
+                                            isPendingReq = false;
+                                        } else
+                                            Toast.makeText(getActivity(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                                jReqCancelFriendrequest.sendRequest();
                                 break;
                         }
                         return false;
