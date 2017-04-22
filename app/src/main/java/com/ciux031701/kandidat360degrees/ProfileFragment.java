@@ -394,7 +394,7 @@ public class ProfileFragment extends Fragment {
                                         if(!error){
                                             Friends.remove(Friends.get(username));
                                             Toast.makeText(getActivity(), "Removed " + username + " as your friend",Toast.LENGTH_SHORT).show();
-                                        }
+                                            isFriend = false;                                        }
                                         else
                                             Toast.makeText(getActivity(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
                                     }

@@ -258,13 +258,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             favs = result.getString("likes");
                             isFriendString = result.getString("isFriend");
                             images = result.getJSONArray("images");
+                            Log.d("Hejaa", result.toString());
                         } catch(JSONException je){
                             error = true;
                         }
 
                         if(!error) {
                             boolean isFriend = false;
-                            if(!isFriendString.equals("null"))
+                            if(isFriendString.equals("true"))
                                 isFriend = true;
                             ThreeSixtyPanoramaCollection imgs = new ThreeSixtyPanoramaCollection();
                             for (int i=0; i < images.length(); i++){
