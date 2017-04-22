@@ -123,6 +123,7 @@ public class DownloadService extends IntentService {
                     result = Activity.RESULT_OK;
                     Log.d("FTP", "File downloaded correctly");
                 }
+                //Else if failed
                 else
                     result = Activity.RESULT_CANCELED;
             } finally {
