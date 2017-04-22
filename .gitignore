@@ -47,3 +47,6 @@ Android.mk
 #Compiled native stuff
 app/.externalNativeBuild/
 app/src/main/jniLibs/
+app/CMakeLists.txt
+app/src/main/java/com/ciux031701/kandidat360degrees/imageprocessing/JniMatHolder.java
+app/src/main/java/com/ciux031701/kandidat360degrees/representation/NativePanorama.java
