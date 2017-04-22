@@ -357,6 +357,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
             ActivityCompat.requestPermissions(this.getActivity(), new String[]{android.Manifest.permission.CAMERA}, 50);
         else
             mCam = Camera.open(0); // 0 = back camera
+        setState(CaptureState.IDLE);
     }
 
     //Sensors:
@@ -526,10 +527,14 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                 sensorManager.unregisterListener(this, accelerometer);
                 sensorManager.unregisterListener(this, magnetometer);
                 sensorManager.unregisterListener(this, rotationVector);
-                mSurfaceViewDraw.stopThread();
                 break;
             case IDLE:
+                isFirstSensorChanged = true;
+                matHandles.clear();
+                currentDegrees = 0;
+                lastDegree = 0;
                 nbrOfPicturesTaken = 0;
+                previewQueued = false;
                 acquireWakeLock();
                 break;
 
