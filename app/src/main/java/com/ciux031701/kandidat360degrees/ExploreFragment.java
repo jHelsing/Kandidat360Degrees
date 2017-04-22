@@ -136,94 +136,100 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         request.setJResultListener(new JRequest.JResultListener() {
             @Override
             public void onHasResult(JSONObject result) {
-            Log.d("Explore", result.toString());
-            imagesToShow = new ArrayList<ExplorePanorama>();
-            try {
-                JSONArray resultArray = result.getJSONArray("images");
-                if (resultArray.length() != 0) {
-                    for(int i=0; i<resultArray.length(); i++) {
-                        imagesToShow.add(JSONParser.parseToExplorePanorama(resultArray.getJSONArray(i)));
-                    }
+                Log.d("Explore", result.toString());
+                imagesToShow = new ArrayList<ExplorePanorama>();
+                try {
+                    JSONArray resultArray = result.getJSONArray("images");
+                    if (resultArray.length() != 0) {
+                        for(int i=0; i<resultArray.length(); i++) {
+                            imagesToShow.add(JSONParser.parseToExplorePanorama(resultArray.getJSONArray(i)));
+                        }
 
-                    JReqFriends reqFriends = new JReqFriends();
-                    reqFriends.setJResultListener(new JRequest.JResultListener() {
-                        @Override
-                        public void onHasResult(JSONObject result) {
-                            Log.d("Explore", "Friends result: " + result.toString());
-                            try {
-                                JSONArray arr = result.getJSONArray("friends");
-                                Log.d("Explore", "Friends arr: " + arr.toString());
-                                friends = new ArrayList<String>();
-                                for (int i=0; i<arr.length(); i++) {
-                                    String friend = arr.getJSONObject(i).getString("name");
-                                    Log.d("Explore", "Friend: " + friend);
-                                    friends.add(friend);
+                        JReqFriends reqFriends = new JReqFriends();
+                        reqFriends.setJResultListener(new JRequest.JResultListener() {
+                            @Override
+                            public void onHasResult(JSONObject result) {
+                                Log.d("Explore", "Friends result: " + result.toString());
+                                try {
+                                    JSONArray arr = result.getJSONArray("friends");
+                                    Log.d("Explore", "Friends arr: " + arr.toString());
+                                    friends = new ArrayList<String>();
+                                    for (int i=0; i<arr.length(); i++) {
+                                        String friend = arr.getJSONObject(i).getString("name");
+                                        Log.d("Explore", "Friend: " + friend);
+                                        friends.add(friend);
+                                    }
+                                } catch (JSONException e) {
+                                    Log.d("Explore", "Fetching friends failed");
                                 }
-                            } catch (JSONException e) {
-                                Log.d("Explore", "Fetching friends failed");
-                            }
 
-                            if (friends.size() != 0) {
-                                // Has friends, in other words it is required to check if the
-                                // private images are friends of the user
-                                int index = 0;
-                                while (index < imagesToShow.size()) {
-                                    boolean couldView = true;
-                                    ExplorePanorama image = imagesToShow.get(index);
+                                if (friends.size() != 0) {
+                                    // Has friends, in other words it is required to check if the
+                                    // private images are friends of the user
+                                    int index = 0;
+                                    while (index < imagesToShow.size()) {
+                                        boolean couldView = true;
+                                        ExplorePanorama image = imagesToShow.get(index);
 
-                                    Log.d("Explore", "Checking Image ID: " + image.getImageID() + " Index: " + index);
+                                        Log.d("Explore", "Checking Image ID: " + image.getImageID() + " Index: " + index);
 
-                                    if (image.isPublic())
-                                        image.setCanView(true);
-                                    else {
-                                        int j = 0;
-                                        for (; j<friends.size(); j++) {
-                                            if(image.getUploader().equals(friends.get(j))) {
-                                                image.setCanView(true);
-                                                j = friends.size() + 5;
+                                        if (image.isPublic())
+                                            image.setCanView(true);
+                                        else {
+                                            int j = 0;
+                                            for (; j<friends.size(); j++) {
+                                                if(image.getUploader().equals(friends.get(j))) {
+                                                    image.setCanView(true);
+                                                    j = friends.size() + 5;
+                                                }
+                                            }
+                                            if (j == friends.size()) {
+                                                couldView = false;
+                                                image.setCanView(false);
                                             }
                                         }
-                                        if (j == friends.size()) {
-                                            couldView = false;
-                                            image.setCanView(false);
+
+                                        if (couldView)
+                                            index++;
+                                        else {
+                                            Log.d("Explore", "User can not view " + image.getImageID()
+                                                    + " due to it being private and users not being friends");
+                                            imagesToShow.remove(index);
+                                            Log.d("Explore", "Removing index: " + index);
+                                        }
+                                        Log.d("Explore", "Index: " + index);
+                                    }
+                                } else {
+                                    // Can only view public photos,
+                                    // just filter on what is public and what isn't
+                                    int i = 0;
+                                    while (i < imagesToShow.size()) {
+                                        ExplorePanorama image = imagesToShow.get(i);
+                                        if (!image.isPublic()) {
+                                            imagesToShow.remove(i);
+                                        } else {
+                                            i++;
                                         }
                                     }
+                                }
 
-                                    if (couldView)
-                                        index++;
-                                    else {
-                                        Log.d("Explore", "User can not view " + image.getImageID()
-                                            + " due to it being private and users not being friends");
-                                        imagesToShow.remove(index);
-                                        Log.d("Explore", "Removing index: " + index);
-                                    }
-                                    Log.d("Explore", "Index: " + index);
-                                }
-                            } else {
-                                // Can only view public photos,
-                                // just filter on what is public and what isn't
-                                int i = 0;
-                                while (i < imagesToShow.size()) {
-                                    ExplorePanorama image = imagesToShow.get(i);
-                                    if (!image.isPublic()) {
-                                        imagesToShow.remove(i);
-                                    } else {
-                                        i++;
-                                    }
-                                }
+                                showImagesOnMap(imagesToShow);
+
+                                LatLng gothenburg = new LatLng(57.688350, 11.979428);
+
+                                // Zoom automatically to the default position
+                                CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(10).build();
+                                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+                                // Fetch previews to local storage
+                                fetchPreviews();
                             }
-
-                            showImagesOnMap();
-
-                            // Fetch previews to local storage
-                            fetchPreviews();
-                        }
-                    });
-                    reqFriends.sendRequest();
+                        });
+                        reqFriends.sendRequest();
+                    }
+                } catch(JSONException e) {
+                    e.printStackTrace();
                 }
-            } catch(JSONException e) {
-                e.printStackTrace();
-            }
             }
 
         });
@@ -275,18 +281,18 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
         MenuItemCompat.setOnActionExpandListener(searchMenuItem,
                 new MenuItemCompat.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
-                return true;
-            }
+                    @Override
+                    public boolean onMenuItemActionExpand(MenuItem item) {
+                        return true;
+                    }
 
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
-                exploreSearchAdapter.clear();
-                searchListView.setVisibility(View.GONE);
-                return true;
-            }
-        });
+                    @Override
+                    public boolean onMenuItemActionCollapse(MenuItem item) {
+                        exploreSearchAdapter.clear();
+                        searchListView.setVisibility(View.GONE);
+                        return true;
+                    }
+                });
         earthButton = menu.findItem(R.id.togglePermission);
         searchView.setQueryHint("Search!");
         int searchPlateId = searchView.getContext().getResources()
@@ -333,12 +339,23 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             case R.id.togglePermission:
                 if (isShowingPublic) {
                     toolbarMenu.getItem(0).setIcon(R.drawable.temp_earthblack);
-                    // TODO Reload markers for the private map
+                    ArrayList<ExplorePanorama> images = (ArrayList<ExplorePanorama>)imagesToShow.clone();
+                    for(int i = 0; i < images.size(); i++) {
+                        if(!isFriend(images.get(i).getUploader()) && !images.get(i).getUploader().equals(Session.getUser())){
+                            images.remove(i);
+                            i--;
+                        }
+                    }
+                    for(int i = 0; i < images.size(); i++) {
+                        Log.d("Amar", images.get(i).getUploader());
+                    }
+
+                    showImagesOnMap(images);
                     isShowingPublic = false;
 
                 } else {
                     toolbarMenu.getItem(0).setIcon(R.drawable.temp_earthwhite);
-                    // TODO Reload markers for the public map
+                    showImagesOnMap(imagesToShow);
                     isShowingPublic = true;
                 }
                 return true;
@@ -468,20 +485,20 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                         ExplorePanorama ep = imagesToShow.get(Integer.parseInt(marker.getSnippet()));
                         if (ep.getUploader().equals(Session.getUser()))
                             marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon_selected));
-                        else if (ep.isPublic())
-                            marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon_selected));
-                        else
+                        else if (isFriend(ep.getUploader()))
                             marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon_selected));
+                        else
+                            marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon_selected));
 
                         // Restore the old marker to unselected
                         if(oldMarker != null && !(marker.getTitle().equals(oldMarker.getTitle()))) {
                             ExplorePanorama oldEp = imagesToShow.get(Integer.parseInt(oldMarker.getSnippet()));
                             if (oldEp.getUploader().equals(Session.getUser()))
                                 oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon));
-                            else if (oldEp.isPublic())
-                                oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
-                            else
+                            else if (isFriend(oldEp.getUploader()))
                                 oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon));
+                            else
+                                oldMarker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
                         }
 
                         oldMarker = marker;
@@ -492,10 +509,10 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                                 ExplorePanorama ep = imagesToShow.get(Integer.parseInt(marker.getSnippet()));
                                 if (ep.getUploader().equals(Session.getUser()))
                                     marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon));
-                                else if (ep.isPublic())
-                                    marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
-                                else
+                                else if (isFriend(ep.getUploader()))
                                     marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon));
+                                else
+                                    marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
                             }
                         });
 
@@ -522,21 +539,6 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 ((MainActivity) getActivity()).loadMapStyling(googleMap);
 
                 googleMap.getUiSettings().setMapToolbarEnabled(false);
-
-                // Set default position
-                LatLng gothenburg = new LatLng(57.688350, 11.979428);
-                MarkerOptions position = new MarkerOptions();
-                position.position(gothenburg);
-                position.title("Your position");
-                position.snippet("Default position");
-                position.icon(BitmapDescriptorFactory
-                        .defaultMarker(BitmapDescriptorFactory.HUE_AZURE));
-                googleMap.addMarker(position);
-
-                // Zoom automatically to the default position
-                CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg)
-                        .zoom(10).build();
-                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             }
         });
     }
@@ -594,7 +596,9 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         });
     }
 
-    private void showImagesOnMap() {
+    private void showImagesOnMap(ArrayList<ExplorePanorama> imagesToShow) {
+        googleMap.clear();
+        setUpClusterer();
         for (int i=0; i<imagesToShow.size(); i++) {
             ExplorePanorama ep = imagesToShow.get(i);
             MyItem newImageToShow = new MyItem(ep.getLocation().latitude, ep.getLocation().longitude);
@@ -603,6 +607,17 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
             newImageToShow.setSnippet(i + "");
             mClusterManager.addItem(newImageToShow);
         }
+
+        // Set default position
+        LatLng gothenburg = new LatLng(57.688350, 11.979428);
+        MarkerOptions position = new MarkerOptions();
+        position.position(gothenburg);
+        position.title("Your position");
+        position.snippet("Default position");
+        position.icon(BitmapDescriptorFactory.fromResource(R.drawable.user_position_icon));
+        googleMap.addMarker(position);
+
+        clusterRefresh();
     }
 
     private void fetchPreviews() {
@@ -647,12 +662,24 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                                                    MarkerOptions markerOptions) {
             if (item.getEp().getUploader().equals(Session.getUser())) {
                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.own_image_location_icon));
-            } else if (item.getEp().isPublic()) {
-                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
-            } else {
+            } else if (isFriend(item.getEp().getUploader())) {
                 markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.friend_image_location_icon));
+            } else {
+                markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.public_image_location_icon));
             }
         }
+    }
+
+    public boolean isFriend(String user) {
+        for (int i = 0; i < friends.size(); i++) {
+            if(friends.get(i).equals(user))
+                return true;
+        }
+        return false;
+    }
+
+    public void clusterRefresh() {
+        mClusterManager.setRenderer(mClusterManager.getRenderer());
     }
 }
 
