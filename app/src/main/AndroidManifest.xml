@@ -82,6 +82,9 @@
             android:name=".communication.UploadService"
             android:exported="false" />
         <service
+            android:name=".communication.SessionCheckService"
+            android:exported="false" />
+        <service
             android:name=".communication.DownloadMultiplePreviewsService"
             android:exported="false"></service>
         <receiver
