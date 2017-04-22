@@ -54,8 +54,13 @@ public class ProfileFlowAdapter extends ArrayAdapter<ThreeSixtyPanorama> {
     @Override
     public View getView(final int position, final View convertView, final ViewGroup parent){
 
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        final View customView = inflater.inflate(R.layout.picture_profile_layout,parent,false);
+        final View customView;
+        if(convertView == null) {
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            customView = inflater.inflate(R.layout.picture_profile_layout, parent, false);
+        }
+        else
+            customView = convertView;
 
         ImageView imageView = (ImageView) customView.findViewById(R.id.panoramaPreview);
         final TextView locationText = (TextView) customView.findViewById(R.id.locationText);
