@@ -47,8 +47,6 @@ public class LoginFragment extends Fragment implements View.OnKeyListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //If there is a saved session, skip login.
-        inSession();
-
         View root = inflater.inflate(R.layout.fragment_login, container, false);
 
         usernameField = (EditText)root.findViewById(R.id.usernameFIeld);
@@ -123,6 +121,7 @@ public class LoginFragment extends Fragment implements View.OnKeyListener {
                             Intent myIntent = new Intent(getActivity(), MainActivity.class);
                             myIntent.putExtra("username", Session.getUser()); //Optional parameters
                             startActivity(myIntent);
+                            getActivity().finish();
 
                         }
                         else if(message.equals("ERR_USER") | message.equals("ERR_PASS")){
@@ -137,38 +136,7 @@ public class LoginFragment extends Fragment implements View.OnKeyListener {
         );
         loginReq.sendRequest();
     }
-    private void inSession(){
-        //Check if a session is saved locally.
-        if (Session.load()) {
-            // TODO Should show a loading screen first instead of showing the login screen.
-            //Send a request to see if it matches a remote session.
-            //If it does, skip login.
-            JReqCheckSession checkSessionReq = new JReqCheckSession();
-            checkSessionReq.setJResultListener(
-                    new JResultListener(){
-                        @Override
-                        public void onHasResult(JSONObject result) {
-                            try {
-                                boolean error = result.getBoolean("error");
-                                if(!error){
-                                    Intent myIntent = new Intent(getActivity(), MainActivity.class);
-                                    Friends.init();
-                                    FriendRequests.init();
-                                    myIntent.putExtra("username", Session.getUser()); //Optional parameters
-                                    startActivity(myIntent);
-                                }
-                            }
-                            catch(JSONException je){
-                                je.printStackTrace();
-                            }
 
-                        }
-                    }
-            );
-            checkSessionReq.sendRequest();
-
-        }
-    }
 
     @Override
     public void onResume() {
