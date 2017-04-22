@@ -58,8 +58,8 @@ android {
         sourceCompatibility 1.7
     }
     externalNativeBuild {
-        ndkBuild {
-            path 'src/main/jni/Android.mk'
+        cmake {
+            path 'CMakeLists.txt'
         }
     }
 }
