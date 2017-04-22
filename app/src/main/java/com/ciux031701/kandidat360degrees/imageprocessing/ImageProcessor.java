@@ -14,6 +14,8 @@ import org.opencv.core.Scalar;
 import org.opencv.imgproc.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /**
  * Created by Neso on 2017-04-15.
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 
 public class ImageProcessor {
     public static Rect getBlackCroppedRect(Mat src) {
+        double epsilon = 0.02;
         Mat gray = new Mat();
         Mat tresh = new Mat();
         Imgproc.cvtColor(src, gray, Imgproc.COLOR_BGR2GRAY);
@@ -32,31 +35,24 @@ public class ImageProcessor {
         MatOfPoint2f contour2f = new MatOfPoint2f();
         MatOfPoint2f approx2f = new MatOfPoint2f();
         contour.convertTo(contour2f, CvType.CV_32F);
-        Imgproc.approxPolyDP(contour2f, approx2f, 0.02*Imgproc.arcLength(contour2f, true), true);
+        Imgproc.approxPolyDP(contour2f, approx2f, epsilon*Imgproc.arcLength(contour2f, true), true);
+        while(approx2f.toArray().length != 4){
+            epsilon += 0.001;
+            Imgproc.approxPolyDP(contour2f, approx2f, epsilon*Imgproc.arcLength(contour2f, true), true);
+            if(epsilon > 0.1)
+                return null;
+        }
+
         approx2f.convertTo(approx, CvType.CV_32S);
         Point points[] = approx.toArray();
 
         if(points.length != 4) {
-            return new Rect();
+            return null;
         }
         else
         {
-            double x1 = (points[0].x > points[1].x) ? points[0].x : points[1].x;
-            double y1 = (points[0].y > points[3].y) ? points[0].y : points[3].y;
-            double x_e1 = (points[3].x > points[2].x) ? points[2].x : points[3].x;
-            double y_e1 = (points[1].y > points[2].y) ? points[2].y : points[1].y;
-
-            int x = (x1 < x_e1) ? (int)x1 : (int)x_e1;
-            int x_e = (x1 < x_e1) ? (int)x_e1 : (int)x1;
-            int y = (y1 < y_e1) ? (int)y1 : (int)y_e1;
-            int y_e = (y1 < y_e1) ? (int)y_e1 : (int)y1;
-
-            int width = (x_e - x);
-            int height = (y_e - y);
-
-
-
-            return new Rect(x, y, width, height);
+            CornerCollection cs = determineCorners(points[0], points[1], points[2], points[3]);
+            return calculateRect(cs);
         }
     }
 
@@ -73,24 +69,68 @@ public class ImageProcessor {
         return maxIndex;
     }
 
-    public static Mat replaceBlack(Mat mat){
-        Mat copy = new Mat();
-        mat.copyTo(copy);
-        Mat mask = new Mat();
-        Scalar lower = new Scalar(0.0, 0.0, 0.0, 0.0);
-        Scalar upper = new Scalar(5.0, 5.0, 5.0, 0.0);
-        Scalar c = new Scalar(6.0, 6.0, 6.0, 0.0);
-        Core.inRange(copy, lower, upper, mask);
-        copy.setTo(c, mask);
-        return copy;
+    private static Rect calculateRect(CornerCollection cs){
+        Corner uLeft = cs.get(Orientation.UPPER, Orientation.LEFT);
+        Corner uRight = cs.get(Orientation.UPPER, Orientation.RIGHT);
+        Corner lLeft = cs.get(Orientation.LOWER, Orientation.LEFT);
+        Corner lRight = cs.get(Orientation.LOWER, Orientation.RIGHT);
+
+        Rect out = new Rect();
+        out.x = uLeft.x > lLeft.x ? (int)uLeft.x : (int)lLeft.x;
+        out.y = uLeft.y > uRight.y ? (int)uLeft.y : (int)uRight.y;
+        out.width = uRight.x < lRight.x ? (int)(uRight.x - out.x) : (int)(lRight.x - out.x);
+        out.height = lLeft.y < lRight.y ? (int)(lLeft.y - out.y) : (int)(lRight.y - out.y);
+        return out;
     }
 
-    public static ArrayList<Mat> replaceBlackInList(ArrayList<Mat> list){
-        ArrayList<Mat> out = new ArrayList();
-        for(int i = 0; i < list.size(); i++){
-            out.add(replaceBlack(list.get(i)));
-        }
-        return out;
+    private static CornerCollection determineCorners(Point p1, Point p2, Point p3, Point p4){
+        Comparator<Point> cmpX = new Comparator<Point>() {
+            @Override
+            public int compare(Point o1, Point o2) {
+                Point p1 = o1;
+                Point p2 = o2;
+                if(p1.x < p2.x)
+                    return -1;
+                else if(p1.x > p2.x)
+                    return 1;
+                else
+                    return 0;
+            }
+        };
+        Comparator<Point> cmpY = new Comparator<Point>() {
+            @Override
+            public int compare(Point o1, Point o2) {
+                Point p1 = o1;
+                Point p2 = o2;
+                if(p1.y < p2.y)
+                    return -1;
+                else if(p1.y > p2.y)
+                    return 1;
+                else
+                    return 0;
+            }
+        };
+        CornerCollection corners = new CornerCollection();
+        corners.add(new Corner(p1));
+        corners.add(new Corner(p2));
+        corners.add(new Corner(p3));
+        corners.add(new Corner(p4));
+
+
+
+        Collections.sort(corners, cmpY);
+        corners.get(0).vertical = Orientation.UPPER;
+        corners.get(1).vertical = Orientation.UPPER;
+        corners.get(2).vertical = Orientation.LOWER;
+        corners.get(3).vertical = Orientation.LOWER;
+
+        Collections.sort(corners, cmpX);
+        corners.get(0).horizontal = Orientation.LEFT;
+        corners.get(1).horizontal = Orientation.LEFT;
+        corners.get(2).horizontal = Orientation.RIGHT;
+        corners.get(3).horizontal = Orientation.RIGHT;
+
+        return corners;
     }
 
 

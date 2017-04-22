@@ -38,10 +38,13 @@ import java.nio.ByteBuffer;
 import org.opencv.core.Mat;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import com.ciux031701.kandidat360degrees.imageprocessing.ImageProcessor;
 import com.ciux031701.kandidat360degrees.imageprocessing.JniMatHolder;
 import com.ciux031701.kandidat360degrees.representation.CaptureState;
 import com.ciux031701.kandidat360degrees.representation.NativePanorama;
 import org.opencv.android.Utils;
+import org.opencv.core.Rect;
 
 
 import java.util.List;
@@ -270,33 +273,26 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                 ByteBuffer handle = NativePanorama.processPanoramaFromHandles(matHandles);
                 JniMatHolder matHolder = new JniMatHolder(handle);
                 Mat resultPanorama = matHolder.getMatAndFreeData();
-                if (resultPanorama.empty()) {
-                    //Try one more time.
-                    NativePanorama.processPanoramaFromHandles(matHandles);
-                    //If still empty, recreate the fragment.
-                    if (resultPanorama.empty()) {
-                        ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image stitching.");
-                        recreateFragment();
-                        return false;
-                    }
-                }
-                //Rect cropRect = ImageProcessor.getBlackCroppedRect(resultPanorama);
-                //Mat cropped = resultPanorama.submat(cropRect);
-                Mat cropped = resultPanorama;
-                //Mat cropped = resultPanorama;
-                if (cropped.empty()) {
-                    ThreeSixtyWorld.showToast(getActivity(), "Something went wrong during image cropping.");
+                if (resultPanorama == null) {
+                    ThreeSixtyWorld.showToast(getActivity(),"Something went wrong during image stitching.");
                     recreateFragment();
-                    return false;
+                }
+                else if(resultPanorama.empty()){
+                    ThreeSixtyWorld.showToast(getActivity(),"Something went wrong during image stitching.");
+                    recreateFragment();
+                }
+                Rect cropRect = ImageProcessor.getBlackCroppedRect(resultPanorama);
+                if (cropRect == null) {
+                    ThreeSixtyWorld.showToast(getActivity(), "Skipping image cropping due to error.");
+                }
+                else{
+                    resultPanorama = resultPanorama.submat(cropRect);
                 }
 
-                //Convert Mat to Bitmap so we can view the image in ImageViewFragment:
-                Log.i(TAG, "Type of Mat: " + cropped.type()); //type = 16 --> CV_8UC3, then it "works", is sometimes 0??
-                resultPanoramaBmp = Bitmap.createBitmap(cropped.cols(), cropped.rows(), Bitmap.Config.ARGB_8888);
-                Utils.matToBitmap(cropped, resultPanoramaBmp); //work with type CV_8UC3
+                Log.i(TAG, "Type of Mat: " + resultPanorama.type()); //type = 16 --> CV_8UC3, then it "works", is sometimes 0??
+                resultPanoramaBmp = Bitmap.createBitmap(resultPanorama.cols(), resultPanorama.rows(), Bitmap.Config.ARGB_8888);
+                Utils.matToBitmap(resultPanorama, resultPanoramaBmp); //work with type CV_8UC3
 
-                //MainActivity mainActivity = (MainActivity) getActivity();
-                //mainActivity.downloadPanoramaLocal(resultPanoramaBmp);
 
             } catch (Exception e) {
                 e.printStackTrace();
