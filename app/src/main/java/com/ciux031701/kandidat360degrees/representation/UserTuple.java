@@ -16,9 +16,10 @@ public class UserTuple {
     private Drawable profilePicture;
     private Context context;
 
-    public UserTuple(String userName, Drawable profilePicture){
+    public UserTuple(String userName, Context context, Drawable profilePicture){
         this.userName = userName;
         this.profilePicture = profilePicture;
+        this.context = context;
     }
 
     public UserTuple(String userName, Context context){

@@ -85,6 +85,8 @@ public class FriendsFragment extends Fragment implements SearchView.OnQueryTextL
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         //TODO: Add separators to the RecyclerView
 
+        Friends.setFriendsAdapter((FriendsAdapter) mRecyclerView.getAdapter());
+
         return root;
     }
 

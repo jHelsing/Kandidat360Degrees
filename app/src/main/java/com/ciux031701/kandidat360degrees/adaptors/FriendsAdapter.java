@@ -213,4 +213,12 @@ public class FriendsAdapter extends RecyclerView.Adapter {
         }
     }
 
+    public void clearDataSet() {
+        mDataSource.clear();
+    }
+
+    public void addDataSet() {
+        mDataSource.addAll(FriendRequests.getFriendsAdapterItems());
+        mDataSource.addAll(Friends.getFriendsAdapterItems());
+    }
 }

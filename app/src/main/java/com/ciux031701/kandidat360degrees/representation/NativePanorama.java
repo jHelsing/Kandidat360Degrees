@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class NativePanorama {
 
     static{
-        System.loadLibrary("MyLib");
+        System.loadLibrary("native-lib");
     }
     public native static ByteBuffer processPanoramaFromHandles(ArrayList<ByteBuffer> handles);
 

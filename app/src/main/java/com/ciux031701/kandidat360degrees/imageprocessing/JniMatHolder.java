@@ -13,7 +13,7 @@ import static org.opencv.core.CvType.*;
 public class JniMatHolder {
     private ByteBuffer handle = null;
     static{
-        System.loadLibrary("MyLib");
+        System.loadLibrary("native-lib");
     }
     private native ByteBuffer jniStoreMatData(Mat mat);
     private native Mat jniGetMatFromStoredData(ByteBuffer handle);
