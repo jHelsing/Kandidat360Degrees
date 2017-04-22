@@ -43,3 +43,7 @@ captures/
 
 # OpenCV
 Android.mk
+
+#Compiled native stuff
+app/.externalNativeBuild/
+app/src/main/jniLibs/
