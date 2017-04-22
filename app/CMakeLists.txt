@@ -1,5 +1,5 @@
-set(pathToProject E:/Users/AMAR/Documents/GitHub/Kandidat360Degrees)
-set(pathToOpenCv E:/Users/AMAR/Documents/GitHub/Kandidat360Degrees/OpenCV-android-sdk)
+set(pathToProject C:/Users/Neso/Documents/Kandidatarbete/Kandidat360Degrees)
+set(pathToOpenCv C:/Users/Neso/Documents/Kandidatarbete/Kandidat360Degrees/OpenCV-android-sdk)
 set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
