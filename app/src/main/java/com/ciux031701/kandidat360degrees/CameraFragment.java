@@ -1,5 +1,6 @@
 package com.ciux031701.kandidat360degrees;
 
+import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -88,6 +89,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
     private boolean shouldTryToViewVertically;
 
     private boolean panoramaCreated = false;
+    private boolean previewQueued = false;
 
 
     @Override
@@ -292,8 +294,6 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                 Log.i(TAG, "Type of Mat: " + resultPanorama.type()); //type = 16 --> CV_8UC3, then it "works", is sometimes 0??
                 resultPanoramaBmp = Bitmap.createBitmap(resultPanorama.cols(), resultPanorama.rows(), Bitmap.Config.ARGB_8888);
                 Utils.matToBitmap(resultPanorama, resultPanoramaBmp); //work with type CV_8UC3
-
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -317,7 +317,12 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
             progressDialog.dismiss();
             delegate.processFinish(result);
             if (result) {
-                sendPanoramaToImageView();
+                try {
+                    sendPanoramaToImageView();
+                }catch(IllegalStateException e){
+                    //Fragment is paused and onResume will call the function instead.
+                    previewQueued = true;
+                }
             }
         }
     }
@@ -345,6 +350,8 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
     @Override
     public void onResume() {
         super.onResume();
+        if(resultPanoramaBmp != null && previewQueued == true)
+            sendPanoramaToImageView();
         if (ContextCompat.checkSelfPermission(ThreeSixtyWorld.getAppContext(), android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
             //ask for authorisation
             ActivityCompat.requestPermissions(this.getActivity(), new String[]{android.Manifest.permission.CAMERA}, 50);
@@ -450,6 +457,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
     private void sendPanoramaToImageView(){
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.showPanoramaBitmap("camera", resultPanoramaBmp);
+        previewQueued = false;
     }
 
     private void takePicture(){
