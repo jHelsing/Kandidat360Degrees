@@ -1,9 +1,11 @@
 package com.ciux031701.kandidat360degrees;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -49,6 +51,8 @@ public class UploadFragment extends Fragment {
     private Button okButton;
     private Bitmap imageBitmap;
     ProgressBar previewProgressBar;
+    private TextView changeImageText;
+    private static final int PICK_IMAGE = 100;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -57,6 +61,16 @@ public class UploadFragment extends Fragment {
         imageUri = getArguments().getParcelable("image");
         imagePreview = (ImageView) root.findViewById(R.id.uploadImageView);
         imagePreview.setImageURI(imageUri);
+        changeImageText = (TextView)root.findViewById(R.id.changeImageText);
+
+        changeImageText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //open gallery
+                Intent gallery = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+                startActivityForResult(gallery,PICK_IMAGE);
+            }
+        });
 
         previewProgressBar = (ProgressBar)root.findViewById(R.id.previewProgressBar);
 
@@ -103,5 +117,25 @@ public class UploadFragment extends Fragment {
         });
 
         return root;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent content){
+        super.onActivityResult(requestCode,resultCode,content);
+
+        if(resultCode== Activity.RESULT_OK && requestCode== PICK_IMAGE){
+            Uri imageUri = content.getData();
+            Class fragmentClass = UploadFragment.class;
+            try {
+                Fragment fragment = (Fragment) fragmentClass.newInstance();
+                Bundle bundle = new Bundle();
+                bundle.putParcelable("image", imageUri);
+                fragment.setArguments(bundle);
+                FragmentManager fragmentManager = getFragmentManager();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
