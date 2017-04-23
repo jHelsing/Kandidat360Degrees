@@ -126,9 +126,14 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
                             left = 0;
                         }
                     }else {
-                        diff = (touchPoint.x - event.getX()) / 12;
+                        if (scaleFactor > 1.2) {
+                            diff = (touchPoint.x - event.getX()) / 11;
+                        }else{
+                            diff = (touchPoint.x - event.getX()) / 9;
+                        }
                         left = ((lastDiff + diff) * -1) % panoramaImage.getWidth();
                         lastDiff = (lastDiff + diff) % panoramaImage.getWidth();
+
                     }
                     Canvas canvas = surfaceHolder.lockCanvas();
                     drawMyStuff(canvas);
