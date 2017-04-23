@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -26,6 +27,7 @@ import com.ciux031701.kandidat360degrees.adaptors.ShareAdapter;
 import com.ciux031701.kandidat360degrees.communication.Friends;
 import com.ciux031701.kandidat360degrees.communication.JReqShareImage;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
+import com.ciux031701.kandidat360degrees.communication.LocationHandler;
 import com.ciux031701.kandidat360degrees.communication.ShareManager;
 
 import org.json.JSONException;

@@ -40,6 +40,7 @@ import org.opencv.core.Mat;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.ciux031701.kandidat360degrees.communication.LocationHandler;
 import com.ciux031701.kandidat360degrees.imageprocessing.ImageProcessor;
 import com.ciux031701.kandidat360degrees.imageprocessing.JniMatHolder;
 import com.ciux031701.kandidat360degrees.representation.CaptureState;
@@ -171,7 +172,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
         int centerY = size.y / 2;
         Point center = new Point(centerX, centerY);
         mSurfaceViewDraw.setCenter(center);
-
+        LocationHandler.startFix();
         return root;
     }
 

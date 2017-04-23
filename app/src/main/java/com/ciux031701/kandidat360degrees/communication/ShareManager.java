@@ -61,7 +61,7 @@ public class ShareManager extends BroadcastReceiver{
             if ((imageid = uploadBitmap(bmp)) != UPLOAD_NOT_STARTED) {
                 setLocked(true);
                 targetUsers = targets;
-                imageInfo = new ThreeSixtyPanorama(imageid, description, isPublic);
+                imageInfo = new ThreeSixtyPanorama(imageid, description, LocationHandler.getLastKnownLocation(), isPublic);
             }
         }
     }

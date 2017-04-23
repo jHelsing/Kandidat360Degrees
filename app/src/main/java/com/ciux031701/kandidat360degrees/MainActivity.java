@@ -29,6 +29,7 @@ import com.ciux031701.kandidat360degrees.communication.JReqDestroySession;
 import com.ciux031701.kandidat360degrees.communication.JReqProfile;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
 import com.ciux031701.kandidat360degrees.adaptors.DrawerAdapter;
+import com.ciux031701.kandidat360degrees.communication.LocationHandler;
 import com.ciux031701.kandidat360degrees.representation.JSONParser;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.ciux031701.kandidat360degrees.representation.RoundImageView;
@@ -77,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LocationHandler.connect();
         setContentView(R.layout.activity_main);
 
         Intent intent = getIntent();

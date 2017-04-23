@@ -2,6 +2,7 @@ package com.ciux031701.kandidat360degrees.representation;
 
 import java.text.SimpleDateFormat;
 
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -44,9 +45,10 @@ public class ThreeSixtyPanorama implements Parcelable {
         this.isPublic = isPublic;
     }
 
-    public ThreeSixtyPanorama(String imageid, String description, Boolean isPublic){
-        this(imageid, Session.getUser(), ThreeSixtyWorld.getDate(), 0, 0, ThreeSixtyWorld.getLastKnownLocation(), description, isPublic);
+    public ThreeSixtyPanorama(String imageid, String description, Location location, Boolean isPublic){
+        this(imageid, Session.getUser(), ThreeSixtyWorld.getDate(), 0, 0, new LatLng(location.getLatitude(), location.getLongitude()), description, isPublic);
     }
+
 
     protected ThreeSixtyPanorama(Parcel in) {
         imageid = in.readString();
