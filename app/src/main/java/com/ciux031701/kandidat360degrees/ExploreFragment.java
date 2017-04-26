@@ -119,6 +119,8 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     private ArrayList<String> friends;
     private int lastSearchStringLength;
 
+    private ImageButton cameraButton;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_explore, container, false);
@@ -283,6 +285,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 new MenuItemCompat.OnActionExpandListener() {
                     @Override
                     public boolean onMenuItemActionExpand(MenuItem item) {
+                        cameraButton.setVisibility(View.GONE);
                         return true;
                     }
 
@@ -290,6 +293,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                     public boolean onMenuItemActionCollapse(MenuItem item) {
                         exploreSearchAdapter.clear();
                         searchListView.setVisibility(View.GONE);
+                        cameraButton.setVisibility(View.VISIBLE);
                         return true;
                     }
                 });
@@ -584,7 +588,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
     private void setUpCamera(View root) {
         // Set up camera button
-        ImageButton cameraButton = (ImageButton) root.findViewById(R.id.cameraButton);
+        cameraButton = (ImageButton) root.findViewById(R.id.cameraButton);
         cameraButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
