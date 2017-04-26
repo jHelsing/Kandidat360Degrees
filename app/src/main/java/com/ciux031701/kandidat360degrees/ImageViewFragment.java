@@ -288,7 +288,7 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
                     Fragment fragment = new ShareFragment();
                     FragmentManager fragmentManager = getFragmentManager();
                     fragment.setArguments(args);
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "SHARE_FRAGMENT").commit();
 
                 }
             });

@@ -42,7 +42,7 @@ public class LoginActivity extends Activity{
                     FragmentManager fragmentManager = getFragmentManager();
                     Fragment fragment = new LoginFragment();
                     //fragmentManager.beginTransaction().add(R.id.fragment_container,fragment).addToBackStack(null).commit();
-                    fragmentManager.beginTransaction().replace(R.id.fragment_container,fragment).commit();
+                    fragmentManager.beginTransaction().replace(R.id.fragment_container,fragment, "LOGIN_FRAGMENT").commit();
                     unregisterReceiver(sessionCheckReceiver);
                 }
             }

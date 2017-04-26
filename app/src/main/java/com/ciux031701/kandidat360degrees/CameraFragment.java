@@ -133,7 +133,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                 mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                 Fragment fragment = new ExploreFragment();
                 FragmentManager fragmentManager = getActivity().getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "EXPLORE_FRAGMENT").commit();
                 //fragmentTransaction.addToBackStack(null);
 
             }
@@ -331,7 +331,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
     private void recreateFragment(){
         CameraFragment cameraFragment = new CameraFragment();
         FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.content_frame, cameraFragment);
+        ft.replace(R.id.content_frame, cameraFragment, "CAMERA_FRAGMENT");
         ft.addToBackStack(null);
         ft.commit();
     }

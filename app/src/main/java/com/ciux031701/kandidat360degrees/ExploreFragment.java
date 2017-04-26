@@ -53,11 +53,13 @@ import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.communication.JReqFriends;
 import com.ciux031701.kandidat360degrees.communication.JReqImages;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
+import com.ciux031701.kandidat360degrees.communication.LocationHandler;
 import com.ciux031701.kandidat360degrees.communication.Session;
 import com.ciux031701.kandidat360degrees.representation.ExplorePanorama;
 import com.ciux031701.kandidat360degrees.representation.JSONParser;
 import com.ciux031701.kandidat360degrees.representation.ProfilePanorama;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -91,6 +93,7 @@ import java.util.List;
 
 public class ExploreFragment extends Fragment implements SearchView.OnQueryTextListener {
 
+    private static final LatLng DEFAULT_POSITION = new LatLng(57.333, 11.17);
     private static final String SELF = "self";
     private static final String FRIEND = "friend";
     private static final String PUBLIC = "public";
@@ -118,17 +121,35 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
     private ArrayList<ExplorePanorama> imagesToShow;
     private ArrayList<String> friends;
     private int lastSearchStringLength;
-
+    private CameraPosition cameraPos;
     private ImageButton cameraButton;
+    private BroadcastReceiver locationReceiver;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_explore, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
+        LocationHandler.tryLocationFix(getActivity());
+        final View root = inflater.inflate(R.layout.fragment_explore, container, false);
         setHasOptionsMenu(true);
         lastSearchStringLength = 0;
 
         // Set ups
         isShowingPublic = true;
+
+        locationReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (LocationResult.hasResult(intent)) {
+                    LocationResult locationResult = LocationResult.extractResult(intent);
+                    Location location = locationResult.getLastLocation();
+                    if(location != null) {
+                        LatLng position = new LatLng(location.getLatitude(), location.getLongitude());
+                        setCameraPosition(position);
+                    }
+                }
+            }
+        };
+        getActivity().registerReceiver(locationReceiver, new IntentFilter(LocationHandler.ACTION_REQUEST_LOCATION));
+
         setUpNavigationAndToolBar(root);
         setUpSearchFunctionality(root);
         setUpCamera(root);
@@ -217,11 +238,9 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
 
                                 showImagesOnMap(imagesToShow);
 
-                                LatLng gothenburg = new LatLng(57.688350, 11.979428);
-
-                                // Zoom automatically to the default position
-                                CameraPosition cameraPosition = new CameraPosition.Builder().target(gothenburg).zoom(10).build();
-                                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                                if(cameraPos == null)
+                                    setCameraPosition(DEFAULT_POSITION);
+                                googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPos));
 
                                 // Fetch previews to local storage
                                 fetchPreviews();
@@ -388,6 +407,11 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
         } else {
             Toast.makeText(getActivity(), "Could not find " + query + ".", Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void setCameraPosition(LatLng position){
+        cameraPos = new CameraPosition.Builder().target(position).zoom(10).build();
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPos));
     }
 
     @Override
@@ -595,7 +619,7 @@ public class ExploreFragment extends Fragment implements SearchView.OnQueryTextL
                 mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
                 CameraFragment fragment = new CameraFragment();
                 FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "CAMERA_FRAGMENT").commit();
             }
         });
     }

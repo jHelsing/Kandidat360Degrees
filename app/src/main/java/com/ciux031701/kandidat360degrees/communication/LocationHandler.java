@@ -1,6 +1,9 @@
 package com.ciux031701.kandidat360degrees.communication;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.Application;
+import android.app.Fragment;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -13,8 +16,10 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.app.FragmentManager;
 import android.util.Log;
 
+import com.ciux031701.kandidat360degrees.ExploreFragment;
 import com.ciux031701.kandidat360degrees.MainActivity;
 import com.ciux031701.kandidat360degrees.ThreeSixtyWorld;
 import com.google.android.gms.common.ConnectionResult;
@@ -29,6 +34,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.maps.model.LatLng;
 
 import static com.google.android.gms.location.LocationServices.FusedLocationApi;
 
@@ -37,9 +43,9 @@ import static com.google.android.gms.location.LocationServices.FusedLocationApi;
  * Created by Neso on 2017-04-23.
  */
 
-public class LocationHandler extends BroadcastReceiver implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class LocationHandler implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     public static final int REQUEST_CHECK_SETTINGS = 1001;
-    private static final String ACTION_REQUEST_LOCATION = "request_location";
+    public static final String ACTION_REQUEST_LOCATION = "request_location";
     private static final String TAG = "LocationHandler";
     private static GoogleApiClient locationClient;
 
@@ -65,14 +71,6 @@ public class LocationHandler extends BroadcastReceiver implements GoogleApiClien
                 })
                 .build();
         locationClient.connect();
-    }
-
-    //When a message is received, start the location listener.
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        if (LocationResult.hasResult(intent)) {
-
-        }
     }
 
     public static void startFusedFix() {
@@ -120,7 +118,13 @@ public class LocationHandler extends BroadcastReceiver implements GoogleApiClien
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
         }
-        return FusedLocationApi.getLastLocation(locationClient);
+        Location location;
+        if((location = FusedLocationApi.getLastLocation(locationClient)) != null)
+            return location;
+        else{
+            location = new Location("none");
+            return location;
+        }
     }
 
     public static void tryLocationFix(final Context context) {

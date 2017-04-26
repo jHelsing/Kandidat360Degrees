@@ -130,7 +130,7 @@ public class ShareFragment extends Fragment {
                 Fragment fragment = new ExploreFragment();
                 FragmentManager fragmentManager = getActivity().getFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.content_frame, fragment);
+                fragmentTransaction.replace(R.id.content_frame, fragment, "EXPLORE_FRAGMENT");
                 fragmentTransaction.addToBackStack(null);
                 fragmentTransaction.commit();
 
