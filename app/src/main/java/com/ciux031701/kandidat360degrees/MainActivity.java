@@ -358,6 +358,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 e.printStackTrace();
             }
         }
+        else if(requestCode == LocationHandler.REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK)
+            LocationHandler.startFusedFix();
     }
 
     public void showSettingsView() {

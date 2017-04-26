@@ -171,8 +171,6 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
         int centerY = size.y / 2;
         Point center = new Point(centerX, centerY);
         mSurfaceViewDraw.setCenter(center);
-        LocationHandler.startFusedFix();
-        LocationHandler.startNetworkFix();
         return root;
     }
 
@@ -184,6 +182,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
     @Override
     public void onStart() {
         super.onStart();
+        LocationHandler.tryLocationFix(getActivity());
     }
 
     private final Camera.PictureCallback jpegCallback = new Camera.PictureCallback() {

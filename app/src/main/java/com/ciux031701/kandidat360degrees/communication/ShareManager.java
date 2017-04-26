@@ -65,8 +65,7 @@ public class ShareManager extends BroadcastReceiver{
                 targetUsers = targets;
                 Location location;
                 if((location = LocationHandler.getLastKnownLocation()) == null)
-                    if((location = LocationHandler.getLastNetworkLocation()) == null)
-                        location = new Location(LocationManager.NETWORK_PROVIDER);
+                    location = new Location(LocationManager.NETWORK_PROVIDER);
                 imageInfo = new ThreeSixtyPanorama(imageid, description, location, isPublic);
             }
         }
