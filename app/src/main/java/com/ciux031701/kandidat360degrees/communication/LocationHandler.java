@@ -33,7 +33,7 @@ public class LocationHandler extends BroadcastReceiver implements GoogleApiClien
     private static final String ACTION_LOCATION_UPDATED = "location_updated";
     private static final String ACTION_REQUEST_LOCATION = "request_location";
     private static final String TAG = "LocationHandler";
-    private static Location location;
+    private static Location networkLocation;
     private static LocationManager locationManager;
     private static GoogleApiClient locationClient;
 
@@ -65,15 +65,11 @@ public class LocationHandler extends BroadcastReceiver implements GoogleApiClien
     @Override
     public void onReceive(Context context, Intent intent) {
         if (LocationResult.hasResult(intent)) {
-            LocationResult locationResult = LocationResult.extractResult(intent);
-            Location location = locationResult.getLastLocation();
-            if (location != null) {
-                LocationHandler.location = location;
-            }
+
         }
     }
 
-    public static void startFix() {
+    public static void startFusedFix() {
         LocationRequest locationRequest = new LocationRequest();
         locationRequest.setNumUpdates(1);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -89,8 +85,26 @@ public class LocationHandler extends BroadcastReceiver implements GoogleApiClien
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        if(locationClient.isConnected())
+        if (locationClient.isConnected())
             FusedLocationApi.requestLocationUpdates(locationClient, locationRequest, pi);
+    }
+
+    public static void startNetworkFix() {
+        locationManager = (LocationManager) ThreeSixtyWorld.getAppContext().getSystemService(Context.LOCATION_SERVICE);
+        String provider = LocationManager.NETWORK_PROVIDER;
+        Intent intent = new Intent(ACTION_REQUEST_LOCATION);
+        PendingIntent pi = PendingIntent.getBroadcast(ThreeSixtyWorld.getAppContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        if (ActivityCompat.checkSelfPermission(ThreeSixtyWorld.getAppContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ThreeSixtyWorld.getAppContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        locationManager.requestSingleUpdate(provider, pi);
     }
 
     @Override
@@ -108,8 +122,18 @@ public class LocationHandler extends BroadcastReceiver implements GoogleApiClien
 
     }
 
-    public Location getLocation() {
-        return location;
+    public static Location getLastNetworkLocation() {
+        if (ActivityCompat.checkSelfPermission(ThreeSixtyWorld.getAppContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(ThreeSixtyWorld.getAppContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return null;
+        }
+        return locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
     }
 
     public static Location getLastKnownLocation() {

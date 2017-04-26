@@ -1,6 +1,5 @@
 package com.ciux031701.kandidat360degrees;
 
-import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -172,7 +171,8 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
         int centerY = size.y / 2;
         Point center = new Point(centerX, centerY);
         mSurfaceViewDraw.setCenter(center);
-        LocationHandler.startFix();
+        LocationHandler.startFusedFix();
+        LocationHandler.startNetworkFix();
         return root;
     }
 
