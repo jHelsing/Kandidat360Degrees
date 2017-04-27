@@ -256,9 +256,14 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
 
     private void saveAndMakePanorama() {
         setState(CaptureState.PROCESSING);
-        StitchingTask task = new StitchingTask();
-        task.delegate = this;
-        task.execute();
+        if (matHandles.size() < 2) {
+            ThreeSixtyWorld.showToast(getActivity(), "Not enough images.");
+            recreateFragment();
+        } else {
+            StitchingTask task = new StitchingTask();
+            task.delegate = this;
+            task.execute();
+        }
     }
 
     @Override
