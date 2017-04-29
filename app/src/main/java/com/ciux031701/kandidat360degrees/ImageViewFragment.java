@@ -2,6 +2,7 @@ package com.ciux031701.kandidat360degrees;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -9,6 +10,10 @@ import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -47,7 +52,7 @@ import static android.content.ContentValues.TAG;
  * Created by boking on 2017-03-14.
  */
 
-public class ImageViewFragment extends Fragment implements SurfaceHolder.Callback {
+public class ImageViewFragment extends Fragment implements SurfaceHolder.Callback,SensorEventListener {
 
     private ImageButton closeButton;
     private ImageButton arrowLeftButton;
@@ -56,6 +61,7 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
     private DrawerLayout mDrawerLayout;
     private ImageButton downloadButton;
     private ProgressBar downloadProgressBar;
+    private ImageButton sensorModeButton;
 
     private String origin;
     private String imageid;
@@ -78,6 +84,17 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
     private float scaleFactor;
     float cX, cY;
     float diff, zoomValue, modLeft;
+    private boolean isSensorModeActive;
+    float currentDegrees;
+    float lastDegree;
+    private float[] mRotationMatrix;
+    private float startGyroDegree;
+    private float orientation[];
+    private boolean isVertical;
+    private boolean isFirstSensorChanged;
+    private float normalModeOffset;
+    private float lastSensorLeftValue;
+    private float lastViewingAngle;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -89,6 +106,18 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
         display = getActivity().getWindowManager().getDefaultDisplay();
         size = new Point();
         display.getSize(size);
+        isSensorModeActive = false;
+        orientation = new float[3];
+        mRotationMatrix = new float[9];
+        isVertical=false;
+        isFirstSensorChanged=true;
+        normalModeOffset =0;
+        lastSensorLeftValue =0;
+        lastViewingAngle = 0;
+
+        SensorManager sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        Sensor rotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        sensorManager.registerListener(this, rotationVector,SensorManager.SENSOR_DELAY_UI);
 
         scaleGestureDetector = new ScaleGestureDetector(getActivity(), new ScaleListener());
         scaleFactor = 1.0f;
@@ -97,55 +126,96 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
         surfaceHolder = surfaceView.getHolder();
         surfaceHolder.addCallback(this);
 
+        sensorModeButton = (ImageButton) root.findViewById(R.id.sensorModeButton);
+        sensorModeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isSensorModeActive){
+                    sensorModeButton.setImageResource(R.drawable.sensormodeicon);
+                    //lastDiff=0;
+                    isFirstSensorChanged=true;
+                    isSensorModeActive=false;
+                    //lastSensorLeftValue =left;
+                    //left=lastSensorLeftValue;
+                    tryDrawing(surfaceHolder);
+                    //lastDiff=-currentDegrees*?
+                }else{//switching to sensor mode
+                    sensorModeButton.setImageResource(R.drawable.normalmode);
+                    //startGyroDegree=left*360/panoramaImage.getWidth();
+
+                    if(left>0){
+                        lastViewingAngle=360-((left/panoramaImage.getWidth())*360);
+                    }else{
+                        System.out.println("settings swag");
+                        lastViewingAngle=((left/panoramaImage.getWidth())*360)*-1;
+                    }
+
+                    System.out.println("setting lastViewingAngle to: " + lastViewingAngle + ", panoramawidth: " + panoramaImage.getWidth() + ", left: " + left);
+                    isSensorModeActive=true;
+                }
+
+            }
+        });
+
         surfaceView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
                 scaleGestureDetector.onTouchEvent(event);
 
-                if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
-                    isTouchingScreen=true;
-                    touchPoint.x = (int) event.getX();
-                    touchPoint.y = (int) event.getY();
-                }else if (event.getAction() == android.view.MotionEvent.ACTION_MOVE) {
-                    if(!imageLargerThanScreen) {
-                        diff = (touchPoint.x - event.getX()) / 15;
-                        left = ((lastDiff + diff) * -1) % panoramaImage.getWidth();
-                        if (lastDiff > zoomValue) {
-                            lastDiff = zoomValue;
-                        } else if (lastDiff < -zoomValue) {
-                            lastDiff = -zoomValue;
+                if(!isSensorModeActive) {
+                    if (event.getAction() == android.view.MotionEvent.ACTION_DOWN) {
+                        isTouchingScreen = true;
+                        touchPoint.x = (int) event.getX();
+                        touchPoint.y = (int) event.getY();
+                    } else if (event.getAction() == android.view.MotionEvent.ACTION_MOVE) {
+                        if (!imageLargerThanScreen) {
+                            diff = (touchPoint.x - event.getX()) / 15;
+                            left = ((lastDiff + diff) * -1) % panoramaImage.getWidth();
+                            if (lastDiff > zoomValue) {
+                                lastDiff = zoomValue;
+                            } else if (lastDiff < -zoomValue) {
+                                lastDiff = -zoomValue;
+                            } else {
+                                lastDiff = (lastDiff + diff) % panoramaImage.getWidth();
+                                System.out.println("new lastdiff: " + lastDiff);
+                            }
+                            if (left < -zoomValue) {
+                                left = zoomValue * -1;
+                            } else if (left > zoomValue) {
+                                left = zoomValue;
+                            } else if (scaleFactor < 1f && left > 0) {
+                                System.out.println("left=0;");
+                                left = 0;
+                            }
+                            System.out.println("lastdiff. left: " + left);
                         } else {
+                            if (scaleFactor > 1.2) {
+                                diff = (touchPoint.x - event.getX()) / 11;
+                            } else {
+                                diff = (touchPoint.x - event.getX()) / 9;
+                            }
                             lastDiff = (lastDiff + diff) % panoramaImage.getWidth();
+                            System.out.println("left gained from drag: " + (((lastDiff + diff) * -1) % panoramaImage.getWidth()) + ", left gained from sensor: " + (panoramaImage.getWidth()-((360-fromDegreeToProgress(currentDegrees))*panoramaImage.getWidth()/360))*-1);
+                            left = (((lastDiff + diff) * -1) % panoramaImage.getWidth() + (panoramaImage.getWidth()-((360-fromDegreeToProgress(currentDegrees))*panoramaImage.getWidth()/360)))%panoramaImage.getWidth();
+                            System.out.println("setting lastdiff: " + lastDiff + ", diff: " + diff);
+                            lastDiff = (lastDiff + diff) % panoramaImage.getWidth();
+                            System.out.println("new lastdiff: " + lastDiff);
+                            System.out.println("left: " +left);
                         }
-                        if (left < -zoomValue) {
-                            left = zoomValue*-1;
-                        } else if (left > zoomValue) {
-                            left = zoomValue;
-                        }else if(scaleFactor<1f && left > 0){
-                            left = 0;
-                        }
-                    }else {
-                        if (scaleFactor > 1.2) {
-                            diff = (touchPoint.x - event.getX()) / 11;
-                        }else{
-                            diff = (touchPoint.x - event.getX()) / 9;
-                        }
-                        left = ((lastDiff + diff) * -1) % panoramaImage.getWidth();
-                        lastDiff = (lastDiff + diff) % panoramaImage.getWidth();
+                        Canvas canvas = surfaceHolder.lockCanvas();
+                        drawMyStuff(canvas);
+                        surfaceHolder.unlockCanvasAndPost(canvas);
 
+                    } else if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+                        isTouchingScreen = false;
                     }
-                    Canvas canvas = surfaceHolder.lockCanvas();
-                    drawMyStuff(canvas);
-                    surfaceHolder.unlockCanvasAndPost(canvas);
-
-                }else if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
-                    isTouchingScreen=false;
                 }
-
                 return true;
             }
         });
+
+
 
         if(origin.equals("profile") || origin.equals("explore")) {
             File file = new File(getActivity().getFilesDir() + FTPInfo.PANORAMA_LOCAL_LOCATION + imageid + FTPInfo.FILETYPE);
@@ -356,6 +426,7 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
             arrowRightButton.setVisibility(View.GONE);
         }else{
             imageLargerThanScreen=true;
+            sensorModeButton.setVisibility(View.VISIBLE);
         }
 
         return root;
@@ -421,6 +492,71 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent sensorEvent) {
+        if (isSensorModeActive) {
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+                // Convert the rotation-vector to a 4x4 matrix.
+                SensorManager.getRotationMatrixFromVector(mRotationMatrix, sensorEvent.values);
+                SensorManager.remapCoordinateSystem(mRotationMatrix, SensorManager.AXIS_X, SensorManager.AXIS_Z, mRotationMatrix);
+                SensorManager.getOrientation(mRotationMatrix, orientation);
+
+                // Optionally convert the result from radians to degrees
+                orientation[0] = (float) Math.toDegrees(orientation[0]);
+                orientation[1] = (float) Math.toDegrees(orientation[1]);
+                orientation[2] = (float) Math.toDegrees(orientation[2]);
+
+                if (orientation[1] > -12 && orientation[1] < 12) {
+                    if (!isVertical) {
+                        isVertical = true;
+                    }
+                } else {
+                    if (isVertical) {
+                        isVertical = false;
+                    }
+                }
+                System.out.println("orientation[0]: " + orientation[0]);
+                currentDegrees = fromOrientationToDegrees(orientation[0]);
+                if (isFirstSensorChanged) {
+                    isFirstSensorChanged = false;
+                    startGyroDegree = currentDegrees;
+                }
+
+                /*if(isFirstSensorChanged){
+                    startGyroDegree=currentDegrees;
+                    isFirstSensorChanged=false;
+                }*/
+                left = (((360-lastViewingAngle)*panoramaImage.getWidth()/360)+(panoramaImage.getWidth()-((360-fromDegreeToProgress(currentDegrees))*panoramaImage.getWidth()/360))*-1)%panoramaImage.getWidth();
+                //left =(360-fromDegreeToProgress(currentDegrees)*panoramaImage.getWidth())/360;
+                System.out.println("left gained from sensor: " + (panoramaImage.getWidth()-((360-fromDegreeToProgress(currentDegrees))*panoramaImage.getWidth()/360))*-1);
+                System.out.println("startdegree: " + startGyroDegree + ", currentdegree: " + currentDegrees + ", progress: " + fromDegreeToProgress(currentDegrees)+ ", left: " + left);
+            }
+            tryDrawing(surfaceHolder);
+        }
+    }
+
+    public float fromOrientationToDegrees(double orientation){
+        if(orientation<0){
+            return (float)(360-Math.abs(orientation));
+        }else
+            return (float)orientation;
+    }
+
+    public float fromDegreeToProgress(float degree) {
+        float progress =0;
+        if (degree >= startGyroDegree) {
+            progress = degree - startGyroDegree;
+        } else {
+            progress = -(startGyroDegree - degree);
+        }
+        return progress;
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 
     private class ScaleListener extends

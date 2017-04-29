@@ -131,6 +131,20 @@
             android:background="@drawable/close"
             android:baselineAlignBottom="false"
             android:padding="5dp" />
+
+        <ImageButton
+            android:id="@+id/sensorModeButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="10dp"
+            android:background="@null"
+            android:baselineAlignBottom="false"
+            android:padding="5dp"
+            android:scaleType="fitXY"
+            android:visibility="gone"
+            app:srcCompat="@drawable/sensormodeicon" />
     </RelativeLayout>
 </FrameLayout>
 
