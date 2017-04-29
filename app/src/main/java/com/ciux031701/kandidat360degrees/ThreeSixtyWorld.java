@@ -45,17 +45,6 @@ public class ThreeSixtyWorld extends Application {
         return getAppContext().getSharedPreferences(ApplicationPreferences, Context.MODE_PRIVATE);
     }
 
-    public static LatLng getLastKnownLocation() {
-        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-        Location location;
-        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            return new LatLng(location.getLatitude(), location.getLongitude());
-        }
-        return new LatLng(0.0, 0.0);
-    }
-
     public static String getDate(){
         Date now = new Date();
         Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");

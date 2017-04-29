@@ -1,6 +1,5 @@
 package com.ciux031701.kandidat360degrees;
 
-import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -134,7 +133,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                 mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
                 Fragment fragment = new ExploreFragment();
                 FragmentManager fragmentManager = getActivity().getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "EXPLORE_FRAGMENT").commit();
                 //fragmentTransaction.addToBackStack(null);
 
             }
@@ -172,7 +171,6 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
         int centerY = size.y / 2;
         Point center = new Point(centerX, centerY);
         mSurfaceViewDraw.setCenter(center);
-        LocationHandler.startFix();
         return root;
     }
 
@@ -184,6 +182,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
     @Override
     public void onStart() {
         super.onStart();
+        LocationHandler.tryLocationFix(getActivity());
     }
 
     private final Camera.PictureCallback jpegCallback = new Camera.PictureCallback() {
@@ -257,9 +256,14 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
 
     private void saveAndMakePanorama() {
         setState(CaptureState.PROCESSING);
-        StitchingTask task = new StitchingTask();
-        task.delegate = this;
-        task.execute();
+        if (matHandles.size() < 2) {
+            ThreeSixtyWorld.showToast(getActivity(), "Not enough images.");
+            recreateFragment();
+        } else {
+            StitchingTask task = new StitchingTask();
+            task.delegate = this;
+            task.execute();
+        }
     }
 
     @Override
@@ -332,7 +336,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
     private void recreateFragment(){
         CameraFragment cameraFragment = new CameraFragment();
         FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.content_frame, cameraFragment);
+        ft.replace(R.id.content_frame, cameraFragment, "CAMERA_FRAGMENT");
         ft.addToBackStack(null);
         ft.commit();
     }

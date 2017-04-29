@@ -90,15 +90,7 @@
                 <action android:name="com.ciux031701.kandidat360degrees.communication.UploadService"/>
             </intent-filter>
         </receiver>
-        <receiver
-            android:name=".communication.LocationHandler"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name=".communcation.LocationHandler.ACTION_REQUEST_LOCATION"/>
-                <action android:name=".communcation.LocationHandler.ACTION_LOCATION_UPDATED"/>
-            </intent-filter>
-        </receiver>
+
     </application>
 
 </manifest>

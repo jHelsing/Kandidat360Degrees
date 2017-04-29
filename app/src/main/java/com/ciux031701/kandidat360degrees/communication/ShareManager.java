@@ -8,6 +8,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.location.Location;
+import android.location.LocationManager;
 import android.util.Log;
 import com.ciux031701.kandidat360degrees.ThreeSixtyWorld;
 import com.ciux031701.kandidat360degrees.representation.ThreeSixtyPanorama;
@@ -61,7 +63,10 @@ public class ShareManager extends BroadcastReceiver{
             if ((imageid = uploadBitmap(bmp)) != UPLOAD_NOT_STARTED) {
                 setLocked(true);
                 targetUsers = targets;
-                imageInfo = new ThreeSixtyPanorama(imageid, description, LocationHandler.getLastKnownLocation(), isPublic);
+                Location location;
+                if((location = LocationHandler.getLastKnownLocation()) == null)
+                    location = new Location(LocationManager.NETWORK_PROVIDER);
+                imageInfo = new ThreeSixtyPanorama(imageid, description, location, isPublic);
             }
         }
     }

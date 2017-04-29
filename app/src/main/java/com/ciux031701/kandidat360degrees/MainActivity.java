@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     // Insert the fragment by replacing any existing fragment
                     FragmentManager fragmentManager = getFragmentManager();
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "LOGIN_FRAGMENT").commit();
                     break;
                 default:
                     showExploreView();
@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         FragmentManager fragmentManager = getFragmentManager();
         Bundle bundle = new Bundle();
         fragment.setArguments(setArgs);
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("explore").commit();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "EXPLORE_FRAGMENT").addToBackStack("explore").commit();
         setTitle("Explore");
     }
 
@@ -297,7 +297,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             b.putBoolean("isPendingReq", isPendingReq);
                             b.putParcelable("images", imgs);
                             fragment.setArguments(b);
-                            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("profile").commit();
+                            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "PROFILE_FRAGMENT").addToBackStack("profile").commit();
                         } else {
                             Toast.makeText(getApplicationContext(), "Could not reach the server, please try again later.",Toast.LENGTH_SHORT).show();
                         }
@@ -310,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void showNotificationView() {
         NotificationFragment fragment = new NotificationFragment();
         FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("notifications").commit();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "NOTIFICATION_FRAGMENT").addToBackStack("notifications").commit();
         setTitle("Notifications");
     }
 
@@ -318,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         Friends.fetch();
         FriendsFragment fragment = new FriendsFragment();
         FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("friends").commit();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "FRIENDS_FRAGMENT").addToBackStack("friends").commit();
         setTitle("Friends");
     }
 
@@ -328,7 +328,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         try {
             Fragment fragment = (Fragment) fragmentClass.newInstance();
             FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "CAMERA_FRAGMENT").commit();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -353,11 +353,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 bundle.putParcelable("image", imageUri);
                 fragment.setArguments(bundle);
                 FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "UPLOAD_FRAGMENT").commit();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        else if(requestCode == LocationHandler.REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK)
+            LocationHandler.startFusedFix();
     }
 
     public void showSettingsView() {
@@ -439,7 +441,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             ImageViewFragment fragment = new ImageViewFragment();
                             fragment.setArguments(args);
                             FragmentManager fragmentManager = getFragmentManager();
-                            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(origin).commit();
+                            fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "IMAGEVIEW_FRAGMENT").addToBackStack(origin).commit();
 
                         }
                     }
@@ -458,7 +460,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ImageViewFragment fragment = new ImageViewFragment();
         fragment.setArguments(args);
         FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).addToBackStack(origin).commit();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "IMAGEVIEW_FRAGMENT").addToBackStack(origin).commit();
     }
 
 }

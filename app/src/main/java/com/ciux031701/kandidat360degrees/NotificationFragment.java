@@ -104,7 +104,7 @@ public class NotificationFragment extends Fragment {
                     fragment.setArguments(setArgs);
                     FragmentManager fragmentManager = getActivity().getFragmentManager();
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    fragmentTransaction.replace(R.id.content_frame, fragment);
+                    fragmentTransaction.replace(R.id.content_frame, fragment, "PROFILE_FRAGMENT");
                     fragmentTransaction.addToBackStack(null);
                     fragmentTransaction.commit();
                 }

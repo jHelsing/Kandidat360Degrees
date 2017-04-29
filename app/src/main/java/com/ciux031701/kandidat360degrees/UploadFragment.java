@@ -89,7 +89,7 @@ public class UploadFragment extends Fragment {
                 Fragment fragment = new ShareFragment();
                 FragmentManager fragmentManager = getFragmentManager();
                 fragment.setArguments(args);
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "SHARE_FRAGMENT").commit();
             }
         });
 
@@ -132,7 +132,7 @@ public class UploadFragment extends Fragment {
                 bundle.putParcelable("image", imageUri);
                 fragment.setArguments(bundle);
                 FragmentManager fragmentManager = getFragmentManager();
-                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "UPLOAD_FRAGMENT").commit();
             } catch (Exception e) {
                 e.printStackTrace();
             }

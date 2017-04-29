@@ -156,6 +156,8 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
 
             }
         });
+        downloadButton = (ImageButton) root.findViewById(R.id.downloadButton);
+
 
         surfaceView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -221,6 +223,7 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
             File file = new File(getActivity().getFilesDir() + FTPInfo.PANORAMA_LOCAL_LOCATION + imageid + FTPInfo.FILETYPE);
             image = Drawable.createFromPath(file.getPath());
             panoramaImage =  ((BitmapDrawable)image).getBitmap();
+            downloadButton.setVisibility(View.GONE);
             final TextView usernameView = (TextView) root.findViewById(R.id.imageViewUsernameTextView);
             final TextView favView = (TextView) root.findViewById(R.id.imageviewFavouriteTextView);
             favView.setOnTouchListener(new View.OnTouchListener() {
@@ -355,7 +358,7 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
                     Fragment fragment = new ShareFragment();
                     FragmentManager fragmentManager = getFragmentManager();
                     fragment.setArguments(args);
-                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
+                    fragmentManager.beginTransaction().replace(R.id.content_frame, fragment, "SHARE_FRAGMENT").commit();
 
                 }
             });
@@ -399,7 +402,6 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
         downloadProgressBar = (ProgressBar) root.findViewById(R.id.downloadProgressBar);
         downloadProgressBar.setVisibility(View.GONE);
 
-        downloadButton = (ImageButton) root.findViewById(R.id.downloadButton);
         downloadButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
