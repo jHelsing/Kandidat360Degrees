@@ -60,10 +60,7 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
         setFocusable(false);
 
         aimCircle = new ShapeDrawable(new OvalShape());
-        aimCircle.getPaint().setStyle(Paint.Style.STROKE);
-        aimCircle.getPaint().setStrokeWidth(5);
-        unfilledRadius = radius + 20;
-        aimCircle.setBounds(center.x-unfilledRadius,center.y-unfilledRadius,center.x+unfilledRadius,center.y+unfilledRadius);
+
     }
 
 
@@ -168,7 +165,13 @@ public class DrawDotSurfaceView extends SurfaceView implements SurfaceHolder.Cal
 
 
     public void setTargetAcquired(boolean targetAcquired) {
-        this.targetAcquired = targetAcquired;
+        if(targetAcquired) {
+            this.targetAcquired = targetAcquired;
+            aimCircle.getPaint().setStyle(Paint.Style.STROKE);
+            aimCircle.getPaint().setStrokeWidth(5);
+            unfilledRadius = radius + 20;
+            aimCircle.setBounds(center.x - unfilledRadius, center.y - unfilledRadius, center.x + unfilledRadius, center.y + unfilledRadius);
+        }
     }
 
     public void setCenter(Point center) {
