@@ -1,7 +1,13 @@
 package com.ciux031701.kandidat360degrees.adaptors;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +18,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.ciux031701.kandidat360degrees.MainActivity;
+import com.ciux031701.kandidat360degrees.communication.DownloadService;
+import com.ciux031701.kandidat360degrees.communication.FTPInfo;
+import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.communication.JReqAcceptFriend;
 import com.ciux031701.kandidat360degrees.communication.JReqDeclineFriend;
 import com.ciux031701.kandidat360degrees.communication.JRequest;
@@ -25,6 +34,7 @@ import com.ciux031701.kandidat360degrees.R;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -37,6 +47,7 @@ public class FriendsAdapter extends RecyclerView.Adapter {
     protected ArrayList<FriendsAdapterItem> mDataSource;
     private ViewHolder holder;
     private Context context;
+    private String username;
 
     public FriendsAdapter(Context context) {
         this.context = context;
@@ -62,6 +73,7 @@ public class FriendsAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
+        System.out.println("viewholder bound");
         TextView titleTextView = (TextView) holder.itemView.findViewById(R.id.friends_list_title);
         ImageView thumbnailImageView = (ImageView) holder.itemView.findViewById(R.id.friends_list_thumbnail);
         RelativeLayout friendlistDetails = (RelativeLayout) holder.itemView.findViewById(R.id.friendlist_details);
@@ -166,16 +178,55 @@ public class FriendsAdapter extends RecyclerView.Adapter {
                                 TextView titleTextView, ImageView thumbnailImageView, final RecyclerView.ViewHolder holder) {
         //List the user's friends
         UserTuple data = mDataSource.get(position).getData();
+        System.out.println("showing friend listitem for: " + data.getUserName());
         acceptButton.setVisibility(View.GONE);
         cancelButton.setVisibility(View.GONE);
-
         friendlistDetails.setVisibility(View.VISIBLE);
         friendlistSectionHeader.setVisibility(View.GONE);
         titleTextView.setText(data.getUserName());
         thumbnailImageView.setImageDrawable(data.getProfilePicture());
-
         addListenerToView(holder, context);
     }
+
+    /**
+     * Starts to fetch the profile picture of the user from the server.
+     */
+    private void loadProfilePicture(String username) {
+        System.out.println("loading picture for: " + username);
+        Intent intent =  new Intent(context, DownloadService.class);
+        intent.putExtra("IMAGETYPE", ImageType.PROFILE);
+        intent.putExtra("USERNAME", username);
+        intent.putExtra("TYPE", "DOWNLOAD");
+        intent.setAction(DownloadService.NOTIFICATION + username + FTPInfo.FILETYPE);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DownloadService.NOTIFICATION + username + FTPInfo.FILETYPE);
+        context.registerReceiver(new ProfileImageBroadcastReceiver(), filter);
+        context.startService(intent);
+    }
+
+    /**
+     * A class for receiving broadcasts from the download of the profile picture
+     */
+    public class ProfileImageBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
+                String path = context.getFilesDir() + "/profiles/"
+                        + username + FTPInfo.FILETYPE;
+                System.out.println("path: " + path);
+                Drawable profileImage = Drawable.createFromPath(path);
+                //TODO: set the imageview with the new drawable
+                File file = new File(path);
+                if (file.delete()) {
+                    Log.d("Profile", "Profile image has been deleted");
+                }
+            }
+            context.unregisterReceiver(this);
+        }
+    }
+
+
 
     public static void addListenerToView(final RecyclerView.ViewHolder holder, final Context context){
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -206,9 +257,9 @@ public class FriendsAdapter extends RecyclerView.Adapter {
 
         public ViewHolder(View itemView) {
             super(itemView);
-
             titleTextView = (TextView) itemView.findViewById(R.id.friends_list_title);
             thumbnailImageView = (ImageView) itemView.findViewById(R.id.friends_list_thumbnail);
+
 
         }
     }

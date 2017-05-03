@@ -54,14 +54,14 @@
 
         <com.ciux031701.kandidat360degrees.representation.RoundImageView
             android:id="@+id/friends_list_thumbnail"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:scaleType="centerInside"
-            tools:src="@drawable/anonymous_profile"
-            android:contentDescription="thumbnail"  />
+            android:contentDescription="thumbnail"
+            android:scaleType="fitXY"
+            tools:src="@drawable/anonymous_profile" />
 
         <RelativeLayout
             android:id="@+id/layout_friends_list_title"
