@@ -1,12 +1,19 @@
 package com.ciux031701.kandidat360degrees;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,11 +21,17 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.adaptors.NotificationAdapter;
+import com.ciux031701.kandidat360degrees.communication.DownloadService;
+import com.ciux031701.kandidat360degrees.communication.FTPInfo;
+import com.ciux031701.kandidat360degrees.communication.ImageType;
+
+import java.io.File;
 
 /**
  * Created by boking on 2017-02-17.
@@ -29,10 +42,11 @@ public class NotificationFragment extends Fragment {
     private ImageButton toolbarMenuButton;
     private DrawerLayout mDrawerLayout;
     private TextView toolbarTitle;
-
+    private ImageView profileImageView;
     private ListView listView;
-    private Button acceptButton;
-    private Button cancelButton;
+    private ImageButton acceptButton;
+    private ImageButton cancelButton;
+    private String username; //for now, but should get username from each notification
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -73,8 +87,9 @@ public class NotificationFragment extends Fragment {
 
         //Buttons:
         View inflatedView = getActivity().getLayoutInflater().inflate(R.layout.notification_friend_item, null);
-        acceptButton = (Button)inflatedView.findViewById(R.id.buttonAcceptNotification);
-        cancelButton = (Button)inflatedView.findViewById(R.id.buttonCancelNotification);
+        profileImageView = (ImageView) inflatedView.findViewById(R.id.notification_friend_image);
+        acceptButton = (ImageButton)inflatedView.findViewById(R.id.buttonAcceptNotification);
+        cancelButton = (ImageButton)inflatedView.findViewById(R.id.buttonCancelNotification);
         acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view){
