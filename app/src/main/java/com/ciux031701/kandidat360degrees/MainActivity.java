@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -18,11 +19,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ciux031701.kandidat360degrees.communication.DownloadService;
+import com.ciux031701.kandidat360degrees.communication.FTPInfo;
 import com.ciux031701.kandidat360degrees.communication.Friends;
 import com.ciux031701.kandidat360degrees.communication.ImageType;
 import com.ciux031701.kandidat360degrees.communication.JReqDestroySession;
@@ -61,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         System.loadLibrary("opencv_java3");
         System.loadLibrary("MyLib");
     }
-
+    private String username;
     private String[] mListOptions;
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -88,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (b != null)
             userName = b.getString("username");
 
+        this.username=userName;
         mListOptions = getResources().getStringArray(R.array.list_options);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
@@ -113,6 +117,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mDrawerList.setAdapter(new DrawerAdapter(this, getApplicationContext(), mListOptions));
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        loadProfilePicture();
 
         showExploreView();
 
@@ -140,6 +146,47 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
+    }
+
+    /**
+     * Starts to fetch the profile picture of the user from the server.
+     */
+    private void loadProfilePicture() {
+        Intent intent =  new Intent(this, DownloadService.class);
+        intent.putExtra("IMAGETYPE", ImageType.PROFILE);
+        intent.putExtra("USERNAME", username);
+        intent.putExtra("TYPE", "DOWNLOAD");
+        intent.setAction(DownloadService.NOTIFICATION + username + FTPInfo.FILETYPE);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DownloadService.NOTIFICATION + username + FTPInfo.FILETYPE);
+        registerReceiver(new ProfileImageBroadcastReceiver(), filter);
+        startService(intent);
+    }
+
+    /**
+     * A class for receiving broadcasts from the download of the profile picture
+     */
+    public class ProfileImageBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getIntExtra("RESULT", -100)  == Activity.RESULT_OK) {
+                Log.d("Profile", "Profile image found and results from download are OK.");
+                String path = context.getFilesDir() + "/profiles/"
+                        + username + FTPInfo.FILETYPE;
+                Drawable profileImage = Drawable.createFromPath(path);
+                ((ImageView)mDrawerList.findViewById(R.id.imageView)).setImageDrawable(profileImage);
+                File file = new File(path);
+                if (file.delete()) {
+                    Log.d("Profile", "Profile image has been deleted");
+                }
+            }
+            context.unregisterReceiver(this);
+        }
+    }
+
+    public void updateProfilePicture(Bitmap bitmap){
+        ((ImageView)mDrawerList.findViewById(R.id.imageView)).setImageBitmap(bitmap);
     }
 
     //Handles drawer item clicks

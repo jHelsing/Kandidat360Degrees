@@ -580,7 +580,8 @@ public class ProfileFragment extends Fragment {
                 final File file = new File(getActivity().getFilesDir() + FTPInfo.PROFILE_LOCAL_LOCATION + Session.getUser() + FTPInfo.FILETYPE);
                 OutputStream outputStream = new FileOutputStream(file.getPath());
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream);
-
+                //Update the profile picture in the drawer
+                ((MainActivity) getActivity()).updateProfilePicture(bitmap);
                 //Start the upload service
                 Intent intent =  new Intent(getActivity(), UploadService.class);
                 intent.putExtra("IMAGETYPE", ImageType.PROFILE);
