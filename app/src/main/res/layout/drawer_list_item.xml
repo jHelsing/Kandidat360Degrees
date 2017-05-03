@@ -7,11 +7,11 @@
 
     <ImageView
         android:id="@+id/itemImageView"
-        android:layout_width="100px"
+        android:layout_width="50dp"
         android:layout_height="match_parent"
         android:layout_marginLeft="10dp"
         android:background="@null"
-        android:padding="5dp" />
+        android:padding="12dp" />
 
     <TextView
         android:id="@+id/itemTextView"
