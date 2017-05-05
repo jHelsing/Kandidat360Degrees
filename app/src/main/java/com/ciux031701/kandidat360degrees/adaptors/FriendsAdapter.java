@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,6 +30,7 @@ import com.ciux031701.kandidat360degrees.communication.FriendRequests;
 import com.ciux031701.kandidat360degrees.representation.FriendsAdapterItem;
 import com.ciux031701.kandidat360degrees.representation.UserTuple;
 import com.ciux031701.kandidat360degrees.R;
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 
 
 import org.json.JSONException;
@@ -41,7 +43,7 @@ import java.util.ArrayList;
  * Created by Anna on 2017-03-07. Modified by Amar 2017-03-09.
  */
 
-public class FriendsAdapter extends RecyclerView.Adapter {
+public class FriendsAdapter extends RecyclerView.Adapter implements FastScrollRecyclerView.SectionedAdapter {
 
     private LayoutInflater mInflater;
     protected ArrayList<FriendsAdapterItem> mDataSource;
@@ -202,6 +204,12 @@ public class FriendsAdapter extends RecyclerView.Adapter {
         filter.addAction(DownloadService.NOTIFICATION + username + FTPInfo.FILETYPE);
         context.registerReceiver(new ProfileImageBroadcastReceiver(), filter);
         context.startService(intent);
+    }
+
+    @NonNull
+    @Override
+    public String getSectionName(int position) {
+        return mDataSource.get(position).getData().getUserName().substring(0,1).toUpperCase();
     }
 
     /**

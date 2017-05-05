@@ -8,7 +8,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
@@ -52,7 +52,7 @@ public class FriendsFragment extends Fragment implements SearchView.OnQueryTextL
     private TextView toolbarTitle;
     private final Friends friendList = new Friends();
     private final FriendRequests friendRequestList = new FriendRequests();
-    private RecyclerView mRecyclerView;
+    private FastScrollRecyclerView mRecyclerView;
     private boolean firstView = false;
     private ArrayList<UserTuple> searchResult;
     private EditText searchEditText;
@@ -79,7 +79,7 @@ public class FriendsFragment extends Fragment implements SearchView.OnQueryTextL
         });
 
         //The ListView:
-        mRecyclerView = (RecyclerView) root.findViewById(R.id.friends_recycle_view);
+        mRecyclerView = (FastScrollRecyclerView) root.findViewById(R.id.friends_recycle_view);
         mRecyclerView.setAdapter(new FriendsAdapter(getActivity()));
 
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
