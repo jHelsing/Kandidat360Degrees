@@ -90,6 +90,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
 
     private boolean panoramaCreated = false;
     private boolean previewQueued = false;
+    private boolean hasPressedCapture;
 
 
     @Override
@@ -100,6 +101,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
         isVertical = false;
         isFirstSensorChanged = true;
         shouldTryToViewVertically = true;
+        hasPressedCapture = false;
 
         lastDegree = 0;
         //For the sensors:
@@ -149,6 +151,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                     setState(CaptureState.NEXT);
                     captureButton.setImageResource(R.drawable.temp_check_black);
                     backButton.setVisibility(View.GONE);
+                    hasPressedCapture=true;
                     takePicture();
                 }
             }
@@ -379,37 +382,38 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                 orientation[1] = (float) Math.toDegrees(orientation[1]);
                 orientation[2] = (float) Math.toDegrees(orientation[2]);
 
-
-                if(shouldTryToViewVertically){
+                if(!hasPressedCapture) {
+                    if (shouldTryToViewVertically) {
                         //The device is considered vertical if the pitch is in the range -12-12
-                    if (orientation[1] > -12 && orientation[1] < 12) {
-                        if (!isVertical) {
-                            isVertical = true;
-                            holdVerticallyImage.setVisibility(View.GONE);
-                            holdVerticallyText.setVisibility(View.GONE);
-                            captureButton.setVisibility(View.VISIBLE);
-                            mSurfaceView.setVisibility(View.VISIBLE);
-                            mSurfaceViewDraw.setVisibility(View.VISIBLE);
-                        }
+                        if (orientation[1] > -12 && orientation[1] < 12) {
+                            if (!isVertical) {
+                                isVertical = true;
+                                holdVerticallyImage.setVisibility(View.GONE);
+                                holdVerticallyText.setVisibility(View.GONE);
+                                captureButton.setVisibility(View.VISIBLE);
+                                mSurfaceView.setVisibility(View.VISIBLE);
+                                mSurfaceViewDraw.setVisibility(View.VISIBLE);
+                            }
 
-                    } else {
-                        if (isVertical) {
-                            isVertical = false;
-                            holdVerticallyImage.setVisibility(View.VISIBLE);
-                            holdVerticallyText.setVisibility(View.VISIBLE);
-                            captureButton.setVisibility(View.GONE);
-                            mSurfaceView.setVisibility(View.GONE);
-                            mSurfaceViewDraw.setVisibility(View.GONE);
+                        } else {
+                            if (isVertical) {
+                                isVertical = false;
+                                holdVerticallyImage.setVisibility(View.VISIBLE);
+                                holdVerticallyText.setVisibility(View.VISIBLE);
+                                captureButton.setVisibility(View.GONE);
+                                mSurfaceView.setVisibility(View.GONE);
+                                mSurfaceViewDraw.setVisibility(View.GONE);
+                            }
                         }
+                        shouldTryToViewVertically = false;
+                        final Handler handler = new Handler();
+                        handler.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                shouldTryToViewVertically = true;
+                            }
+                        }, 300);
                     }
-                    shouldTryToViewVertically = false;
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            shouldTryToViewVertically = true;
-                        }
-                    }, 300);
                 }
 
                 //Save current degree if taking a pano and holding phone vertically
