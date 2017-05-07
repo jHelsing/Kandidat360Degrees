@@ -61,6 +61,7 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
     private ImageButton backButton;
     private ImageView holdVerticallyImage;
     private ImageButton captureButton;
+    private ImageView leftArrow,rightArrow;
 
     private SurfaceView mSurfaceView;
     private DrawDotSurfaceView mSurfaceViewDraw;
@@ -118,7 +119,8 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
         holdVerticallyText = (TextView) root.findViewById(R.id.holdVerticallyText);
         holdVerticallyImage = (ImageView) root.findViewById(R.id.holdVerticallyImage);
         backButton = (ImageButton) root.findViewById(R.id.backButton);
-
+        leftArrow = (ImageView)root.findViewById(R.id.arrowLeft);
+        rightArrow = (ImageView)root.findViewById(R.id.arrowRight);
         backButton.setBackgroundResource(R.drawable.temp_return);
         captureButton.setVisibility(View.GONE);
 
@@ -443,6 +445,8 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                             public void run() {
                                 //is the current angle close enough to the target angle still?
                                 if (fromDegreeToProgress(currentDegrees) > (mSurfaceViewDraw.getTargetDegree() - 2) && fromDegreeToProgress(currentDegrees) < (mSurfaceViewDraw.getTargetDegree() + 2)) {
+                                    leftArrow.setVisibility(View.GONE);
+                                    rightArrow.setVisibility(View.GONE);
                                     mSurfaceViewDraw.setCircleColor(Color.GREEN);
                                     takePicture();
 
@@ -454,7 +458,16 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
                                 }
                                 proximityCheckerInProgress = false;
                             }
-                        }, 20);//1000 milliseconds check
+                        }, 20);//20 milliseconds check
+
+                    }
+                    if(isLeftOfDot()){
+                        rightArrow.setVisibility(View.VISIBLE);
+                        leftArrow.setVisibility(View.GONE);
+                    }else if(!isLeftOfDot()){
+                        leftArrow.setVisibility(View.VISIBLE);
+                        rightArrow.setVisibility(View.GONE);
+
                     }
 
                     lastDegree = currentDegrees;
@@ -464,6 +477,19 @@ public class CameraFragment extends Fragment implements SensorEventListener, Sti
             }
     }
 
+    private boolean isLeftOfDot(){
+        boolean returnValue = false;
+        if(fromDegreeToProgress(currentDegrees)>180 && mSurfaceViewDraw.getTargetDegree()<180){
+            returnValue = true;
+        }else{
+            if(fromDegreeToProgress(currentDegrees) < (mSurfaceViewDraw.getTargetDegree() - 2)){
+                returnValue = true;
+            }else if(fromDegreeToProgress(currentDegrees) > (mSurfaceViewDraw.getTargetDegree() + 2)){
+                returnValue = false;
+            }
+        }
+        return returnValue;
+    }
     private void sendPanoramaToImageView(){
         MainActivity mainActivity = (MainActivity) getActivity();
         mainActivity.showPanoramaBitmap("camera", resultPanoramaBmp);

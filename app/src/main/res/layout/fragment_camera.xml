@@ -78,4 +78,39 @@
         android:textColor="@android:color/white"
         android:textSize="22sp" />
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true">
+
+        <ImageView
+            android:id="@+id/arrowLeft"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginRight="100dp"
+            android:layout_marginTop="20dp"
+            android:layout_weight="1"
+            android:rotation="180"
+            android:visibility="gone"
+            opencv:srcCompat="@drawable/angleimage" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+         android:layout_centerVertical="true">
+
+        <ImageView
+            android:id="@+id/arrowRight"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginLeft="100dp"
+            android:layout_marginTop="20dp"
+            android:visibility="gone"
+            opencv:srcCompat="@drawable/angleimage" />
+    </LinearLayout>
+
+
 </RelativeLayout>
