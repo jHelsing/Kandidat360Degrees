@@ -35,10 +35,12 @@
         android:layout_margin="10dp" />
 
     <ImageView
+        android:id="@+id/holdVerticallyImage"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/holdVerticallyImage"
-        opencv:srcCompat="@drawable/temp_hold_vertically" />
+        android:background="@android:color/black"
+        android:scaleType="fitCenter"
+        opencv:srcCompat="@drawable/holdvertically" />
 
     <ImageButton
         android:id="@+id/sendToShareButton"
@@ -66,14 +68,14 @@
         android:visibility="gone" />
 
     <TextView
-        android:text="@string/hold_phone_vertical"
+        android:id="@+id/holdVerticallyText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/holdVerticallyText"
-        android:textColor="@android:color/white"
-        android:textSize="22sp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="25dp" />
+        android:layout_marginBottom="60dp"
+        android:text="@string/hold_phone_vertical"
+        android:textColor="@android:color/white"
+        android:textSize="22sp" />
 
 </RelativeLayout>
