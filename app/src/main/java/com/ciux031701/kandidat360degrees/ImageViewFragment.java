@@ -497,6 +497,18 @@ public class ImageViewFragment extends Fragment implements SurfaceHolder.Callbac
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        SensorManager sensorManager = (SensorManager) getActivity().getSystemService(Context.SENSOR_SERVICE);
+        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        Sensor magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        Sensor rotationVector = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        sensorManager.unregisterListener(this, accelerometer);
+        sensorManager.unregisterListener(this, magnetometer);
+        sensorManager.unregisterListener(this, rotationVector);
+    }
+
+    @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
         if (isSensorModeActive) {
             if (sensorEvent.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
