@@ -16,6 +16,7 @@ android {
     sourceSets.main {
         jni.srcDirs = [] //to disable automatic ndk-build
     }
+
     task ndkBuild(type: Exec, description: 'Compile JNI source via NDK') {
         def rootDir = project.rootDir
         def localProperties = new File(rootDir, "local.properties")
